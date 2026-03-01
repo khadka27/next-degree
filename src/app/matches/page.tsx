@@ -1,1389 +1,384 @@
 "use client";
+import { useState, useMemo } from "react";
+import Link from "next/link";
 
-import { useState } from "react";
+/* ─── Types ─── */
+interface Form { country:string;degree:string;field:string;program:string;testType:string;testScore:string;budget:string;currency:string;scholarship:boolean;name:string;gpa:string; }
+interface Match { id:string|number;name:string;location?:string;tuitionFee?:number;feeBand?:string|null;englishReq?:number;website?:string;admissionRate?:number;rankingWorld?:number;scholarships?:{name:string;value:string}[]; }
 
-/* ─────────────────────────────────────────────
-   Types
-───────────────────────────────────────────── */
-interface FormData {
-  name: string;
-  degreeLevel: string;
-  fieldOfStudy: string;
-  gpa: string;
-  englishTestType: string;
-  englishScore: string;
-  budget: string;
-  currency: string;
-  scholarshipNeeded: boolean;
-  country: string;
-}
-
-interface UniversityMatch {
-  id: string | number;
-  name: string;
-  location?: string;
-  tuitionFee?: number;
-  feeBand?: string | null;
-  englishReq?: number;
-  website?: string;
-  admissionRate?: number;
-  rankingWorld?: number;
-  scholarships?: { name: string; value: string }[];
-}
-
-/* ─────────────────────────────────────────────
-   Static Data
-───────────────────────────────────────────── */
-const COUNTRIES = [
-  { code: "CA", flag: "🇨🇦", name: "Canada" },
-  { code: "USA", flag: "🇺🇸", name: "U.S.A." },
-  { code: "AU", flag: "🇦🇺", name: "Australia" },
-  { code: "UK", flag: "🇬🇧", name: "U.K." },
-  { code: "DE", flag: "🇩🇪", name: "Germany" },
-  { code: "IE", flag: "🇮🇪", name: "Ireland" },
-  { code: "NL", flag: "🇳🇱", name: "Netherlands" },
+/* ─── Data ─── */
+const COUNTRIES=[
+  {code:"CA",flag:"🇨🇦",name:"Canada",     city:"Toronto",   c:"#ef4444"},
+  {code:"USA",flag:"🇺🇸",name:"U.S.A.",     city:"New York",  c:"#3b82f6"},
+  {code:"AU",flag:"🇦🇺",name:"Australia",  city:"Sydney",    c:"#10b981"},
+  {code:"UK",flag:"🇬🇧",name:"U.K.",        city:"London",    c:"#8b5cf6"},
+  {code:"DE",flag:"🇩🇪",name:"Germany",    city:"Berlin",    c:"#f59e0b"},
+  {code:"IE",flag:"🇮🇪",name:"Ireland",    city:"Dublin",    c:"#06b6d4"},
+  {code:"NL",flag:"🇳🇱",name:"Netherlands",city:"Amsterdam", c:"#ec4899"},
 ];
-
-const DEGREE_LEVELS = [
-  { value: "foundation", label: "Foundation" },
-  { value: "diploma", label: "Diploma" },
-  { value: "bachelor", label: "Bachelor's" },
-  { value: "master", label: "Master's" },
-  { value: "phd", label: "PhD" },
+const DEGREES=[
+  {v:"foundation",l:"Foundation",     s:"Pre-university prep",    e:"📖"},
+  {v:"diploma",   l:"Diploma",        s:"Vocational training",    e:"📋"},
+  {v:"bachelor",  l:"Bachelor's",     s:"3–4 yr undergraduate",   e:"📚"},
+  {v:"master",    l:"Master's / PG",  s:"Postgraduate study",     e:"🎓"},
+  {v:"phd",       l:"PhD / Doctorate",s:"Research programs",      e:"🔬"},
 ];
-
-const ENGLISH_TESTS = ["IELTS", "TOEFL", "PTE", "Duolingo", "Cambridge"];
-const CURRENCIES = ["USD", "GBP", "AUD", "CAD", "EUR", "NPR"];
-
-const STEPS = [
-  {
-    id: 0,
-    title: "Destination Country",
-    question: "Which countries are you interested in?",
-  },
-  {
-    id: 1,
-    title: "Degree Level",
-    question: "What level of degree are you pursuing?",
-  },
-  {
-    id: 2,
-    title: "English Proficiency",
-    question: "What's your English test score?",
-  },
-  { id: 3, title: "Budget", question: "What's your annual tuition budget?" },
-  { id: 4, title: "Your Profile", question: "Tell us a bit about yourself." },
-  { id: 5, title: "Field of Study", question: "What do you want to study?" },
-  {
-    id: 6,
-    title: "Your Matches",
-    question: "Here are universities that match you!",
-  },
+const FIELDS=["Business & Management","Computer Science & IT","Engineering","Medicine & Health Sciences","Law","Arts & Humanities","Data Science & Analytics","Architecture & Design","Social Sciences","Natural Sciences","Education","Other"];
+const PROGRAMS:Record<string,string[]>={"Business & Management":["MBA","Finance","Marketing","Accounting","Economics"],"Computer Science & IT":["Software Engineering","Cybersecurity","AI & ML","Data Engineering","Web Dev"],"Engineering":["Mechanical","Civil","Electrical","Chemical","Aerospace"],"Medicine & Health Sciences":["Medicine","Nursing","Pharmacy","Public Health","Physiotherapy"],"Law":["LLB","LLM","Criminal Law","Corporate Law","International Law"],"Arts & Humanities":["English Lit","History","Philosophy","Fine Arts","Music"],"Data Science & Analytics":["Data Science","Business Analytics","Statistics","Machine Learning"],"Architecture & Design":["Architecture","Interior Design","Urban Planning","Graphic Design"],"Social Sciences":["Psychology","Sociology","Political Science","International Relations"],"Natural Sciences":["Biology","Chemistry","Physics","Environmental Science"],"Education":["Primary Education","Secondary Education","TESOL"],"Other":["Other / Not Listed"]};
+const TESTS=["IELTS","TOEFL","PTE","Duolingo","Cambridge"];
+const CURRENCIES=["USD","GBP","AUD","CAD","EUR","NPR"];
+const STEPS=[
+  {n:"01",label:"Destination",   title:"Where to\nstudy?",           grad:"135deg,#4f46e5,#7c3aed"},
+  {n:"02",label:"Study Level",   title:"Your degree\nlevel?",         grad:"135deg,#0284c7,#4f46e5"},
+  {n:"03",label:"Field",         title:"What will\nyou study?",       grad:"135deg,#059669,#0284c7"},
+  {n:"04",label:"English",       title:"English\nproficiency?",       grad:"135deg,#d97706,#dc2626"},
+  {n:"05",label:"Budget",        title:"Annual\nbudget?",             grad:"135deg,#7c3aed,#db2777"},
+  {n:"06",label:"Profile",       title:"Final\ndetails!",             grad:"135deg,#0284c7,#059669"},
+  {n:"07",label:"Results",       title:"Your\nmatches!",              grad:"135deg,#4f46e5,#7c3aed"},
 ];
+const DEF:Form={country:"",degree:"",field:"",program:"",testType:"IELTS",testScore:"",budget:"",currency:"USD",scholarship:false,name:"",gpa:""};
 
-const DEFAULTS: FormData = {
-  name: "",
-  degreeLevel: "bachelor",
-  fieldOfStudy: "",
-  gpa: "",
-  englishTestType: "IELTS",
-  englishScore: "",
-  budget: "",
-  currency: "USD",
-  scholarshipNeeded: false,
-  country: "",
-};
+/* ─── Helpers ─── */
+const fmtCur=(n:number,c="USD")=>new Intl.NumberFormat("en-US",{style:"currency",currency:c,maximumFractionDigits:0}).format(n);
+function getBand(s:string,t:string){const n=parseFloat(s);if(!n)return null;if(t==="IELTS"){if(n>=8)return{l:"Expert",c:"#10b981"};if(n>=7)return{l:"Good",c:"#3b82f6"};if(n>=6)return{l:"Competent",c:"#f59e0b"};return{l:"Developing",c:"#ef4444"};}if(t==="TOEFL"){if(n>=100)return{l:"Expert",c:"#10b981"};if(n>=87)return{l:"Good",c:"#3b82f6"};if(n>=72)return{l:"Competent",c:"#f59e0b"};return{l:"Developing",c:"#ef4444"};}return{l:"Submitted",c:"#8b5cf6"};}
 
-/* ─────────────────────────────────────────────
-   Helpers
-───────────────────────────────────────────── */
-function fmt(n: number, cur = "USD") {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: cur,
-    maximumFractionDigits: 0,
-  }).format(n);
-}
-
-function ScoreBadge({ score, test }: { score: string; test: string }) {
-  const n = parseFloat(score);
-  if (!n) return null;
-  let label = "Developing",
-    color = "#ef4444";
-  if (test === "IELTS") {
-    if (n >= 8) {
-      label = "Expert";
-      color = "#10b981";
-    } else if (n >= 7) {
-      label = "Good";
-      color = "#3b82f6";
-    } else if (n >= 6) {
-      label = "Competent";
-      color = "#f59e0b";
-    }
-  }
-  if (test === "TOEFL") {
-    if (n >= 100) {
-      label = "Expert";
-      color = "#10b981";
-    } else if (n >= 87) {
-      label = "Good";
-      color = "#3b82f6";
-    } else if (n >= 72) {
-      label = "Competent";
-      color = "#f59e0b";
-    }
-  }
-  return (
-    <span
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 5,
-        fontSize: 12,
-        fontWeight: 600,
-        color,
-        background: `${color}18`,
-        border: `1px solid ${color}44`,
-        borderRadius: 99,
-        padding: "3px 10px",
-      }}
-    >
-      <span
-        style={{
-          width: 7,
-          height: 7,
-          borderRadius: "50%",
-          background: color,
-          boxShadow: `0 0 6px ${color}`,
-        }}
-      />
-      {label}
-    </span>
-  );
-}
-
-/* ─────────────────────────────────────────────
-   Result Card
-───────────────────────────────────────────── */
-function ResultCard({ m, currency }: { m: UniversityMatch; currency: string }) {
-  return (
-    <div
-      style={{
-        background: "#fff",
-        borderRadius: 16,
-        padding: "18px 20px",
-        border: "1px solid #e8ecf4",
-        boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
-        display: "flex",
-        flexDirection: "column",
-        gap: 12,
-      }}
-    >
-      {/* Header */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "flex-start",
-          gap: 8,
-        }}
-      >
-        <div>
-          <p
-            style={{
-              margin: 0,
-              fontWeight: 700,
-              fontSize: 15,
-              color: "#1a1a2e",
-              lineHeight: 1.3,
-            }}
-          >
-            {m.name}
-          </p>
-          {m.location && (
-            <p
-              style={{
-                margin: "4px 0 0",
-                fontSize: 12,
-                color: "#94a3b8",
-                display: "flex",
-                alignItems: "center",
-                gap: 3,
-              }}
-            >
-              📍 {m.location}
-            </p>
-          )}
+/* ─── Compact Search Select ─── */
+function SS({ph,opts,val,set}:{ph:string;opts:string[];val:string;set:(v:string)=>void}){
+  const [q,setQ]=useState("");const [open,setOpen]=useState(false);
+  const list=useMemo(()=>opts.filter(o=>o.toLowerCase().includes(q.toLowerCase())),[opts,q]);
+  return(
+    <div style={{position:"relative",zIndex:open?100:1}}>
+      <div onClick={()=>{setOpen(true);setQ("");}} style={{display:"flex",alignItems:"center",gap:8,padding:"10px 14px",borderRadius:12,border:`1.5px solid ${open||val?"#6366f1":"#e2e8f0"}`,background:val?"#f8f7ff":"#f8fafc",cursor:"pointer",transition:"all .2s"}}>
+        <span style={{fontSize:13}}>{val?"✅":"🔍"}</span>
+        <span style={{flex:1,fontSize:13,color:val?"#4f46e5":"#94a3b8",fontWeight:val?600:400,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap" as const}}>{val||ph}</span>
+        {val&&<button onMouseDown={e=>{e.stopPropagation();set("");}} style={{fontSize:12,color:"#94a3b8",background:"none",border:"none",padding:0,lineHeight:1,cursor:"pointer"}}>✕</button>}
+        <span style={{fontSize:11,color:"#94a3b8",transform:open?"rotate(180deg)":"rotate(0)",transition:"transform .2s"}}>▾</span>
+      </div>
+      {open&&<>
+        <div style={{position:"fixed",inset:0,zIndex:98}} onClick={()=>setOpen(false)}/>
+        <div style={{position:"absolute",top:"calc(100% + 4px)",left:0,right:0,background:"#fff",borderRadius:14,boxShadow:"0 16px 48px rgba(0,0,0,.15)",border:"1px solid #e8ecf4",zIndex:200,overflow:"hidden"}}>
+          <div style={{padding:"8px 10px",borderBottom:"1px solid #f1f5f9"}}>
+            <input autoFocus value={q} placeholder="Search..." onChange={e=>setQ(e.target.value)} style={{width:"100%",padding:"7px 12px",borderRadius:8,border:"1.5px solid #e2e8f0",fontSize:13,outline:"none",fontFamily:"inherit"}}/>
+          </div>
+          <div style={{maxHeight:160,overflowY:"auto"}}>
+            {list.slice(0,20).map(o=>(
+              <button key={o} onMouseDown={()=>{set(o);setOpen(false);}} style={{display:"block",width:"100%",textAlign:"left",padding:"9px 14px",border:"none",background:val===o?"#eef2ff":"transparent",color:val===o?"#6366f1":"#374151",fontWeight:val===o?700:400,fontSize:13,cursor:"pointer",fontFamily:"inherit",borderBottom:"1px solid #fafafa"}}>
+                {val===o&&"✓ "}{o}
+              </button>
+            ))}
+            {list.length===0&&<p style={{padding:"10px 14px",color:"#94a3b8",fontSize:13,margin:0}}>No results</p>}
+          </div>
         </div>
-        <span
-          style={{
-            flexShrink: 0,
-            fontSize: 11,
-            fontWeight: 700,
-            color: "#10b981",
-            background: "#ecfdf5",
-            border: "1px solid #bbf7d0",
-            borderRadius: 99,
-            padding: "3px 10px",
-          }}
-        >
-          ✓ Match
-        </span>
-      </div>
-
-      {/* Pills */}
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-        {m.tuitionFee ? (
-          <span
-            style={{
-              fontSize: 12,
-              color: "#6366f1",
-              background: "#eef2ff",
-              border: "1px solid #c7d2fe",
-              borderRadius: 8,
-              padding: "5px 10px",
-              fontWeight: 600,
-            }}
-          >
-            💰 {fmt(m.tuitionFee, currency)}/yr
-          </span>
-        ) : m.feeBand ? (
-          <span
-            style={{
-              fontSize: 12,
-              color: "#6366f1",
-              background: "#eef2ff",
-              border: "1px solid #c7d2fe",
-              borderRadius: 8,
-              padding: "5px 10px",
-              fontWeight: 600,
-              textTransform: "capitalize",
-            }}
-          >
-            💰 {m.feeBand} fees
-          </span>
-        ) : null}
-        {m.englishReq && m.englishReq > 0 && (
-          <span
-            style={{
-              fontSize: 12,
-              color: "#d97706",
-              background: "#fffbeb",
-              border: "1px solid #fde68a",
-              borderRadius: 8,
-              padding: "5px 10px",
-              fontWeight: 600,
-            }}
-          >
-            📝 IELTS {m.englishReq}+
-          </span>
-        )}
-        {m.admissionRate && (
-          <span
-            style={{
-              fontSize: 12,
-              color: "#db2777",
-              background: "#fdf2f8",
-              border: "1px solid #fbcfe8",
-              borderRadius: 8,
-              padding: "5px 10px",
-              fontWeight: 600,
-            }}
-          >
-            🎯 {Math.round(m.admissionRate * 100)}% acceptance
-          </span>
-        )}
-        {m.rankingWorld && (
-          <span
-            style={{
-              fontSize: 12,
-              color: "#059669",
-              background: "#ecfdf5",
-              border: "1px solid #a7f3d0",
-              borderRadius: 8,
-              padding: "5px 10px",
-              fontWeight: 600,
-            }}
-          >
-            🏆 #{m.rankingWorld} World
-          </span>
-        )}
-        {m.scholarships && m.scholarships.length > 0 && (
-          <span
-            style={{
-              fontSize: 12,
-              color: "#b45309",
-              background: "#fefce8",
-              border: "1px solid #fef08a",
-              borderRadius: 8,
-              padding: "5px 10px",
-              fontWeight: 600,
-            }}
-          >
-            🎓 {m.scholarships.length} scholarships
-          </span>
-        )}
-      </div>
-
-      {m.website && (
-        <a
-          href={m.website}
-          target="_blank"
-          rel="noreferrer"
-          style={{
-            fontSize: 13,
-            color: "#6366f1",
-            fontWeight: 600,
-            textDecoration: "none",
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 4,
-          }}
-        >
-          Visit website →
-        </a>
-      )}
+      </>}
     </div>
   );
 }
 
-/* ─────────────────────────────────────────────
-   Main Page
-───────────────────────────────────────────── */
-export default function MatchesPage() {
-  const [step, setStep] = useState(0);
-  const [form, setForm] = useState<FormData>(DEFAULTS);
-  const [matches, setMatches] = useState<UniversityMatch[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [infoDismissed, setInfoDismissed] = useState(false);
+/* ─── Match Card ─── */
+function MC({m,c}:{m:Match;c:string}){
+  return(
+    <div style={{background:"#fff",borderRadius:16,border:"1.5px solid #e8ecf4",padding:"14px 16px",display:"flex",flexDirection:"column",gap:8,boxShadow:"0 2px 12px rgba(0,0,0,.05)",flexShrink:0}}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:8}}>
+        <div style={{flex:1,minWidth:0}}>
+          <p style={{margin:0,fontWeight:700,fontSize:13,color:"#0f172a",lineHeight:1.3,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap" as const}}>{m.name}</p>
+          {m.location&&<p style={{margin:"2px 0 0",fontSize:11,color:"#94a3b8"}}>📍 {m.location}</p>}
+        </div>
+        <span style={{fontSize:10,fontWeight:700,color:"#059669",background:"#ecfdf5",border:"1px solid #6ee7b7",borderRadius:99,padding:"3px 8px",flexShrink:0}}>✓ Match</span>
+      </div>
+      <div style={{display:"flex",flexWrap:"wrap" as const,gap:5}}>
+        {m.tuitionFee&&<span style={{fontSize:11,fontWeight:600,color:"#6366f1",background:"#eef2ff",borderRadius:6,padding:"3px 8px"}}>💰 {fmtCur(m.tuitionFee,c)}/yr</span>}
+        {!m.tuitionFee&&m.feeBand&&<span style={{fontSize:11,fontWeight:600,color:"#6366f1",background:"#eef2ff",borderRadius:6,padding:"3px 8px",textTransform:"capitalize" as const}}>💰 {m.feeBand}</span>}
+        {!!m.englishReq&&<span style={{fontSize:11,fontWeight:600,color:"#d97706",background:"#fffbeb",borderRadius:6,padding:"3px 8px"}}>📝 {m.englishReq}+</span>}
+        {m.admissionRate!=null&&<span style={{fontSize:11,fontWeight:600,color:"#be185d",background:"#fdf2f8",borderRadius:6,padding:"3px 8px"}}>🎯 {Math.round(m.admissionRate*100)}%</span>}
+        {m.rankingWorld&&<span style={{fontSize:11,fontWeight:600,color:"#059669",background:"#ecfdf5",borderRadius:6,padding:"3px 8px"}}>🏆 #{m.rankingWorld}</span>}
+        {!!m.scholarships?.length&&<span style={{fontSize:11,fontWeight:600,color:"#b45309",background:"#fefce8",borderRadius:6,padding:"3px 8px"}}>🎓 {m.scholarships.length}</span>}
+      </div>
+      {m.website&&<a href={m.website} target="_blank" rel="noreferrer" style={{fontSize:12,color:"#6366f1",fontWeight:600,textDecoration:"none"}}>Visit →</a>}
+    </div>
+  );
+}
 
-  function setF<K extends keyof FormData>(key: K, val: FormData[K]) {
-    setForm((p) => ({ ...p, [key]: val }));
+/* ─── Main ─── */
+export default function MatchesPage(){
+  const [step,setStep]=useState(0);
+  const [form,setForm]=useState<Form>(DEF);
+  const [matches,setMatches]=useState<Match[]>([]);
+  const [loading,setLoading]=useState(false);
+  const [error,setError]=useState("");
+  function sf<K extends keyof Form>(k:K,v:Form[K]){setForm(p=>({...p,[k]:v}));}
+  async function search(){
+    setLoading(true);setError("");setMatches([]);
+    try{const qs=new URLSearchParams({country:form.country,budget:form.budget||"0",englishScore:form.testScore||"0",degreeLevel:form.degree});const r=await fetch(`/api/matches?${qs}`);if(!r.ok)throw new Error(`HTTP ${r.status}`);const d=await r.json();setMatches(d.matches||[]);}
+    catch(e:unknown){setError((e as Error).message);}finally{setLoading(false);}
   }
+  const ok=()=>[!!form.country,!!form.degree,!!form.field,!!form.testScore,!!form.budget,!!form.name][step]??true;
+  function next(){if(step<5)setStep(s=>s+1);else{setStep(6);search();}}
+  const s=STEPS[Math.min(step,6)];
+  const band=getBand(form.testScore,form.testType);
+  const progs=form.field?PROGRAMS[form.field]||[]:[];
+  const selC=COUNTRIES.find(c=>c.code===form.country);
 
-  async function doSearch() {
-    setLoading(true);
-    setError("");
-    setMatches([]);
-    setStep(6);
-    try {
-      const qs = new URLSearchParams({
-        country: form.country,
-        budget: form.budget || "0",
-        englishScore: form.englishScore || "0",
-        degreeLevel: form.degreeLevel,
-      });
-      const res = await fetch(`/api/matches?${qs}`);
-      if (!res.ok) throw new Error(`Error ${res.status}`);
-      const data = await res.json();
-      setMatches(data.matches || []);
-    } catch (e: unknown) {
-      setError((e as Error).message || "Something went wrong.");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  const canContinue = () => {
-    if (step === 0) return !!form.country;
-    if (step === 1) return !!form.degreeLevel;
-    if (step === 2) return !!form.englishScore;
-    if (step === 3) return !!form.budget;
-    if (step === 4) return !!form.name;
-    return true;
-  };
-
-  function handleContinue() {
-    if (step < 5) setStep((s) => s + 1);
-    else doSearch();
-  }
-
-  const currentStep = STEPS[step];
-
-  /* ══════════════════════════════════════════
-     STYLES
-  ══════════════════════════════════════════ */
-  const page: React.CSSProperties = {
-    minHeight: "100vh",
-    background:
-      "linear-gradient(160deg, #e8edf8 0%, #f0f4ff 50%, #dde9f7 100%)",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: "24px 16px 48px",
-    fontFamily: "'Inter','Segoe UI',system-ui,sans-serif",
-  };
-
-  const card: React.CSSProperties = {
-    width: "100%",
-    maxWidth: 480,
-    background: "#fff",
-    borderRadius: 28,
-    boxShadow: "0 8px 48px rgba(0,0,0,0.10)",
-    overflow: "hidden",
-    display: "flex",
-    flexDirection: "column",
-  };
-
-  const inputStyle: React.CSSProperties = {
-    width: "100%",
-    padding: "13px 16px",
-    borderRadius: 12,
-    border: "1.5px solid #e2e8f0",
-    fontSize: 15,
-    color: "#1e293b",
-    outline: "none",
-    background: "#f8fafc",
-    boxSizing: "border-box",
-    transition: "border-color 0.2s",
-  };
-
-  /* ══════════════════════════════════════════
-     STEP CONTENT
-  ══════════════════════════════════════════ */
-
-  /* Step 0 — Country */
-  const step0Content = (
+  return(
     <>
-      {/* Info Banner */}
-      {!infoDismissed && (
-        <div
-          style={{
-            margin: "4px 0 16px",
-            borderRadius: 16,
-            overflow: "hidden",
-            position: "relative",
-            background: "linear-gradient(135deg,#1e3a5f,#2d6a4f)",
-            minHeight: 100,
-            display: "flex",
-            alignItems: "flex-end",
-          }}
-        >
-          <div
-            style={{
-              position: "absolute",
-              inset: 0,
-              background: "rgba(0,0,0,0.35)",
-            }}
-          />
-          <div style={{ position: "relative", padding: "16px 20px", flex: 1 }}>
-            <p
-              style={{
-                margin: 0,
-                color: "#fff",
-                fontWeight: 700,
-                fontSize: 14,
-                lineHeight: 1.4,
-              }}
-            >
-              🌟 Home to 8 of the world&apos;s top 10 universities.
-              <br />
-              <span style={{ fontWeight: 400, fontSize: 13 }}>
-                We&apos;ll help you navigate the application process.
-              </span>
-            </p>
-            <button
-              onClick={() => setInfoDismissed(true)}
-              style={{
-                marginTop: 10,
-                background: "rgba(255,255,255,0.2)",
-                color: "#fff",
-                border: "1px solid rgba(255,255,255,0.35)",
-                borderRadius: 99,
-                padding: "4px 14px",
-                fontSize: 12,
-                cursor: "pointer",
-                fontWeight: 600,
-              }}
-            >
-              Tap to dismiss
-            </button>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+        *,::before,::after{box-sizing:border-box;margin:0;padding:0;}
+        html,body{font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased;height:100%;overflow:hidden;}
+        @keyframes fadeSlide{from{opacity:0;transform:translateX(10px)}to{opacity:1;transform:translateX(0)}}
+        @keyframes spin{to{transform:rotate(360deg)}}
+        .anim{animation:fadeSlide .25s ease both;}
+        .cc{transition:all .15s;cursor:pointer;} .cc:hover{transform:translateY(-2px);border-color:#6366f1!important;box-shadow:0 6px 20px rgba(99,102,241,.15)!important;}
+        .opt{transition:all .15s;cursor:pointer;} .opt:hover{background:#f0f4ff!important;border-color:#a5b4fc!important;}
+        button{cursor:pointer;font-family:inherit;}
+        input{font-family:inherit;}
+        input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
+        ::-webkit-scrollbar{width:4px;height:4px} ::-webkit-scrollbar-thumb{background:#c7d2fe;border-radius:4px}
+        @media(max-width:700px){.split{flex-direction:column!important;}.left-col{min-height:auto!important;max-height:170px!important;padding:20px!important;}.right-col{flex:1!important;}}
+      `}</style>
+
+      {/* ── Full viewport, no outer scroll ── */}
+      <div className="split" style={{display:"flex",height:"100vh",width:"100vw",overflow:"hidden"}}>
+
+        {/* ══ LEFT PANEL ══ */}
+        <div className="left-col" style={{width:260,flexShrink:0,background:`linear-gradient(${s.grad})`,display:"flex",flexDirection:"column",justifyContent:"space-between",padding:"28px 24px",position:"relative",overflow:"hidden"}}>
+          {/* BG circles */}
+          <div style={{position:"absolute",top:-50,right:-50,width:180,height:180,borderRadius:"50%",background:"rgba(255,255,255,.07)"}}/>
+          <div style={{position:"absolute",bottom:-60,left:-30,width:200,height:200,borderRadius:"50%",background:"rgba(255,255,255,.05)"}}/>
+
+          {/* Top: step label */}
+          <div style={{position:"relative"}}>
+            <span style={{fontSize:10,fontWeight:800,letterSpacing:"0.14em",color:"rgba(255,255,255,.6)",textTransform:"uppercase" as const}}>Step {s.n} / 07</span>
+            {/* Progress pills */}
+            <div style={{display:"flex",gap:3,marginTop:8}}>
+              {STEPS.map((_,i)=>(
+                <div key={i} style={{height:3,borderRadius:99,flex:i===step?2:1,background:i<=step?"rgba(255,255,255,.9)":"rgba(255,255,255,.2)",transition:"all .4s"}}/>
+              ))}
+            </div>
           </div>
-          {/* Floating flags */}
-          <div
-            style={{
-              position: "absolute",
-              top: 8,
-              right: 12,
-              display: "flex",
-              gap: 4,
-              fontSize: 24,
-              opacity: 0.85,
-            }}
-          >
-            <span>🇺🇸</span>
-            <span>🇨🇦</span>
+
+          {/* Middle: title */}
+          <div style={{position:"relative"}}>
+            <p style={{margin:"0 0 4px",fontSize:10,fontWeight:700,color:"rgba(255,255,255,.55)",textTransform:"uppercase" as const,letterSpacing:"0.1em"}}>{s.label}</p>
+            <h2 style={{margin:0,fontSize:26,fontWeight:900,color:"#fff",lineHeight:1.2,whiteSpace:"pre-line" as const}}>{s.title}</h2>
           </div>
-          <div
-            style={{
-              position: "absolute",
-              bottom: 8,
-              right: 12,
-              fontSize: 24,
-              opacity: 0.85,
-            }}
-          >
-            <span>🇦🇺</span>
+
+          {/* Bottom: selected chips */}
+          <div style={{position:"relative",display:"flex",flexDirection:"column",gap:6}}>
+            {selC&&step>0&&<Chip>{selC.flag} {selC.name}</Chip>}
+            {form.degree&&step>1&&<Chip>🎓 {DEGREES.find(d=>d.v===form.degree)?.l}</Chip>}
+            {form.field&&step>2&&<Chip>📚 {form.field.split(" ")[0]}</Chip>}
+            {form.testScore&&step>3&&<Chip>📝 {form.testType} {form.testScore}</Chip>}
+            {form.budget&&step>4&&<Chip>💰 {form.currency} {Number(form.budget).toLocaleString()}</Chip>}
           </div>
         </div>
-      )}
 
-      {/* Country Grid */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(3,1fr)",
-          gap: 12,
-        }}
-      >
-        {COUNTRIES.map((c) => {
-          const sel = form.country === c.code;
-          return (
-            <button
-              key={c.code}
-              onClick={() => setF("country", c.code)}
-              style={{
-                background: sel ? "#eef2ff" : "#f8fafc",
-                border: sel ? "2px solid #6366f1" : "2px solid #e8ecf4",
-                borderRadius: 16,
-                padding: "18px 10px 14px",
-                cursor: "pointer",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: 8,
-                position: "relative",
-                transition: "all 0.18s",
-                boxShadow: sel
-                  ? "0 4px 16px rgba(99,102,241,0.15)"
-                  : "0 1px 4px rgba(0,0,0,0.06)",
-              }}
-            >
-              {/* Checkmark */}
-              {sel && (
-                <span
-                  style={{
-                    position: "absolute",
-                    top: -8,
-                    right: -8,
-                    width: 22,
-                    height: 22,
-                    borderRadius: "50%",
-                    background: "#6366f1",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontSize: 12,
-                    color: "#fff",
-                    boxShadow: "0 2px 8px rgba(99,102,241,0.4)",
-                    fontWeight: 700,
-                  }}
-                >
-                  ✓
-                </span>
-              )}
-              <span style={{ fontSize: 32, lineHeight: 1 }}>{c.flag}</span>
-              <span
-                style={{
-                  fontSize: 13,
-                  fontWeight: sel ? 700 : 500,
-                  color: sel ? "#6366f1" : "#374151",
-                }}
-              >
-                {c.name}
-              </span>
-            </button>
-          );
-        })}
+        {/* ══ RIGHT PANEL ══ */}
+        <div className="right-col" style={{flex:1,display:"flex",flexDirection:"column",background:"#fff",overflow:"hidden"}}>
+
+          {/* ── HEADER ── */}
+          <div style={{padding:"14px 24px 12px",borderBottom:"1px solid #f1f5f9",flexShrink:0,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+            {/* Back / Home button — always visible */}
+            {step===0
+              ?<Link href="/" style={{display:"inline-flex",alignItems:"center",gap:6,fontSize:13,fontWeight:600,color:"#64748b",textDecoration:"none",padding:"6px 12px",borderRadius:10,border:"1.5px solid #e2e8f0",background:"#f8fafc",transition:"all .2s"}} onMouseOver={e=>{const t=e.currentTarget;t.style.background="#eef2ff";t.style.color="#6366f1";t.style.borderColor="#a5b4fc";}} onMouseOut={e=>{const t=e.currentTarget;t.style.background="#f8fafc";t.style.color="#64748b";t.style.borderColor="#e2e8f0";}}>← Home</Link>
+              :<button onClick={()=>setStep(p=>p-1)} style={{display:"inline-flex",alignItems:"center",gap:6,fontSize:13,fontWeight:600,color:"#64748b",padding:"6px 12px",borderRadius:10,border:"1.5px solid #e2e8f0",background:"#f8fafc",transition:"all .2s"}} onMouseOver={e=>{const t=e.currentTarget;t.style.background="#eef2ff";t.style.color="#6366f1";t.style.borderColor="#a5b4fc";}} onMouseOut={e=>{const t=e.currentTarget;t.style.background="#f8fafc";t.style.color="#64748b";t.style.borderColor="#e2e8f0";}}>← Back</button>}
+            <div style={{textAlign:"center" as const}}>
+              <h3 style={{margin:0,fontSize:15,fontWeight:800,color:"#0f172a"}}>{s.label}</h3>
+            </div>
+            <span style={{fontSize:11,fontWeight:700,color:"#94a3b8",background:"#f1f5f9",borderRadius:99,padding:"3px 10px"}}>{step+1}/7</span>
+          </div>
+
+          {/* ── CONTENT (no outer scroll, each step is self-contained) ── */}
+          <div className="anim" key={step} style={{flex:1,overflow:step===6?"auto":"hidden",padding:step===6?"16px 24px":"16px 24px 0",display:"flex",flexDirection:"column",gap:10,minHeight:0}}>
+
+            {/* STEP 0 — Countries */}
+            {step===0&&(
+              <>
+                <p style={{fontSize:12,color:"#64748b",margin:0,fontWeight:500}}>Pick your preferred study destination:</p>
+                <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8,flex:1,alignContent:"start"}}>
+                  {COUNTRIES.map(c=>{
+                    const sel=form.country===c.code;
+                    return(
+                      <button key={c.code} className="cc" onClick={()=>sf("country",c.code)}
+                        style={{background:sel?`${c.c}12`:"#f8fafc",border:`2px solid ${sel?c.c:"#e8ecf4"}`,borderRadius:16,padding:"14px 8px 12px",display:"flex",flexDirection:"column",alignItems:"center",gap:7,position:"relative",boxShadow:sel?`0 4px 16px ${c.c}30`:"0 1px 4px rgba(0,0,0,.04)"}}>
+                        {sel&&<span style={{position:"absolute",top:-7,right:-7,width:18,height:18,borderRadius:"50%",background:c.c,color:"#fff",fontSize:9,fontWeight:800,display:"flex",alignItems:"center",justifyContent:"center"}}>✓</span>}
+                        <span style={{fontSize:26,lineHeight:1}}>{c.flag}</span>
+                        <p style={{margin:0,fontSize:11,fontWeight:sel?700:600,color:sel?c.c:"#374151",textAlign:"center" as const,lineHeight:1.2}}>{c.name}</p>
+                        <p style={{margin:0,fontSize:10,color:"#94a3b8"}}>{c.city}</p>
+                      </button>
+                    );
+                  })}
+                </div>
+              </>
+            )}
+
+            {/* STEP 1 — Degree */}
+            {step===1&&(
+              <>
+                <p style={{fontSize:12,color:"#64748b",margin:0,fontWeight:500}}>Choose your qualification level:</p>
+                <div style={{display:"flex",flexDirection:"column",gap:7,flex:1,justifyContent:"center"}}>
+                  {DEGREES.map(d=>{
+                    const sel=form.degree===d.v;
+                    return(
+                      <button key={d.v} className="opt" onClick={()=>sf("degree",d.v)}
+                        style={{background:sel?"#eef2ff":"#f8fafc",border:`1.5px solid ${sel?"#6366f1":"#e8ecf4"}`,borderRadius:14,padding:"11px 16px",display:"flex",alignItems:"center",gap:12,boxShadow:sel?"0 2px 12px rgba(99,102,241,.12)":"none"}}>
+                        <span style={{fontSize:20,flexShrink:0}}>{d.e}</span>
+                        <div style={{flex:1,textAlign:"left" as const}}>
+                          <p style={{margin:0,fontSize:13,fontWeight:sel?700:600,color:sel?"#4f46e5":"#1e293b"}}>{d.l}</p>
+                          <p style={{margin:"1px 0 0",fontSize:11,color:"#94a3b8"}}>{d.s}</p>
+                        </div>
+                        <div style={{width:20,height:20,borderRadius:"50%",border:`2px solid ${sel?"#6366f1":"#d1d5db"}`,background:sel?"#6366f1":"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                          {sel&&<svg width="9" height="7" viewBox="0 0 9 7" fill="none"><path d="M1 3.5l2 2L8 1" stroke="#fff" strokeWidth="1.8" strokeLinecap="round"/></svg>}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </>
+            )}
+
+            {/* STEP 2 — Field */}
+            {step===2&&(
+              <>
+                <p style={{fontSize:12,color:"#64748b",margin:0,fontWeight:500}}>Select your field and specific program:</p>
+                <SS ph="Select a field of study" opts={FIELDS} val={form.field} set={v=>{sf("field",v);sf("program","");}}/>
+                {form.field&&<SS ph="Select a program (optional)" opts={progs} val={form.program} set={v=>sf("program",v)}/>}
+                {!form.field&&(
+                  <div>
+                    <p style={{fontSize:11,color:"#94a3b8",margin:"0 0 8px",fontWeight:600,textTransform:"uppercase" as const,letterSpacing:"0.06em"}}>Popular fields</p>
+                    <div style={{display:"flex",flexWrap:"wrap" as const,gap:7}}>
+                      {["Business","Computer Science","Engineering","Medicine","Law","Data Science"].map(t=>(
+                        <button key={t} onClick={()=>sf("field",FIELDS.find(f=>f.toLowerCase().includes(t.toLowerCase()))||t)} style={{padding:"7px 13px",borderRadius:99,background:"#f0f4ff",border:"1.5px solid #e0e7ff",color:"#6366f1",fontWeight:600,fontSize:12,transition:"all .15s"}}>{t}</button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+
+            {/* STEP 3 — English */}
+            {step===3&&(
+              <>
+                <p style={{fontSize:12,color:"#64748b",margin:0,fontWeight:500}}>Select test type and enter your score:</p>
+                <div style={{display:"flex",flexWrap:"wrap" as const,gap:7}}>
+                  {TESTS.map(t=>{const sel=form.testType===t;return<button key={t} onClick={()=>sf("testType",t)} style={{padding:"8px 16px",borderRadius:99,border:`2px solid ${sel?"#6366f1":"#e2e8f0"}`,background:sel?"#6366f1":"#f8fafc",color:sel?"#fff":"#64748b",fontWeight:sel?700:500,fontSize:13,transition:"all .15s",boxShadow:sel?"0 3px 10px rgba(99,102,241,.3)":"none"}}>{t}</button>;})}
+                </div>
+                <div style={{position:"relative"}}>
+                  <span style={{position:"absolute",left:14,top:"50%",transform:"translateY(-50%)",fontSize:15,pointerEvents:"none"}}>📝</span>
+                  <input type="number" value={form.testScore} placeholder={form.testType==="IELTS"?"e.g. 6.5 (range 0–9)":"e.g. 90 (range 0–120)"} min="0" max={form.testType==="IELTS"?"9":"120"} step={form.testType==="IELTS"?"0.5":"1"} onChange={e=>sf("testScore",e.target.value)}
+                    style={{width:"100%",padding:"12px 14px 12px 44px",borderRadius:12,border:"1.5px solid #e2e8f0",fontSize:14,color:"#0f172a",background:"#f8fafc",outline:"none",boxSizing:"border-box" as const,transition:"all .2s"}}
+                    onFocus={e=>{e.target.style.borderColor="#6366f1";e.target.style.boxShadow="0 0 0 3px rgba(99,102,241,.12)";e.target.style.background="#f8f7ff";}}
+                    onBlur={e=>{e.target.style.borderColor="#e2e8f0";e.target.style.boxShadow="none";e.target.style.background="#f8fafc";}}
+                  />
+                </div>
+                {band&&<span style={{display:"inline-flex",alignItems:"center",gap:6,fontSize:12,fontWeight:700,color:band.c,background:`${band.c}15`,border:`1.5px solid ${band.c}40`,borderRadius:99,padding:"5px 14px",width:"fit-content"}}><span style={{width:7,height:7,borderRadius:"50%",background:band.c,display:"inline-block",boxShadow:`0 0 6px ${band.c}`}}/>{band.l} proficiency</span>}
+                <div style={{background:"#f8fafc",borderRadius:12,padding:"10px 14px",border:"1px solid #e8ecf4"}}>
+                  <p style={{margin:0,fontSize:12,color:"#64748b",lineHeight:1.6}}>💡 <strong style={{color:"#374151"}}>No score yet?</strong> Enter your expected score — we'll still find matching universities.</p>
+                </div>
+              </>
+            )}
+
+            {/* STEP 4 — Budget */}
+            {step===4&&(
+              <>
+                <p style={{fontSize:12,color:"#64748b",margin:0,fontWeight:500}}>Set your maximum annual tuition budget:</p>
+                <div style={{display:"flex",flexWrap:"wrap" as const,gap:6}}>
+                  {CURRENCIES.map(c=>{const sel=form.currency===c;return<button key={c} onClick={()=>sf("currency",c)} style={{padding:"6px 14px",borderRadius:99,border:`2px solid ${sel?"#6366f1":"#e2e8f0"}`,background:sel?"#6366f1":"#f8fafc",color:sel?"#fff":"#64748b",fontWeight:sel?700:500,fontSize:12,transition:"all .15s"}}>{c}</button>;})}
+                </div>
+                <div style={{position:"relative"}}>
+                  <span style={{position:"absolute",left:14,top:"50%",transform:"translateY(-50%)",fontSize:15,pointerEvents:"none"}}>💰</span>
+                  <input type="number" value={form.budget} placeholder={`Enter max tuition in ${form.currency}`} min="0" onChange={e=>sf("budget",e.target.value)}
+                    style={{width:"100%",padding:"12px 14px 12px 44px",borderRadius:12,border:"1.5px solid #e2e8f0",fontSize:14,color:"#0f172a",background:"#f8fafc",outline:"none",boxSizing:"border-box" as const,transition:"all .2s"}}
+                    onFocus={e=>{e.target.style.borderColor="#6366f1";e.target.style.boxShadow="0 0 0 3px rgba(99,102,241,.12)";e.target.style.background="#f8f7ff";}}
+                    onBlur={e=>{e.target.style.borderColor="#e2e8f0";e.target.style.boxShadow="none";e.target.style.background="#f8fafc";}}
+                  />
+                </div>
+                <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8}}>
+                  {["10000","20000","30000","50000"].map(p=>(
+                    <button key={p} onClick={()=>sf("budget",p)} style={{padding:"9px 0",borderRadius:11,border:`2px solid ${form.budget===p?"#6366f1":"#e2e8f0"}`,background:form.budget===p?"#eef2ff":"#f8fafc",color:form.budget===p?"#6366f1":"#64748b",fontWeight:700,fontSize:13,transition:"all .15s"}}>
+                      {parseInt(p)/1000}K
+                    </button>
+                  ))}
+                </div>
+                <div onClick={()=>sf("scholarship",!form.scholarship)} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"13px 16px",borderRadius:14,border:`2px solid ${form.scholarship?"#6366f1":"#e2e8f0"}`,background:form.scholarship?"#f8f7ff":"#f8fafc",cursor:"pointer",transition:"all .2s"}}>
+                  <div>
+                    <p style={{margin:0,fontWeight:700,fontSize:13,color:"#1e293b"}}>Open to scholarships?</p>
+                    <p style={{margin:"2px 0 0",fontSize:11,color:"#94a3b8"}}>Include scholarship-eligible programs</p>
+                  </div>
+                  <div style={{width:44,height:24,borderRadius:12,background:form.scholarship?"#6366f1":"#d1d5db",position:"relative",transition:"background .25s",flexShrink:0}}>
+                    <span style={{position:"absolute",top:3,left:form.scholarship?22:3,width:18,height:18,borderRadius:"50%",background:"#fff",transition:"left .25s",display:"block",boxShadow:"0 1px 4px rgba(0,0,0,.25)"}}/>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* STEP 5 — Profile */}
+            {step===5&&(
+              <>
+                <p style={{fontSize:12,color:"#64748b",margin:0,fontWeight:500}}>Final step — personalise your results:</p>
+                <div style={{position:"relative"}}>
+                  <span style={{position:"absolute",left:14,top:"50%",transform:"translateY(-50%)",fontSize:15,pointerEvents:"none"}}>👤</span>
+                  <input value={form.name} placeholder="Your full name" onChange={e=>sf("name",e.target.value)}
+                    style={{width:"100%",padding:"13px 14px 13px 44px",borderRadius:12,border:"1.5px solid #e2e8f0",fontSize:14,color:"#0f172a",background:"#f8fafc",outline:"none",boxSizing:"border-box" as const,transition:"all .2s"}}
+                    onFocus={e=>{e.target.style.borderColor="#6366f1";e.target.style.boxShadow="0 0 0 3px rgba(99,102,241,.12)";e.target.style.background="#f8f7ff";}}
+                    onBlur={e=>{e.target.style.borderColor="#e2e8f0";e.target.style.boxShadow="none";e.target.style.background="#f8fafc";}}
+                  />
+                </div>
+                <div style={{position:"relative"}}>
+                  <span style={{position:"absolute",left:14,top:"50%",transform:"translateY(-50%)",fontSize:15,pointerEvents:"none"}}>📊</span>
+                  <input type="number" value={form.gpa} placeholder="GPA / Grade (optional)" onChange={e=>sf("gpa",e.target.value)}
+                    style={{width:"100%",padding:"13px 14px 13px 44px",borderRadius:12,border:"1.5px solid #e2e8f0",fontSize:14,color:"#0f172a",background:"#f8fafc",outline:"none",boxSizing:"border-box" as const,transition:"all .2s"}}
+                    onFocus={e=>{e.target.style.borderColor="#6366f1";e.target.style.boxShadow="0 0 0 3px rgba(99,102,241,.12)";e.target.style.background="#f8f7ff";}}
+                    onBlur={e=>{e.target.style.borderColor="#e2e8f0";e.target.style.boxShadow="none";e.target.style.background="#f8fafc";}}
+                  />
+                </div>
+                <div style={{background:"linear-gradient(135deg,#eef2ff,#f0fdf4)",borderRadius:14,padding:"14px 16px",border:"1px solid #e0e7ff"}}>
+                  <p style={{margin:0,fontSize:13,color:"#475569",lineHeight:1.6}}><strong style={{color:"#6366f1"}}>✓ No account needed.</strong> We match you instantly using live government & education APIs. Nothing is stored.</p>
+                </div>
+              </>
+            )}
+
+            {/* STEP 6 — Results (only step that scrolls internally) */}
+            {step===6&&(
+              <div style={{display:"flex",flexDirection:"column",gap:12}}>
+                {/* Summary */}
+                <div style={{background:"linear-gradient(135deg,#6366f1,#7c3aed)",borderRadius:20,padding:"20px 22px",position:"relative",overflow:"hidden",flexShrink:0}}>
+                  <div style={{position:"absolute",top:-24,right:-24,width:110,height:110,borderRadius:"50%",background:"rgba(255,255,255,.07)"}}/>
+                  <p style={{margin:"0 0 2px",fontSize:11,color:"rgba(255,255,255,.65)",fontWeight:700,textTransform:"uppercase" as const,letterSpacing:"0.1em",position:"relative"}}>Your Results</p>
+                  <p style={{margin:"0 0 14px",fontWeight:900,fontSize:22,color:"#fff",position:"relative"}}>{loading?"Scanning databases…":error?"Search failed":matches.length===0?"No matches found":`${matches.length} universities found 🎉`}</p>
+                  <div style={{display:"flex",flexWrap:"wrap" as const,gap:6,position:"relative"}}>
+                    {[selC?.flag+" "+selC?.name,`${form.testType} ${form.testScore}`,form.budget?`${form.currency} ${Number(form.budget).toLocaleString()}`:null,form.field?.split(" ")[0]].filter(Boolean).map((t,i)=>(
+                      <span key={i} style={{fontSize:11,fontWeight:600,color:"rgba(255,255,255,.9)",background:"rgba(255,255,255,.18)",borderRadius:99,padding:"3px 10px"}}>{t}</span>
+                    ))}
+                  </div>
+                </div>
+                {loading&&<div style={{textAlign:"center",padding:"40px 20px"}}><div style={{width:44,height:44,border:"4px solid #e8ecf4",borderTopColor:"#6366f1",borderRadius:"50%",animation:"spin .8s linear infinite",margin:"0 auto 14px"}}/><p style={{color:"#6366f1",fontWeight:700,fontSize:14,margin:"0 0 4px"}}>Finding your universities…</p><p style={{color:"#94a3b8",fontSize:12}}>Querying live databases</p></div>}
+                {error&&!loading&&<div style={{background:"#fef2f2",border:"1.5px solid #fecaca",borderRadius:14,padding:14}}><p style={{margin:0,color:"#ef4444",fontWeight:700,fontSize:13}}>⚠️ {error}</p></div>}
+                {!loading&&matches.map(m=><MC key={m.id} m={m} c={form.currency}/>)}
+                {!loading&&!error&&matches.length===0&&<div style={{textAlign:"center",padding:"32px",background:"#f8fafc",borderRadius:18}}><p style={{fontSize:32,margin:"0 0 8px"}}>🔍</p><p style={{fontWeight:800,color:"#1e293b",fontSize:16,margin:"0 0 4px"}}>No matches found</p><p style={{fontSize:13,color:"#94a3b8"}}>Try increasing budget or adjusting score.</p></div>}
+                {!loading&&<div style={{display:"flex",gap:10}}>
+                  <button onClick={()=>{setStep(4);setMatches([]);}} style={{flex:1,padding:"12px",borderRadius:12,border:"1.5px solid #e2e8f0",background:"#fff",color:"#64748b",fontWeight:700,fontSize:14}}>← Refine</button>
+                  <button onClick={()=>{setStep(0);setForm(DEF);setMatches([]);}} style={{flex:1,padding:"12px",borderRadius:12,border:"none",background:"linear-gradient(135deg,#6366f1,#7c3aed)",color:"#fff",fontWeight:700,fontSize:14,boxShadow:"0 4px 14px rgba(99,102,241,.4)"}}>Start Over</button>
+                </div>}
+              </div>
+            )}
+          </div>
+
+          {/* ── CTA ── */}
+          {step<6&&(
+            <div style={{padding:"12px 24px 20px",borderTop:"1px solid #f1f5f9",flexShrink:0,background:"#fff"}}>
+              <button onClick={next} disabled={!ok()}
+                style={{width:"100%",padding:"15px 0",borderRadius:16,border:"none",background:ok()?"linear-gradient(135deg,#6366f1,#7c3aed)":"#e8ecf4",color:ok()?"#fff":"#94a3b8",fontWeight:800,fontSize:15,display:"flex",alignItems:"center",justifyContent:"center",gap:10,boxShadow:ok()?"0 8px 24px rgba(99,102,241,.4)":"none",transition:"all .2s",cursor:ok()?"pointer":"not-allowed"}}>
+                <span>{step===5?"🚀":"→"}</span>
+                {step===5?"Find My Universities":"Continue"}
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </>
   );
+}
 
-  /* Step 1 — Degree */
-  const step1Content = (
-    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-      {DEGREE_LEVELS.map((d) => {
-        const sel = form.degreeLevel === d.value;
-        return (
-          <button
-            key={d.value}
-            onClick={() => setF("degreeLevel", d.value)}
-            style={{
-              background: sel ? "#eef2ff" : "#f8fafc",
-              border: sel ? "2px solid #6366f1" : "2px solid #e8ecf4",
-              borderRadius: 14,
-              padding: "14px 18px",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              transition: "all 0.15s",
-              boxShadow: sel ? "0 2px 10px rgba(99,102,241,0.12)" : "none",
-            }}
-          >
-            <span
-              style={{
-                fontSize: 15,
-                fontWeight: sel ? 700 : 500,
-                color: sel ? "#6366f1" : "#374151",
-              }}
-            >
-              {d.label}
-            </span>
-            {sel && (
-              <span
-                style={{
-                  width: 20,
-                  height: 20,
-                  borderRadius: "50%",
-                  background: "#6366f1",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: 11,
-                  color: "#fff",
-                  fontWeight: 700,
-                }}
-              >
-                ✓
-              </span>
-            )}
-          </button>
-        );
-      })}
-    </div>
-  );
-
-  /* Step 2 — English Score */
-  const step2Content = (
-    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-      {/* Test Type */}
-      <div>
-        <label
-          style={{
-            fontSize: 12,
-            fontWeight: 700,
-            color: "#64748b",
-            textTransform: "uppercase",
-            letterSpacing: "0.07em",
-            display: "block",
-            marginBottom: 8,
-          }}
-        >
-          Test Type
-        </label>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-          {ENGLISH_TESTS.map((t) => {
-            const sel = form.englishTestType === t;
-            return (
-              <button
-                key={t}
-                onClick={() => setF("englishTestType", t)}
-                style={{
-                  padding: "8px 16px",
-                  borderRadius: 10,
-                  border: sel ? "2px solid #6366f1" : "2px solid #e2e8f0",
-                  background: sel ? "#eef2ff" : "#f8fafc",
-                  color: sel ? "#6366f1" : "#475569",
-                  fontWeight: sel ? 700 : 500,
-                  fontSize: 13,
-                  cursor: "pointer",
-                  transition: "all 0.15s",
-                }}
-              >
-                {t}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Score */}
-      <div>
-        <label
-          style={{
-            fontSize: 12,
-            fontWeight: 700,
-            color: "#64748b",
-            textTransform: "uppercase",
-            letterSpacing: "0.07em",
-            display: "block",
-            marginBottom: 8,
-          }}
-        >
-          {form.englishTestType} Score{" "}
-          {form.englishTestType === "IELTS" ? "(0–9)" : "(0–120)"}
-        </label>
-        <input
-          type="number"
-          value={form.englishScore}
-          placeholder={
-            form.englishTestType === "IELTS" ? "e.g. 6.5" : "e.g. 90"
-          }
-          min="0"
-          max={form.englishTestType === "IELTS" ? "9" : "120"}
-          step={form.englishTestType === "IELTS" ? "0.5" : "1"}
-          onChange={(e) => setF("englishScore", e.target.value)}
-          style={inputStyle}
-          onFocus={(e) => {
-            e.target.style.borderColor = "#6366f1";
-            e.target.style.boxShadow = "0 0 0 3px rgba(99,102,241,0.15)";
-          }}
-          onBlur={(e) => {
-            e.target.style.borderColor = "#e2e8f0";
-            e.target.style.boxShadow = "none";
-          }}
-        />
-        {form.englishScore && (
-          <div style={{ marginTop: 10 }}>
-            <ScoreBadge score={form.englishScore} test={form.englishTestType} />
-          </div>
-        )}
-      </div>
-    </div>
-  );
-
-  /* Step 3 — Budget */
-  const step3Content = (
-    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-      <div>
-        <label
-          style={{
-            fontSize: 12,
-            fontWeight: 700,
-            color: "#64748b",
-            textTransform: "uppercase",
-            letterSpacing: "0.07em",
-            display: "block",
-            marginBottom: 8,
-          }}
-        >
-          Currency
-        </label>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-          {CURRENCIES.map((c) => {
-            const sel = form.currency === c;
-            return (
-              <button
-                key={c}
-                onClick={() => setF("currency", c)}
-                style={{
-                  padding: "7px 14px",
-                  borderRadius: 10,
-                  border: sel ? "2px solid #6366f1" : "2px solid #e2e8f0",
-                  background: sel ? "#eef2ff" : "#f8fafc",
-                  color: sel ? "#6366f1" : "#475569",
-                  fontWeight: sel ? 700 : 500,
-                  fontSize: 13,
-                  cursor: "pointer",
-                }}
-              >
-                {c}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      <div>
-        <label
-          style={{
-            fontSize: 12,
-            fontWeight: 700,
-            color: "#64748b",
-            textTransform: "uppercase",
-            letterSpacing: "0.07em",
-            display: "block",
-            marginBottom: 8,
-          }}
-        >
-          Max Annual Tuition ({form.currency})
-        </label>
-        <input
-          type="number"
-          value={form.budget}
-          min="0"
-          placeholder="e.g. 25000"
-          onChange={(e) => setF("budget", e.target.value)}
-          style={inputStyle}
-          onFocus={(e) => {
-            e.target.style.borderColor = "#6366f1";
-            e.target.style.boxShadow = "0 0 0 3px rgba(99,102,241,0.15)";
-          }}
-          onBlur={(e) => {
-            e.target.style.borderColor = "#e2e8f0";
-            e.target.style.boxShadow = "none";
-          }}
-        />
-      </div>
-
-      {/* Scholarship toggle */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          background: "#f8fafc",
-          borderRadius: 14,
-          padding: "14px 16px",
-          border: "1.5px solid #e2e8f0",
-        }}
-      >
-        <div>
-          <p
-            style={{
-              margin: 0,
-              fontWeight: 600,
-              fontSize: 14,
-              color: "#1e293b",
-            }}
-          >
-            Open to Scholarships?
-          </p>
-          <p style={{ margin: "2px 0 0", fontSize: 12, color: "#94a3b8" }}>
-            Also show scholarship-eligible programs
-          </p>
-        </div>
-        <button
-          onClick={() => setF("scholarshipNeeded", !form.scholarshipNeeded)}
-          style={{
-            width: 46,
-            height: 26,
-            borderRadius: 13,
-            border: "none",
-            background: form.scholarshipNeeded ? "#6366f1" : "#cbd5e1",
-            cursor: "pointer",
-            position: "relative",
-            transition: "background 0.3s",
-            flexShrink: 0,
-          }}
-        >
-          <span
-            style={{
-              position: "absolute",
-              top: 3,
-              left: form.scholarshipNeeded ? 22 : 3,
-              width: 20,
-              height: 20,
-              borderRadius: "50%",
-              background: "#fff",
-              transition: "left 0.3s",
-              display: "block",
-              boxShadow: "0 1px 4px rgba(0,0,0,0.2)",
-            }}
-          />
-        </button>
-      </div>
-    </div>
-  );
-
-  /* Step 4 — Profile */
-  const step4Content = (
-    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-      {[
-        {
-          key: "name",
-          label: "Full Name",
-          placeholder: "e.g. Aarav Khadka",
-          type: "text",
-        },
-        {
-          key: "gpa",
-          label: "GPA / Grade",
-          placeholder: "e.g. 3.5",
-          type: "number",
-        },
-      ].map((f) => (
-        <div key={f.key}>
-          <label
-            style={{
-              fontSize: 12,
-              fontWeight: 700,
-              color: "#64748b",
-              textTransform: "uppercase",
-              letterSpacing: "0.07em",
-              display: "block",
-              marginBottom: 8,
-            }}
-          >
-            {f.label}
-          </label>
-          <input
-            type={f.type}
-            value={form[f.key as keyof FormData] as string}
-            placeholder={f.placeholder}
-            onChange={(e) => setF(f.key as keyof FormData, e.target.value)}
-            style={inputStyle}
-            onFocus={(e) => {
-              e.target.style.borderColor = "#6366f1";
-              e.target.style.boxShadow = "0 0 0 3px rgba(99,102,241,0.15)";
-            }}
-            onBlur={(e) => {
-              e.target.style.borderColor = "#e2e8f0";
-              e.target.style.boxShadow = "none";
-            }}
-          />
-        </div>
-      ))}
-    </div>
-  );
-
-  /* Step 5 — Field of Study */
-  const step5Content = (
-    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-      {[
-        "Computer Science",
-        "Business & Management",
-        "Engineering",
-        "Medicine & Health",
-        "Law",
-        "Arts & Humanities",
-        "Data Science",
-        "Other",
-      ].map((f) => {
-        const sel = form.fieldOfStudy === f;
-        return (
-          <button
-            key={f}
-            onClick={() => setF("fieldOfStudy", f)}
-            style={{
-              background: sel ? "#eef2ff" : "#f8fafc",
-              border: sel ? "2px solid #6366f1" : "2px solid #e8ecf4",
-              borderRadius: 14,
-              padding: "12px 18px",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              transition: "all 0.15s",
-            }}
-          >
-            <span
-              style={{
-                fontSize: 14,
-                fontWeight: sel ? 700 : 500,
-                color: sel ? "#6366f1" : "#374151",
-              }}
-            >
-              {f}
-            </span>
-            {sel && (
-              <span
-                style={{
-                  width: 20,
-                  height: 20,
-                  borderRadius: "50%",
-                  background: "#6366f1",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: 11,
-                  color: "#fff",
-                  fontWeight: 700,
-                }}
-              >
-                ✓
-              </span>
-            )}
-          </button>
-        );
-      })}
-    </div>
-  );
-
-  /* Step 6 — Results */
-  const step6Content = (
-    <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-      {loading ? (
-        <div style={{ textAlign: "center", padding: "48px 24px" }}>
-          <div
-            style={{
-              width: 48,
-              height: 48,
-              border: "4px solid #e8ecf4",
-              borderTopColor: "#6366f1",
-              borderRadius: "50%",
-              animation: "spin 0.8s linear infinite",
-              margin: "0 auto 18px",
-            }}
-          />
-          <p
-            style={{
-              color: "#64748b",
-              fontSize: 15,
-              margin: 0,
-              fontWeight: 500,
-            }}
-          >
-            Finding your universities…
-          </p>
-        </div>
-      ) : error ? (
-        <div
-          style={{
-            background: "#fef2f2",
-            border: "1px solid #fecaca",
-            borderRadius: 14,
-            padding: 18,
-          }}
-        >
-          <p
-            style={{
-              margin: 0,
-              color: "#ef4444",
-              fontWeight: 600,
-              fontSize: 14,
-            }}
-          >
-            ⚠️ {error}
-          </p>
-          <button
-            onClick={() => setStep(5)}
-            style={{
-              marginTop: 12,
-              padding: "8px 18px",
-              borderRadius: 10,
-              background: "#fff",
-              border: "1.5px solid #e2e8f0",
-              color: "#64748b",
-              fontWeight: 600,
-              cursor: "pointer",
-              fontSize: 13,
-            }}
-          >
-            ← Try Again
-          </button>
-        </div>
-      ) : (
-        <>
-          {/* Summary banner */}
-          <div
-            style={{
-              background: "linear-gradient(135deg,#6366f1,#8b5cf6)",
-              borderRadius: 16,
-              padding: "16px 18px",
-            }}
-          >
-            <p
-              style={{
-                margin: 0,
-                color: "rgba(255,255,255,0.8)",
-                fontSize: 13,
-              }}
-            >
-              Hi{" "}
-              <strong style={{ color: "#fff" }}>{form.name || "there"}</strong>!
-              Based on your profile:
-            </p>
-            <p
-              style={{
-                margin: "6px 0 0",
-                color: "#fff",
-                fontWeight: 800,
-                fontSize: 20,
-              }}
-            >
-              {matches.length > 0
-                ? `${matches.length} universities match 🎉`
-                : "No matches found"}
-            </p>
-            <div
-              style={{
-                display: "flex",
-                flexWrap: "wrap",
-                gap: 6,
-                marginTop: 10,
-              }}
-            >
-              {[
-                COUNTRIES.find((c) => c.code === form.country)?.flag +
-                  " " +
-                  COUNTRIES.find((c) => c.code === form.country)?.name,
-                `${form.englishTestType} ${form.englishScore}`,
-                form.budget
-                  ? `Budget: ${form.currency} ${Number(form.budget).toLocaleString()}`
-                  : null,
-              ]
-                .filter(Boolean)
-                .map((tag, i) => (
-                  <span
-                    key={i}
-                    style={{
-                      fontSize: 11,
-                      fontWeight: 600,
-                      color: "rgba(255,255,255,0.9)",
-                      background: "rgba(255,255,255,0.18)",
-                      borderRadius: 99,
-                      padding: "3px 10px",
-                    }}
-                  >
-                    {tag}
-                  </span>
-                ))}
-            </div>
-          </div>
-
-          {/* University cards */}
-          {matches.map((m) => (
-            <ResultCard key={m.id} m={m} currency={form.currency} />
-          ))}
-
-          {matches.length === 0 && !loading && (
-            <div
-              style={{
-                textAlign: "center",
-                padding: "32px 16px",
-                color: "#94a3b8",
-              }}
-            >
-              <p style={{ fontSize: 32, margin: "0 0 10px" }}>🔍</p>
-              <p
-                style={{
-                  fontWeight: 600,
-                  fontSize: 15,
-                  color: "#475569",
-                  margin: "0 0 6px",
-                }}
-              >
-                No matches found
-              </p>
-              <p style={{ fontSize: 13, margin: 0 }}>
-                Try increasing your budget or adjusting your English score.
-              </p>
-            </div>
-          )}
-
-          {/* Action buttons */}
-          <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
-            <button
-              onClick={() => {
-                setStep(3);
-                setMatches([]);
-              }}
-              style={{
-                flex: 1,
-                padding: "12px",
-                borderRadius: 12,
-                border: "1.5px solid #e2e8f0",
-                background: "#f8fafc",
-                color: "#64748b",
-                fontWeight: 600,
-                cursor: "pointer",
-                fontSize: 14,
-              }}
-            >
-              Refine ←
-            </button>
-            <button
-              onClick={() => {
-                setStep(0);
-                setForm(DEFAULTS);
-                setMatches([]);
-              }}
-              style={{
-                flex: 1,
-                padding: "12px",
-                borderRadius: 12,
-                border: "none",
-                background: "linear-gradient(135deg,#6366f1,#8b5cf6)",
-                color: "#fff",
-                fontWeight: 700,
-                cursor: "pointer",
-                fontSize: 14,
-                boxShadow: "0 4px 14px rgba(99,102,241,0.35)",
-              }}
-            >
-              Start Over
-            </button>
-          </div>
-        </>
-      )}
-    </div>
-  );
-
-  const stepContents = [
-    step0Content,
-    step1Content,
-    step2Content,
-    step3Content,
-    step4Content,
-    step5Content,
-    step6Content,
-  ];
-
-  /* ══════════════════════════════════════════
-     RENDER
-  ══════════════════════════════════════════ */
-  return (
-    <div style={page}>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-        * { box-sizing: border-box; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        button:active { transform: scale(0.97); }
-        input[type=number]::-webkit-inner-spin-button,
-        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-      `}</style>
-
-      <div style={card}>
-        {/* ── Top bar ── */}
-        <div style={{ padding: "20px 24px 0" }}>
-          {/* Step label + counter */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              marginBottom: 12,
-            }}
-          >
-            <span style={{ fontSize: 16, fontWeight: 700, color: "#1e293b" }}>
-              {currentStep.title}
-            </span>
-            <span style={{ fontSize: 13, fontWeight: 600, color: "#94a3b8" }}>
-              {step + 1}/{STEPS.length}
-            </span>
-          </div>
-
-          {/* Progress track */}
-          <div style={{ display: "flex", gap: 5, marginBottom: 20 }}>
-            {STEPS.map((_, i) => (
-              <div
-                key={i}
-                style={{
-                  flex: 1,
-                  height: 4,
-                  borderRadius: 99,
-                  background: i <= step ? "#6366f1" : "#e2e8f0",
-                  transition: "background 0.3s",
-                }}
-              />
-            ))}
-          </div>
-
-          {/* Mascot + Question */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "flex-start",
-              gap: 12,
-              marginBottom: 20,
-            }}
-          >
-            {/* Mascot */}
-            <div
-              style={{
-                width: 46,
-                height: 46,
-                borderRadius: "50%",
-                background: "linear-gradient(135deg,#6366f1,#8b5cf6)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: 22,
-                flexShrink: 0,
-                boxShadow: "0 4px 14px rgba(99,102,241,0.35)",
-              }}
-            >
-              🎓
-            </div>
-            {/* Bubble */}
-            <div
-              style={{
-                background: "#f0f4ff",
-                borderRadius: "0 16px 16px 16px",
-                padding: "12px 16px",
-                flex: 1,
-              }}
-            >
-              <p
-                style={{
-                  margin: 0,
-                  fontSize: 16,
-                  fontWeight: 700,
-                  color: "#1a1a2e",
-                  lineHeight: 1.35,
-                }}
-              >
-                {currentStep.question}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* ── Scrollable content ── */}
-        <div
-          style={{
-            padding: "0 24px",
-            overflowY: "auto",
-            flex: 1,
-            maxHeight: 480,
-          }}
-        >
-          {stepContents[step]}
-          <div style={{ height: 24 }} />
-        </div>
-
-        {/* ── Fixed bottom button ── */}
-        {step < 6 && (
-          <div
-            style={{
-              padding: "16px 24px 28px",
-              borderTop: "1px solid #f1f5f9",
-            }}
-          >
-            {step > 0 && (
-              <button
-                onClick={() => setStep((s) => s - 1)}
-                style={{
-                  width: "100%",
-                  marginBottom: 10,
-                  padding: "13px",
-                  borderRadius: 14,
-                  border: "1.5px solid #e2e8f0",
-                  background: "#f8fafc",
-                  color: "#64748b",
-                  fontWeight: 600,
-                  cursor: "pointer",
-                  fontSize: 15,
-                }}
-              >
-                ← Back
-              </button>
-            )}
-            <button
-              onClick={handleContinue}
-              disabled={!canContinue()}
-              style={{
-                width: "100%",
-                padding: "16px",
-                borderRadius: 16,
-                border: "none",
-                background: canContinue()
-                  ? "linear-gradient(135deg, #6366f1 0%, #7c3aed 100%)"
-                  : "#c4c9f0",
-                color: "#fff",
-                fontWeight: 800,
-                fontSize: 16,
-                cursor: canContinue() ? "pointer" : "not-allowed",
-                boxShadow: canContinue()
-                  ? "0 6px 24px rgba(99,102,241,0.45)"
-                  : "none",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 10,
-                transition: "all 0.2s",
-              }}
-            >
-              <span style={{ fontSize: 18 }}>✦</span>
-              {step === 5 ? "Find My Universities" : "Continue"}
-            </button>
-          </div>
-        )}
-      </div>
-    </div>
-  );
+function Chip({children}:{children:React.ReactNode}){
+  return<div style={{display:"inline-flex",alignItems:"center",gap:6,background:"rgba(255,255,255,.18)",backdropFilter:"blur(8px)",border:"1px solid rgba(255,255,255,.25)",borderRadius:10,padding:"6px 12px",fontSize:12,fontWeight:600,color:"#fff",width:"fit-content"}}>{children}</div>;
 }
