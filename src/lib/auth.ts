@@ -8,26 +8,40 @@ export const authOptions: NextAuthOptions = {
     CredentialsProvider({
       name: "Credentials",
       credentials: {
-        email: { label: "Email", type: "email" },
+        identifier: { label: "Email or Username", type: "text" },
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
-          throw new Error("Invalid credentials");
+        if (!credentials?.identifier || !credentials?.password) {
+          throw new Error("Please enter your email/username and password.");
         }
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email },
+
+        const identifier = credentials.identifier.trim().toLowerCase();
+
+        // Try email first, then username
+        let user = await prisma.user.findUnique({
+          where: { email: identifier },
         });
-        if (!user || !user.password) {
-          throw new Error("Invalid credentials");
+
+        if (!user) {
+          user = await prisma.user.findUnique({
+            where: { username: identifier },
+          });
         }
+
+        if (!user || !user.password) {
+          throw new Error("No account found with that email or username.");
+        }
+
         const isCorrectPassword = await bcrypt.compare(
           credentials.password,
           user.password,
         );
+
         if (!isCorrectPassword) {
-          throw new Error("Invalid credentials");
+          throw new Error("Incorrect password. Please try again.");
         }
+
         return {
           id: user.id,
           name: user.name,
