@@ -718,14 +718,6 @@ export default function NextDegreeMatchesPage() {
               ...prev,
               name: data.name || prev.name,
               email: data.email || prev.email,
-              countries: p.preferredCountry ? [p.preferredCountry] : prev.countries,
-              degree: p.degreeLevel || prev.degree,
-              field: p.fieldOfStudy || prev.field,
-              testType: p.englishTestType || prev.testType,
-              testScore: p.englishScore?.toString() || prev.testScore,
-              budget: p.yearlyBudget?.toString() || prev.budget,
-              currency: p.currency || prev.currency,
-              scholarship: p.scholarshipNeeded || prev.scholarship,
               gpa: p.gpa?.toString() || prev.gpa,
             }));
           }

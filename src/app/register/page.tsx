@@ -283,7 +283,7 @@ export default function RegisterPage() {
         </div>
 
         {/* Card */}
-        <div className="bg-white/[0.03] border border-white/10 rounded-3xl p-7 backdrop-blur-sm shadow-2xl fade-up">
+        <div className="bg-white/3 border border-white/10 rounded-3xl p-7 backdrop-blur-sm shadow-2xl fade-up">
           {/* Step header */}
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 bg-indigo-500/15 border border-indigo-500/25 rounded-2xl flex items-center justify-center shrink-0">

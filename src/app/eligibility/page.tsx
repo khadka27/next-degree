@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import {
   GraduationCap,
   Calendar,
@@ -281,6 +282,30 @@ export default function EligibilityHub() {
     activity: "",
     lastEdu: "Bachelor in Computer Science",
   });
+
+  const { status } = useSession();
+
+  useEffect(() => {
+    if (status === "authenticated") {
+      const fetchProfile = async () => {
+        try {
+          const res = await fetch("/api/profile");
+          if (res.ok) {
+            const data = await res.json();
+            const p = data.profile || {};
+            setForm((prev) => ({
+              ...prev,
+              gpa: p.gpa || prev.gpa,
+              countries: p.nationality ? [p.nationality] : prev.countries,
+            }));
+          }
+        } catch (e) {
+          console.error("Failed to load profile", e);
+        }
+      };
+      fetchProfile();
+    }
+  }, [status]);
 
   const [isProcessing, setIsProcessing] = useState(false);
   const [showResult, setShowResult] = useState(false);
