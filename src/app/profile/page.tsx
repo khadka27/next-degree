@@ -9,24 +9,11 @@ import {
   GraduationCap,
   User,
   Globe,
-  BookOpen,
   ChevronRight,
   Save,
   CheckCircle2,
   AlertCircle,
   ArrowLeft,
-  Sparkles,
-  Briefcase,
-  Monitor,
-  HeartPulse,
-  Scale,
-  Palette,
-  LineChart,
-  Microscope,
-  Brain,
-  AlignLeft,
-  Award,
-  DollarSign,
   LogOut,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
@@ -40,48 +27,10 @@ const COUNTRIES_LIST = [
   "France", "Netherlands", "Ireland", "New Zealand", "Singapore",
 ];
 
-const PREFERRED_COUNTRIES = [
-  { code: "CA", name: "Canada", emoji: "🇨🇦" },
-  { code: "US", name: "USA", emoji: "🇺🇸" },
-  { code: "AU", name: "Australia", emoji: "🇦🇺" },
-  { code: "GB", name: "UK", emoji: "🇬🇧" },
-  { code: "DE", name: "Germany", emoji: "🇩🇪" },
-  { code: "IE", name: "Ireland", emoji: "🇮🇪" },
-  { code: "NL", name: "Netherlands", emoji: "🇳🇱" },
-  { code: "NZ", name: "New Zealand", emoji: "🇳🇿" },
-  { code: "MY", name: "Malaysia", emoji: "🇲🇾" },
-  { code: "SG", name: "Singapore", emoji: "🇸🇬" },
-  { code: "FR", name: "France", emoji: "🇫🇷" },
-  { code: "ES", name: "Spain", emoji: "🇪🇸" },
-];
-
-const DEGREES = [
-  { v: "foundation", l: "Foundation", icon: AlignLeft },
-  { v: "diploma", l: "Diploma", icon: Award },
-  { v: "bachelor", l: "Bachelor's", icon: BookOpen },
-  { v: "master", l: "Master's", icon: GraduationCap },
-  { v: "phd", l: "PhD", icon: Microscope },
-];
-
-const FIELDS = [
-  { v: "Business & Management", icon: Briefcase },
-  { v: "Computer Science & IT", icon: Monitor },
-  { v: "Engineering", icon: Sparkles },
-  { v: "Medicine & Health", icon: HeartPulse },
-  { v: "Law", icon: Scale },
-  { v: "Arts & Humanities", icon: Palette },
-  { v: "Data Science", icon: LineChart },
-  { v: "Natural Sciences", icon: Microscope },
-  { v: "Social Sciences", icon: Brain },
-];
-
-const TESTS = ["IELTS", "TOEFL", "PTE", "Duolingo", "None"];
 
 const SECTIONS = [
   { id: "personal", label: "Personal Info", icon: User },
   { id: "background", label: "Background", icon: Globe },
-  { id: "goals", label: "Study Goals", icon: BookOpen },
-  { id: "finances", label: "Finances", icon: DollarSign },
 ];
 
 function GlassInput({ label, type = "text", placeholder, value, onChange }: {
@@ -144,18 +93,6 @@ export default function ProfilePage() {
     nationality: "",
     currentCountry: "",
     gpa: "",
-    // goals
-    preferredCountry: "",
-    degreeLevel: "",
-    fieldOfStudy: "",
-    intake: "",
-    // finances
-    englishTestType: "",
-    englishScore: "",
-    yearlyBudget: "",
-    currency: "USD",
-    scholarshipNeeded: false,
-    loanWilling: false,
   });
 
   useEffect(() => {
@@ -182,16 +119,6 @@ export default function ProfilePage() {
           nationality: data.profile?.nationality || "",
           currentCountry: data.profile?.currentCountry || "",
           gpa: data.profile?.gpa?.toString() || "",
-          preferredCountry: data.profile?.preferredCountry || "",
-          degreeLevel: data.profile?.degreeLevel || "",
-          fieldOfStudy: data.profile?.fieldOfStudy || "",
-          intake: data.profile?.intake || "",
-          englishTestType: data.profile?.englishTestType || "",
-          englishScore: data.profile?.englishScore?.toString() || "",
-          yearlyBudget: data.profile?.yearlyBudget?.toString() || "",
-          currency: data.profile?.currency || "USD",
-          scholarshipNeeded: data.profile?.scholarshipNeeded || false,
-          loanWilling: data.profile?.loanWilling || false,
         }));
       }
     } catch (e) {
@@ -247,7 +174,7 @@ export default function ProfilePage() {
       <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-violet-700/8 rounded-full blur-3xl pointer-events-none" />
 
       {/* Top Nav */}
-      <nav className="bg-white/[0.03] border-b border-white/8 px-4 py-4 flex items-center justify-between sticky top-0 z-30 backdrop-blur-md">
+      <nav className="bg-white/3 border-b border-white/8 px-4 py-4 flex items-center justify-between sticky top-0 z-30 backdrop-blur-md">
         <div className="flex items-center gap-3">
           <Link href="/matches" className="w-8 h-8 bg-white/5 border border-white/10 rounded-xl flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-all">
             <ArrowLeft className="w-4 h-4" />
@@ -281,7 +208,7 @@ export default function ProfilePage() {
 
       <div className="max-w-3xl mx-auto px-4 py-8">
         {/* User card */}
-        <div className="bg-white/[0.03] border border-white/10 rounded-3xl p-6 mb-6 flex items-center justify-between">
+        <div className="bg-white/3 border border-white/10 rounded-3xl p-6 mb-6 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="w-14 h-14 bg-indigo-600/20 border border-indigo-500/30 rounded-2xl flex items-center justify-center text-xl font-black text-indigo-300">
               {initials}
@@ -304,7 +231,7 @@ export default function ProfilePage() {
         {/* Error */}
         {error && (
           <div className="mb-5 bg-red-500/10 border border-red-500/30 rounded-2xl p-4 flex items-center gap-3">
-            <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0" />
+            <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
             <p className="text-sm text-red-300">{error}</p>
           </div>
         )}
@@ -331,7 +258,7 @@ export default function ProfilePage() {
         </div>
 
         {/* Section content */}
-        <div className="bg-white/[0.03] border border-white/10 rounded-3xl p-6">
+        <div className="bg-white/3 border border-white/10 rounded-3xl p-6">
           {/* ─── Personal ─── */}
           {activeSection === "personal" && (
             <div className="space-y-4">
@@ -364,174 +291,6 @@ export default function ProfilePage() {
             </div>
           )}
 
-          {/* ─── Goals ─── */}
-          {activeSection === "goals" && (
-            <div className="space-y-5">
-              <h3 className="text-sm font-black text-white mb-5">Study Goals</h3>
-
-              <div className="flex flex-col gap-2">
-                <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">Preferred Study Country</label>
-                <div className="grid grid-cols-3 gap-2">
-                  {PREFERRED_COUNTRIES.map((c) => (
-                    <button
-                      key={c.code}
-                      type="button"
-                      onClick={() => set("preferredCountry", c.code)}
-                      className={`flex flex-col items-center gap-1.5 p-3 rounded-2xl border text-xs font-bold transition-all ${
-                        profile.preferredCountry === c.code
-                          ? "border-indigo-500 bg-indigo-500/15 text-indigo-300"
-                          : "border-white/10 bg-white/5 text-slate-400 hover:border-white/20 hover:text-white"
-                      }`}
-                    >
-                      <span className="text-xl">{c.emoji}</span>
-                      <span className="text-[10px]">{c.name}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-2">
-                <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">Degree Level</label>
-                <div className="grid grid-cols-3 gap-2">
-                  {DEGREES.map((d) => {
-                    const Icon = d.icon;
-                    return (
-                      <button
-                        key={d.v}
-                        type="button"
-                        onClick={() => set("degreeLevel", d.v)}
-                        className={`flex flex-col items-center gap-1.5 p-3 rounded-2xl border text-xs font-bold transition-all ${
-                          profile.degreeLevel === d.v
-                            ? "border-indigo-500 bg-indigo-500/15 text-indigo-300"
-                            : "border-white/10 bg-white/5 text-slate-400 hover:border-white/20 hover:text-white"
-                        }`}
-                      >
-                        <Icon className="w-5 h-5" strokeWidth={1.5} />
-                        <span className="text-[10px]">{d.l}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-2">
-                <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">Field of Study</label>
-                <div className="grid grid-cols-2 gap-2">
-                  {FIELDS.map((f) => {
-                    const Icon = f.icon;
-                    return (
-                      <button
-                        key={f.v}
-                        type="button"
-                        onClick={() => set("fieldOfStudy", f.v)}
-                        className={`flex items-center gap-2 p-3 rounded-2xl border text-xs font-bold transition-all text-left ${
-                          profile.fieldOfStudy === f.v
-                            ? "border-indigo-500 bg-indigo-500/15 text-indigo-300"
-                            : "border-white/10 bg-white/5 text-slate-400 hover:border-white/20 hover:text-white"
-                        }`}
-                      >
-                        <Icon className="w-4 h-4 flex-shrink-0" strokeWidth={1.5} />
-                        <span className="text-[10px] leading-tight">{f.v}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <GlassSelect
-                label="Target Intake"
-                placeholder="When do you want to start?"
-                options={["January 2025", "May 2025", "September 2025", "January 2026", "May 2026", "September 2026"]}
-                value={profile.intake}
-                onChange={(v) => set("intake", v)}
-              />
-            </div>
-          )}
-
-          {/* ─── Finances ─── */}
-          {activeSection === "finances" && (
-            <div className="space-y-5">
-              <h3 className="text-sm font-black text-white mb-5">Finances & English</h3>
-
-              <div className="flex flex-col gap-2">
-                <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">English Test</label>
-                <div className="grid grid-cols-3 gap-2">
-                  {TESTS.map((t) => (
-                    <button
-                      key={t}
-                      type="button"
-                      onClick={() => set("englishTestType", t)}
-                      className={`py-2.5 rounded-xl border text-xs font-bold transition-all ${
-                        profile.englishTestType === t
-                          ? "border-indigo-500 bg-indigo-500/15 text-indigo-300"
-                          : "border-white/10 bg-white/5 text-slate-400 hover:border-white/20 hover:text-white"
-                      }`}
-                    >
-                      {t}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {profile.englishTestType && profile.englishTestType !== "None" && (
-                <GlassInput
-                  label={`${profile.englishTestType} Score`}
-                  type="number"
-                  placeholder={profile.englishTestType === "IELTS" ? "e.g. 6.5" : "e.g. 90"}
-                  value={profile.englishScore}
-                  onChange={(v) => set("englishScore", v)}
-                />
-              )}
-
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">Annual Budget</label>
-                <div className="flex gap-2">
-                  <select
-                    value={profile.currency}
-                    onChange={(e) => set("currency", e.target.value)}
-                    className="h-[50px] bg-white/5 border border-white/10 rounded-2xl px-3 text-sm font-bold text-white outline-none focus:border-indigo-500 transition-all appearance-none cursor-pointer [&>option]:bg-[#0f0f1a] w-24 flex-shrink-0"
-                  >
-                    {["USD", "GBP", "AUD", "CAD", "EUR", "NPR"].map((c) => (
-                      <option key={c} value={c}>{c}</option>
-                    ))}
-                  </select>
-                  <input
-                    type="number"
-                    value={profile.yearlyBudget}
-                    onChange={(e) => set("yearlyBudget", e.target.value)}
-                    placeholder="e.g. 25000"
-                    className="flex-1 h-[50px] bg-white/5 border border-white/10 rounded-2xl px-4 text-white placeholder:text-slate-600 text-sm font-medium outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                {[
-                  { key: "scholarshipNeeded", label: "I need a scholarship" },
-                  { key: "loanWilling", label: "Willing to take a student loan" },
-                ].map(({ key, label }) => (
-                  <label key={key} className="flex items-center gap-3 cursor-pointer group">
-                    <div
-                      onClick={() => set(key, !(profile as any)[key])}
-                      className={`relative w-11 h-6 rounded-full border transition-all duration-300 flex-shrink-0 ${
-                        (profile as any)[key]
-                          ? "bg-indigo-500 border-indigo-500"
-                          : "bg-white/5 border-white/20"
-                      }`}
-                    >
-                      <div
-                        className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-all duration-300 ${
-                          (profile as any)[key] ? "left-[22px]" : "left-0.5"
-                        }`}
-                      />
-                    </div>
-                    <span className="text-sm text-slate-300 font-medium group-hover:text-white transition-colors">{label}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-          )}
-
           {/* Save button (bottom of card) */}
           <div className="mt-6 pt-5 border-t border-white/8 flex justify-between items-center">
             <Link
@@ -544,7 +303,7 @@ export default function ProfilePage() {
             <button
               onClick={handleSave}
               disabled={saving}
-              className="h-10 px-6 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center gap-2 transition-all disabled:opacity-50 shadow-lg shadow-indigo-500/20 hover:-translate-y-0.5 active:translate-y-0"
+              className="h-10 px-6 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center gap-2 transition-all disabled:opacity-50 shadow-lg shadow-indigo-500/25 hover:-translate-y-0.5 active:translate-y-0"
             >
               {saving ? (
                 <div className="w-3.5 h-3.5 border border-white/30 border-t-white rounded-full animate-spin" />

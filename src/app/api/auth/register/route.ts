@@ -13,16 +13,7 @@ export async function POST(req: Request) {
       // Student profile fields
       nationality,
       currentCountry,
-      preferredCountry,
-      degreeLevel,
-      fieldOfStudy,
       gpa,
-      englishTestType,
-      englishScore,
-      yearlyBudget,
-      currency,
-      scholarshipNeeded,
-      intake,
     } = body;
 
     // Validate required fields
@@ -71,16 +62,7 @@ export async function POST(req: Request) {
           create: {
             nationality: nationality || null,
             currentCountry: currentCountry || null,
-            preferredCountry: preferredCountry || null,
-            degreeLevel: degreeLevel || null,
-            fieldOfStudy: fieldOfStudy || null,
             gpa: gpa ? parseFloat(gpa) : null,
-            englishTestType: englishTestType || null,
-            englishScore: englishScore ? parseFloat(englishScore) : null,
-            yearlyBudget: yearlyBudget ? parseFloat(yearlyBudget) : null,
-            currency: currency || "USD",
-            scholarshipNeeded: scholarshipNeeded || false,
-            intake: intake || null,
           },
         },
       },

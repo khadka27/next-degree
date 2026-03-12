@@ -698,7 +698,8 @@ function MatchCostEstimator({ match: m }: { match: Match }) {
 }
 
 /* ─────────────── Main Component ─────────────── */
-  const { data: session, status } = useSession();
+export default function NextDegreeMatchesPage() {
+  const { status } = useSession();
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<Form>(DEF);
   const [matches, setMatches] = useState<Match[]>([]);

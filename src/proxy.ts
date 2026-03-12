@@ -15,6 +15,8 @@ export default withAuth(
       "/profile",
       "/matches",
       "/applications",
+      "/eligibility",
+      "/costing",
     ];
     if (
       studentRoutes.some((route) => path.startsWith(route)) &&
@@ -27,6 +29,9 @@ export default withAuth(
     callbacks: {
       authorized: ({ token }) => !!token,
     },
+    pages: {
+      signIn: "/login",
+    },
   },
 );
 
@@ -36,6 +41,8 @@ export const config = {
     "/profile/:path*",
     "/matches/:path*",
     "/applications/:path*",
+    "/eligibility/:path*",
+    "/costing/:path*",
     "/admin/:path*",
   ],
 };

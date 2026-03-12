@@ -13,19 +13,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Globe,
-  BookOpen,
   Sparkles,
   AlertCircle,
-  Briefcase,
-  Monitor,
-  HeartPulse,
-  Scale,
-  Palette,
-  LineChart,
-  Microscope,
-  Brain,
-  AlignLeft,
-  Award,
 } from "lucide-react";
 
 /* ─── Constants ─── */
@@ -38,51 +27,10 @@ const COUNTRIES_LIST = [
   "France", "Netherlands", "Ireland", "New Zealand", "Singapore",
 ];
 
-const PREFERRED_COUNTRIES = [
-  { code: "CA", name: "Canada", emoji: "🇨🇦" },
-  { code: "US", name: "USA", emoji: "🇺🇸" },
-  { code: "AU", name: "Australia", emoji: "🇦🇺" },
-  { code: "GB", name: "UK", emoji: "🇬🇧" },
-  { code: "DE", name: "Germany", emoji: "🇩🇪" },
-  { code: "IE", name: "Ireland", emoji: "🇮🇪" },
-  { code: "NL", name: "Netherlands", emoji: "🇳🇱" },
-  { code: "NZ", name: "New Zealand", emoji: "🇳🇿" },
-  { code: "MY", name: "Malaysia", emoji: "🇲🇾" },
-  { code: "SG", name: "Singapore", emoji: "🇸🇬" },
-  { code: "FR", name: "France", emoji: "🇫🇷" },
-  { code: "ES", name: "Spain", emoji: "🇪🇸" },
-];
-
-const DEGREES = [
-  { v: "foundation", l: "Foundation", icon: AlignLeft },
-  { v: "diploma", l: "Diploma", icon: Award },
-  { v: "bachelor", l: "Bachelor's", icon: BookOpen },
-  { v: "master", l: "Master's", icon: GraduationCap },
-  { v: "phd", l: "PhD", icon: Microscope },
-];
-
-const FIELDS = [
-  { v: "Business & Management", icon: Briefcase },
-  { v: "Computer Science & IT", icon: Monitor },
-  { v: "Engineering", icon: Sparkles },
-  { v: "Medicine & Health", icon: HeartPulse },
-  { v: "Law", icon: Scale },
-  { v: "Arts & Humanities", icon: Palette },
-  { v: "Data Science", icon: LineChart },
-  { v: "Natural Sciences", icon: Microscope },
-  { v: "Social Sciences", icon: Brain },
-];
-
-const TESTS = ["IELTS", "TOEFL", "PTE", "Duolingo", "None"];
-
-const INTAKES = ["January 2025", "May 2025", "September 2025", "January 2026", "May 2026", "September 2026"];
-
 /* ─── Step Definitions ─── */
 const STEPS = [
   { title: "Account Setup", subtitle: "Create your login credentials", icon: User },
   { title: "Your Background", subtitle: "Tell us where you're from", icon: Globe },
-  { title: "Study Goals", subtitle: "What do you want to study?", icon: BookOpen },
-  { title: "English & Budget", subtitle: "Your scores and finances", icon: GraduationCap },
 ];
 
 /* ─── Input field component ─── */
@@ -197,18 +145,7 @@ export default function RegisterPage() {
     // Background
     nationality: "",
     currentCountry: "",
-    // Study goals
-    preferredCountry: "",
-    degreeLevel: "",
-    fieldOfStudy: "",
-    intake: "",
-    // Scores & budget
-    englishTestType: "",
-    englishScore: "",
-    yearlyBudget: "",
-    currency: "USD",
     gpa: "",
-    scholarshipNeeded: false,
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -239,12 +176,6 @@ export default function RegisterPage() {
       if (!form.currentCountry) e.currentCountry = "Please select your current country.";
     }
 
-    if (step === 2) {
-      if (!form.preferredCountry) e.preferredCountry = "Please choose a preferred country.";
-      if (!form.degreeLevel) e.degreeLevel = "Please select a degree level.";
-      if (!form.fieldOfStudy) e.fieldOfStudy = "Please select a field of study.";
-    }
-
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -272,16 +203,17 @@ export default function RegisterPage() {
           password: form.password,
           nationality: form.nationality,
           currentCountry: form.currentCountry,
-          preferredCountry: form.preferredCountry,
-          degreeLevel: form.degreeLevel,
-          fieldOfStudy: form.fieldOfStudy,
           gpa: form.gpa,
-          englishTestType: form.englishTestType,
-          englishScore: form.englishScore,
-          yearlyBudget: form.yearlyBudget,
-          currency: form.currency,
-          scholarshipNeeded: form.scholarshipNeeded,
-          intake: form.intake,
+          // Set defaults for missing match fields
+          preferredCountry: "",
+          degreeLevel: "",
+          fieldOfStudy: "",
+          englishTestType: "None",
+          englishScore: "0",
+          yearlyBudget: "0",
+          currency: "USD",
+          scholarshipNeeded: false,
+          intake: "",
         }),
       });
       const data = await res.json();
@@ -354,7 +286,7 @@ export default function RegisterPage() {
         <div className="bg-white/[0.03] border border-white/10 rounded-3xl p-7 backdrop-blur-sm shadow-2xl fade-up">
           {/* Step header */}
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 bg-indigo-500/15 border border-indigo-500/25 rounded-2xl flex items-center justify-center flex-shrink-0">
+            <div className="w-10 h-10 bg-indigo-500/15 border border-indigo-500/25 rounded-2xl flex items-center justify-center shrink-0">
               <StepIcon className="w-5 h-5 text-indigo-400" />
             </div>
             <div>
@@ -371,7 +303,7 @@ export default function RegisterPage() {
           {/* SERVER ERROR */}
           {serverError && (
             <div className="mb-5 bg-red-500/10 border border-red-500/30 rounded-2xl p-4 flex items-start gap-3">
-              <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
+              <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
               <p className="text-sm text-red-300">{serverError}</p>
             </div>
           )}
@@ -483,192 +415,6 @@ export default function RegisterPage() {
                   onChange={(v) => set("gpa", v)}
                 />
               </Field>
-            </div>
-          )}
-
-          {/* ─── STEP 2: Study Goals ─── */}
-          {step === 2 && (
-            <div className="space-y-5">
-              <Field label="Preferred Study Destination" error={errors.preferredCountry}>
-                <div className="grid grid-cols-3 gap-2">
-                  {PREFERRED_COUNTRIES.map((c) => (
-                    <button
-                      key={c.code}
-                      type="button"
-                      onClick={() => set("preferredCountry", c.code)}
-                      className={`flex flex-col items-center gap-1.5 p-3 rounded-2xl border text-xs font-bold transition-all duration-200 ${
-                        form.preferredCountry === c.code
-                          ? "border-indigo-500 bg-indigo-500/15 text-indigo-300"
-                          : "border-white/10 bg-white/5 text-slate-400 hover:border-white/20 hover:text-white"
-                      }`}
-                    >
-                      <span className="text-xl">{c.emoji}</span>
-                      <span className="text-[10px]">{c.name}</span>
-                    </button>
-                  ))}
-                </div>
-              </Field>
-
-              <Field label="Degree Level" error={errors.degreeLevel}>
-                <div className="grid grid-cols-3 gap-2">
-                  {DEGREES.map((d) => {
-                    const Icon = d.icon;
-                    return (
-                      <button
-                        key={d.v}
-                        type="button"
-                        onClick={() => set("degreeLevel", d.v)}
-                        className={`flex flex-col items-center gap-1.5 p-3 rounded-2xl border text-xs font-bold transition-all duration-200 ${
-                          form.degreeLevel === d.v
-                            ? "border-indigo-500 bg-indigo-500/15 text-indigo-300"
-                            : "border-white/10 bg-white/5 text-slate-400 hover:border-white/20 hover:text-white"
-                        }`}
-                      >
-                        <Icon className="w-5 h-5" strokeWidth={1.5} />
-                        <span className="text-[10px]">{d.l}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </Field>
-
-              <Field label="Field of Study" error={errors.fieldOfStudy}>
-                <div className="grid grid-cols-2 gap-2">
-                  {FIELDS.map((f) => {
-                    const Icon = f.icon;
-                    return (
-                      <button
-                        key={f.v}
-                        type="button"
-                        onClick={() => set("fieldOfStudy", f.v)}
-                        className={`flex items-center gap-2 p-3 rounded-2xl border text-xs font-bold transition-all duration-200 text-left ${
-                          form.fieldOfStudy === f.v
-                            ? "border-indigo-500 bg-indigo-500/15 text-indigo-300"
-                            : "border-white/10 bg-white/5 text-slate-400 hover:border-white/20 hover:text-white"
-                        }`}
-                      >
-                        <Icon className="w-4 h-4 flex-shrink-0" strokeWidth={1.5} />
-                        <span className="text-[10px] leading-tight">{f.v}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </Field>
-
-              <Field label="Target Intake (Optional)">
-                <GlassSelect
-                  placeholder="When do you plan to start?"
-                  options={INTAKES}
-                  value={form.intake}
-                  onChange={(v) => set("intake", v)}
-                />
-              </Field>
-            </div>
-          )}
-
-          {/* ─── STEP 3: English & Budget ─── */}
-          {step === 3 && (
-            <div className="space-y-4">
-              <Field label="English Test">
-                <div className="grid grid-cols-3 gap-2">
-                  {TESTS.map((t) => (
-                    <button
-                      key={t}
-                      type="button"
-                      onClick={() => set("englishTestType", t)}
-                      className={`py-2.5 rounded-xl border text-xs font-bold transition-all ${
-                        form.englishTestType === t
-                          ? "border-indigo-500 bg-indigo-500/15 text-indigo-300"
-                          : "border-white/10 bg-white/5 text-slate-400 hover:border-white/20 hover:text-white"
-                      }`}
-                    >
-                      {t}
-                    </button>
-                  ))}
-                </div>
-              </Field>
-
-              {form.englishTestType && form.englishTestType !== "None" && (
-                <Field label={`Your ${form.englishTestType} Score`}>
-                  <GlassInput
-                    type="number"
-                    placeholder={form.englishTestType === "IELTS" ? "e.g. 6.5" : form.englishTestType === "TOEFL" ? "e.g. 90" : "e.g. 65"}
-                    value={form.englishScore}
-                    onChange={(v) => set("englishScore", v)}
-                  />
-                </Field>
-              )}
-
-              <Field label="Annual Budget (USD)">
-                <div className="flex gap-2">
-                  <select
-                    value={form.currency}
-                    onChange={(e) => set("currency", e.target.value)}
-                    className="h-[52px] bg-white/5 border border-white/10 rounded-2xl px-3 text-sm font-bold text-white outline-none focus:border-indigo-500 transition-all appearance-none cursor-pointer [&>option]:bg-[#0f0f1a] w-24 flex-shrink-0"
-                  >
-                    {["USD", "GBP", "AUD", "CAD", "EUR", "NPR"].map((c) => (
-                      <option key={c} value={c}>{c}</option>
-                    ))}
-                  </select>
-                  <GlassInput
-                    type="number"
-                    placeholder="e.g. 25000"
-                    value={form.yearlyBudget}
-                    onChange={(v) => set("yearlyBudget", v)}
-                  />
-                </div>
-              </Field>
-
-              <label className="flex items-center gap-3 cursor-pointer group">
-                <div
-                  onClick={() => set("scholarshipNeeded", !form.scholarshipNeeded)}
-                  className={`relative w-11 h-6 rounded-full border transition-all duration-300 flex-shrink-0 ${
-                    form.scholarshipNeeded
-                      ? "bg-indigo-500 border-indigo-500"
-                      : "bg-white/5 border-white/20"
-                  }`}
-                >
-                  <div
-                    className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-all duration-300 ${
-                      form.scholarshipNeeded ? "left-[22px]" : "left-0.5"
-                    }`}
-                  />
-                </div>
-                <span className="text-sm text-slate-300 font-medium group-hover:text-white transition-colors">
-                  I need a scholarship
-                </span>
-              </label>
-
-              {/* Summary preview */}
-              <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-4 mt-2">
-                <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">Your Profile Summary</p>
-                <div className="space-y-1.5 text-xs">
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">Name</span>
-                    <span className="text-white font-semibold">{form.name || "—"}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">Username</span>
-                    <span className="text-white font-semibold">@{form.username || "—"}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">From</span>
-                    <span className="text-white font-semibold">{form.nationality || "—"}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">Destination</span>
-                    <span className="text-white font-semibold">{form.preferredCountry || "—"}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">Degree</span>
-                    <span className="text-white font-semibold capitalize">{form.degreeLevel || "—"}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">Field</span>
-                    <span className="text-white font-semibold">{form.fieldOfStudy || "—"}</span>
-                  </div>
-                </div>
-              </div>
             </div>
           )}
 
