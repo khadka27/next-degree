@@ -13,7 +13,7 @@ export default function ClientWrapper({
   const pathname = usePathname();
 
   // Routes where we DON'T want the Navbar and Footer
-  const noShellRoutes = ["/matches", "/dashboard", "/login", "/register", "/profile"];
+  const noShellRoutes = ["/matches", "/dashboard", "/profile"];
   const hideShell = noShellRoutes.some((r) => pathname?.startsWith(r));
 
   if (hideShell) {
@@ -23,7 +23,7 @@ export default function ClientWrapper({
   return (
     <SessionProvider>
       <Navbar />
-      <div className="pt-16">{children}</div>
+      <div>{children}</div>
       <Footer />
     </SessionProvider>
   );

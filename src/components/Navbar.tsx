@@ -1,20 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
-import { Menu, X, Rocket, GraduationCap, User, LogIn } from "lucide-react";
-import { useSession } from "next-auth/react";
+import { Menu, X, GraduationCap, User, ArrowRight, ChevronDown } from "lucide-react";
 
 const NAV_LINKS = [
-  { href: "/matches", label: "University Finder" },
-  { href: "/eligibility", label: "Eligibility Hub" },
-  { href: "/costing", label: "Cost Estimator" },
+  { href: "/matches", label: "Search Programs" },
+  { href: "#", label: "Study Destinations", hasDropdown: true },
+  { href: "/scholarships", label: "Scholarships" },
+  { href: "/guides", label: "Resources" },
 ];
 
 export default function Navbar() {
-  const pathname = usePathname();
-  const { data: session, status } = useSession();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -27,146 +24,89 @@ export default function Navbar() {
   return (
     <>
       <nav
-        className={`fixed top-0 left-0 right-0 z-[200] transition-all duration-300 ${
+        className={`fixed top-0 left-0 right-0 z-[200] transition-all duration-500 ${
           scrolled
-            ? "bg-white/80 backdrop-blur-xl border-b border-gray-200 shadow-[0_4px_20px_-10px_rgba(0,0,0,0.1)] py-3"
+            ? "bg-white/80 backdrop-blur-xl border-b border-gray-100 py-3 shadow-sm"
             : "bg-transparent py-5"
         }`}
       >
-        <div className="max-w-[1200px] mx-auto flex items-center justify-between px-6">
+        <div className="max-w-[1280px] mx-auto flex items-center justify-between px-6 lg:px-12">
           {/* Logo */}
-          <div className="flex items-center gap-8">
-            <Link
-              href="/"
-              className="flex items-center gap-2.5 group no-underline"
-            >
-              <div className="relative w-9 h-9 rounded-xl bg-gradient-to-br from-[#17a38b] to-[#128a7e] flex items-center justify-center shadow-md shadow-teal-500/20 group-hover:scale-105 transition-transform duration-300">
-                <span className="text-white font-black text-lg">N</span>
-              </div>
-              <span className="font-black text-xl tracking-tight text-gray-900 group-hover:text-teal-700 transition-colors">
-                NextDegree
-              </span>
-            </Link>
+          <Link href="/" className="flex items-center gap-2 group no-underline">
+            <div className="w-10 h-10 rounded-xl bg-[#3366FF] flex items-center justify-center text-white shadow-lg shadow-blue-500/30 group-hover:scale-110 transition-transform duration-300">
+              <GraduationCap className="w-6 h-6" />
+            </div>
+            <div className={`text-xl font-black tracking-tight transition-colors duration-300 text-[#0f172a]`}>
+              Next<span className="text-[#3366FF]">Degree</span>
+            </div>
+          </Link>
 
-            {/* Desktop Links */}
-            <ul className="hidden lg:flex items-center gap-2 list-none m-0 p-0">
-              {NAV_LINKS.map((l) => (
-                <li key={l.href}>
-                  <Link
-                    href={l.href}
-                    className={`text-[14px] font-bold px-4 py-2 rounded-xl transition-all duration-200 ${
-                      pathname === l.href
-                        ? "bg-gray-100 text-gray-900 shadow-sm"
-                        : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
-                    }`}
-                  >
-                    {l.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+          {/* Desktop Links */}
+          <ul className="hidden lg:flex items-center gap-8 list-none m-0 p-0">
+            {NAV_LINKS.map((l) => (
+              <li key={l.label}>
+                <Link
+                  href={l.href}
+                  className={`text-[15px] font-bold transition-all flex items-center gap-1.5 hover:text-[#3366FF] ${
+                    scrolled ? "text-gray-600" : "text-gray-900"
+                  }`}
+                >
+                  {l.label}
+                  {l.hasDropdown && (
+                    <ChevronDown className={`w-4 h-4 transition-transform group-hover:rotate-180 ${scrolled ? "text-gray-400" : "text-gray-400"}`} />
+                  )}
+                </Link>
+              </li>
+            ))}
+          </ul>
 
           {/* Right actions */}
-          <div className="flex items-center gap-3">
-            {status === "loading" ? (
-              <div className="w-8 h-8 rounded-full bg-gray-100 animate-pulse hidden sm:block" />
-            ) : session ? (
-              <Link
-                href="/profile"
-                className="hidden sm:flex items-center gap-2 text-[14px] font-bold text-gray-700 px-4 py-2.5 rounded-2xl bg-gray-100 border border-transparent hover:border-gray-200 transition-all duration-200 shadow-sm"
-              >
-                <div className="w-6 h-6 rounded-full bg-indigo-500 flex items-center justify-center text-[10px] text-white">
-                  {session.user?.name?.[0].toUpperCase() || "U"}
-                </div>
-                <span>Profile</span>
-              </Link>
-            ) : (
-              <div className="hidden sm:flex items-center gap-3">
-                <Link
-                  href="/login"
-                  className="text-[14px] font-bold text-gray-600 hover:text-gray-900 px-4 py-2.5"
-                >
-                  Login
-                </Link>
-                <Link
-                  href="/register"
-                  className="text-[14px] font-bold text-white px-5 py-2.5 rounded-2xl bg-gray-900 hover:bg-black hover:-translate-y-0.5 transition-all duration-200 shadow-md"
-                >
-                  Join NextDegree
-                </Link>
-              </div>
-            )}
+          <div className="flex items-center gap-4 sm:gap-6">
+            <Link
+              href="/profile"
+              className={`p-2 transition-colors ${scrolled ? "text-gray-700 hover:text-[#3366FF]" : "text-gray-700 hover:text-[#3366FF]"}`}
+            >
+              <User className="w-6 h-6" strokeWidth={2} />
+            </Link>
 
             <Link
-              href="/matches"
-              className="hidden md:flex items-center gap-2 text-[14px] font-bold text-white px-5 py-2.5 rounded-2xl bg-[#3366FF] hover:bg-[#2952CC] hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-500/30 transition-all duration-200 shadow-sm"
+              href="/register"
+              className="hidden md:flex items-center gap-2 bg-[#3366FF] text-white font-bold px-7 py-3 rounded-2xl text-[15px] shadow-xl shadow-blue-500/25 hover:bg-[#2952CC] hover:-translate-y-0.5 transition-all duration-300 active:scale-95"
             >
-              <Rocket className="w-4 h-4" /> Go to Finder
+              Get Started
+              <ArrowRight className="w-4 h-4" />
             </Link>
 
             {/* Mobile burger */}
             <button
-              className="lg:hidden w-10 h-10 flex justify-center items-center rounded-xl bg-gray-50 hover:bg-gray-100 border border-gray-200 transition-colors text-gray-600"
+              className={`lg:hidden w-11 h-11 flex justify-center items-center rounded-2xl border transition-all shadow-sm bg-white border-gray-100 text-gray-900`}
               onClick={() => setMobileOpen(!mobileOpen)}
-              aria-label="Toggle menu"
             >
-              {mobileOpen ? (
-                <X className="w-5 h-5" />
-              ) : (
-                <Menu className="w-5 h-5" />
-              )}
+              {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
           </div>
         </div>
 
         {/* Mobile drawer */}
         {mobileOpen && (
-          <div className="lg:hidden absolute top-full left-0 w-full border-b border-gray-200 bg-white/95 backdrop-blur-xl px-6 py-5 flex flex-col gap-2 shadow-xl">
+          <div className="lg:hidden absolute top-full left-0 w-full border-b border-gray-100 bg-white px-6 py-10 flex flex-col gap-6 shadow-2xl animate-fade-in">
             {NAV_LINKS.map((l) => (
               <Link
-                key={l.href}
+                key={l.label}
                 href={l.href}
                 onClick={() => setMobileOpen(false)}
-                className="text-sm font-bold text-gray-600 hover:text-gray-900 px-4 py-3.5 rounded-xl hover:bg-gray-50 transition-colors"
+                className="text-xl font-extrabold text-[#0f172a] hover:text-[#3366FF] transition-colors"
               >
                 {l.label}
               </Link>
             ))}
-            
-            {session ? (
-              <Link
-                href="/profile"
-                onClick={() => setMobileOpen(false)}
-                className="flex items-center gap-3 text-sm font-bold text-gray-700 px-4 py-3.5 rounded-xl bg-gray-100"
-              >
-                <User className="w-4 h-4" /> My Profile
-              </Link>
-            ) : (
-              <div className="flex flex-col gap-2 mt-2">
-                <Link
-                  href="/login"
-                  onClick={() => setMobileOpen(false)}
-                  className="flex items-center justify-center gap-2 text-sm font-bold text-gray-600 px-4 py-3.5 border border-gray-200 rounded-xl"
-                >
-                  <LogIn className="w-4 h-4" /> Login
-                </Link>
-                <Link
-                  href="/register"
-                  onClick={() => setMobileOpen(false)}
-                  className="flex items-center justify-center gap-2 text-sm font-bold text-white px-4 py-3.5 rounded-xl bg-gray-900"
-                >
-                  Create Account
-                </Link>
-              </div>
-            )}
-
+            <div className="h-px bg-gray-100 my-2" />
             <Link
-              href="/matches"
+              href="/register"
               onClick={() => setMobileOpen(false)}
-              className="flex items-center justify-center gap-2 text-sm font-bold text-white px-5 py-3.5 rounded-xl bg-[#3366FF] hover:bg-[#2952CC] mt-2 shadow-md"
+              className="flex items-center justify-center gap-2 bg-[#3366FF] text-white font-bold px-6 py-4 rounded-2xl shadow-lg shadow-blue-500/20"
             >
-              <GraduationCap className="w-5 h-5" /> Find Universities
+              Get Started <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
         )}

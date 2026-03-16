@@ -32,7 +32,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className="bg-[#07070f] text-slate-100 antialiased"
+        className="bg-white text-[#0f172a] antialiased"
         suppressHydrationWarning={true}
       >
         <ClientWrapper>{children}</ClientWrapper>

@@ -1,263 +1,137 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
-import CountryCard from "@/components/CountryCard";
+import Image from "next/image";
 import {
   GraduationCap,
   ArrowRight,
   Globe2,
-  Wallet,
-  Zap,
-  Brain,
-  BadgeCheck,
-  FileSearch,
-  Sparkles,
-  TrendingUp,
-  Search,
   CheckCircle2,
-  Calculator,
+  Headphones,
+  Users,
+  Building2,
+  Quote,
+  ChevronLeft,
+  ChevronRight,
+  Trophy,
+  MapPin,
+  Calendar,
+  BookOpen,
+  Sparkles,
+  Briefcase,
+  Handshake,
+  Plus,
+  Minus,
+  Facebook,
+  Twitter,
+  Instagram,
+  Linkedin,
+  Youtube,
 } from "lucide-react";
 
-/* ─────────────────────────────────────────────
-   Static Data
-───────────────────────────────────────────── */
-const STATS = [
-  { value: "65+", label: "API Endpoints", icon: Zap },
-  { value: "7", label: "Countries", icon: Globe2 },
-  { value: "6K+", label: "Universities", icon: BuildingIcon },
-  { value: "Free", label: "Forever", icon: BadgeCheck },
-];
-
-function BuildingIcon(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      {...props}
-    >
-      <rect width="16" height="20" x="4" y="2" rx="2" ry="2" />
-      <path d="M9 22v-4h6v4" />
-      <path d="M8 6h.01" />
-      <path d="M16 6h.01" />
-      <path d="M12 6h.01" />
-      <path d="M12 10h.01" />
-      <path d="M12 14h.01" />
-      <path d="M16 10h.01" />
-      <path d="M16 14h.01" />
-      <path d="M8 10h.01" />
-      <path d="M8 14h.01" />
-    </svg>
-  );
-}
-
-const COUNTRIES = [
-  {
-    flag: "🇺🇸",
-    name: "United States",
-    universities: "4,000+",
-    color: "#3b82f6",
-  },
-  {
-    flag: "🇬🇧",
-    name: "United Kingdom",
-    universities: "160+",
-    color: "#8b5cf6",
-  },
-  { flag: "🇦🇺", name: "Australia", universities: "43+", color: "#10b981" },
-  { flag: "🇨🇦", name: "Canada", universities: "100+", color: "#f59e0b" },
-  { flag: "🇩🇪", name: "Germany", universities: "400+", color: "#ef4444" },
-  { flag: "🇮🇪", name: "Ireland", universities: "30+", color: "#06b6d4" },
-  { flag: "🇳🇱", name: "Netherlands", universities: "80+", color: "#ec4899" },
-];
-
-const TRUST_BADGES = [
-  { icon: Globe2, label: "College Scorecard API" },
-  { icon: FileSearch, label: "WorqNow Education API" },
-  { icon: BadgeCheck, label: "Data.gov Verified" },
-];
-
-/* ─────────────────────────────────────────────
-   Page
-───────────────────────────────────────────── */
 export default function HomePage() {
   return (
-    <div className="w-full bg-[#f8f9fc] text-[#0f172a] font-sans selection:bg-[#3366FF]/20 selection:text-[#3366FF] overflow-hidden">
-      {/* ── HERO ── */}
-      <section className="relative pt-[140px] pb-[100px] px-6 lg:px-8">
-        {/* Background Canvas */}
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute inset-0 bg-linear-to-b from-[#ffffff] via-[#f8f9fc] to-[#f8f9fc]" />
+    <div className="w-full bg-white text-[#0f172a] font-sans selection:bg-[#3366FF]/20 selection:text-[#3366FF] overflow-hidden">
+      {/* ── HERO SECTION ── */}
+      <section className="relative pt-[120px] pb-[80px] px-6 lg:px-12 overflow-hidden">
+        {/* Background Decorations */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          {/* Light blue abstract shapes */}
+          <div className="absolute top-[10%] left-[-5%] w-[400px] h-[400px] bg-blue-50/50 rounded-full blur-3xl opacity-60" />
+          <div className="absolute top-[20%] right-[-10%] w-[500px] h-[500px] bg-blue-50/50 rounded-full blur-3xl opacity-60" />
+          
+          {/* Wavy lines placeholder */}
+          <svg className="absolute left-[-5%] top-[15%] opacity-20" width="300" height="400" viewBox="0 0 300 400" fill="none">
+            <path d="M-50 100 Q 50 150 150 100 T 350 100" stroke="#3366FF" strokeWidth="2" fill="none" className="animate-float" />
+            <path d="M-50 150 Q 50 200 150 150 T 350 150" stroke="#3366FF" strokeWidth="2" fill="none" className="animate-float-slow" />
+          </svg>
 
-          {/* Subtle grid pattern */}
-          <div
-            className="absolute inset-0 opacity-[0.3] mix-blend-multiply"
-            style={{
-              backgroundImage: "radial-gradient(#cbd5e1 1px, transparent 1px)",
-              backgroundSize: "32px 32px",
-              maskImage:
-                "linear-gradient(to bottom, black 30%, transparent 100%)",
-              WebkitMaskImage:
-                "linear-gradient(to bottom, black 30%, transparent 100%)",
-            }}
-          />
+          {/* Concentric circles around student */}
+          <div className="absolute right-[5%] top-[10%] w-[600px] h-[600px] border border-blue-100 rounded-full flex items-center justify-center opacity-40">
+            <div className="w-[80%] h-[80%] border border-blue-200 rounded-full flex items-center justify-center">
+              <div className="w-[80%] h-[80%] border-2 border-[#3366FF] rounded-full" />
+            </div>
+          </div>
 
-          {/* Glowing Orbs */}
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1200px] h-[800px] bg-linear-to-b from-[#3366FF]/[0.06] to-transparent rounded-full blur-[120px]" />
-          <div className="absolute top-[20%] left-[-10%] w-[600px] h-[600px] rounded-full bg-[#17a38b]/[0.05] blur-[150px] animate-float" />
-          <div className="absolute top-[30%] right-[-10%] w-[500px] h-[500px] rounded-full bg-[#8b5cf6]/[0.05] blur-[140px] animate-float-slow" />
+          {/* Dots pattern at bottom left */}
+          <div className="absolute left-[15%] bottom-[10%] opacity-30">
+            <svg width="120" height="120" viewBox="0 0 120 120">
+              <circle cx="10" cy="10" r="4" fill="#3366FF" />
+              <circle cx="35" cy="10" r="4" fill="#3366FF" />
+              <circle cx="60" cy="10" r="4" fill="#3366FF" />
+              <circle cx="10" cy="35" r="4" fill="#3366FF" />
+              <circle cx="35" cy="35" r="4" fill="#3366FF" />
+              <circle cx="60" cy="35" r="4" fill="#3366FF" />
+              <circle cx="10" cy="60" r="4" fill="#3366FF" />
+              <circle cx="35" cy="60" r="4" fill="#3366FF" />
+              <circle cx="60" cy="60" r="4" fill="#3366FF" />
+            </svg>
+          </div>
         </div>
 
-        <div className="relative max-w-[1240px] mx-auto text-center z-10">
-          {/* Release Badge */}
-          <Link
-            href="/matches"
-            className="fade-up inline-flex items-center gap-2.5 bg-white border border-[#3366FF]/20 rounded-full px-4 py-2 text-[13px] font-bold text-[#3366FF] mb-10 shadow-sm shadow-[#3366FF]/10 transition-all hover:shadow-[#3366FF]/20 hover:border-[#3366FF]/40 hover:-translate-y-0.5"
-          >
-            <span className="flex items-center justify-center w-5 h-5 rounded-full bg-[#3366FF]/10">
-              <Sparkles className="w-3 h-3 text-[#3366FF] animate-pulse" />
-            </span>
-            Meet the New V2 Matching Engine
-            <ArrowRight className="w-3.5 h-3.5 opacity-70" />
-          </Link>
+        <div className="relative max-w-[1280px] mx-auto z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          {/* Left Content */}
+          <div className="fade-up">
+            <h1 className="text-[56px] lg:text-[72px] font-extrabold leading-[1.1] mb-6 tracking-tight">
+              Your Path to <br /> Studying Abroad <br />
+              <span className="text-[#3366FF]">Begins Here</span>
+            </h1>
+            <p className="text-[18px] text-gray-500 mb-8 max-w-[500px] leading-relaxed">
+              Discover research programs, academic excellence, and global opportunities tailored for your specific career path.
+            </p>
 
-          {/* Epic Headline */}
-          <h1
-            className="fade-up delay-100 font-extrabold leading-[1.05] tracking-tight mb-8 text-[#0f172a]"
-            style={{ fontSize: "clamp(48px, 7vw, 96px)" }}
-          >
-            Find universities <br className="hidden md:block" />
-            that{" "}
-            <span className="relative inline-block">
-              <span className="relative z-10 bg-linear-to-r from-[#3366FF] to-[#17a38b] bg-clip-text text-transparent">
-                actually fit you.
-              </span>
-              <svg
-                className="absolute w-full h-4 -bottom-1 left-0 text-[#17a38b]/30 z-0"
-                viewBox="0 0 100 10"
-                preserveAspectRatio="none"
-              >
-                <path
-                  d="M0 5 Q 50 10 100 5"
-                  stroke="currentColor"
-                  strokeWidth="8"
-                  fill="none"
-                  strokeLinecap="round"
-                />
-              </svg>
-            </span>
-          </h1>
+            <div className="flex flex-col sm:flex-row gap-6 mb-10">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-5 h-5 text-green-500" />
+                <span className="text-[15px] font-semibold text-gray-700">160+ Countries</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-5 h-5 text-red-500" />
+                <span className="text-[15px] font-semibold text-gray-700">1000+ Universities</span>
+              </div>
+            </div>
 
-          {/* Subheading */}
-          <p
-            className="fade-up delay-200 mx-auto mb-12 text-[#64748b] font-medium"
-            style={{
-              fontSize: "clamp(18px, 2vw, 22px)",
-              maxWidth: "660px",
-              lineHeight: 1.6,
-            }}
-          >
-            Enter your English score, budget, and dream country. We instantly
-            cross-match your credentials against 6,000+ programs worldwide. No
-            bias, no fees.
-          </p>
-
-          {/* CTA Group */}
-          <div className="fade-up delay-300 flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Link
               href="/matches"
-              className="relative inline-flex items-center gap-3 bg-[#3366FF] text-white font-bold px-10 py-5 rounded-[20px] text-[17px] shadow-lg shadow-[#3366FF]/25 hover:bg-[#2952cc] transition-all hover:-translate-y-1 w-full sm:w-auto"
+              className="inline-flex items-center gap-3 bg-[#3366FF] text-white font-bold px-8 py-4 rounded-xl text-[17px] shadow-xl shadow-blue-500/25 hover:bg-[#2952cc] transition-all hover:scale-[1.02]"
             >
-              <Search className="w-5 h-5 shrink-0" strokeWidth={2.5} />
-              Start Matching Now
-            </Link>
-            <Link
-              href="/eligibility"
-              className="inline-flex items-center gap-3 bg-white text-[#475569] font-bold px-9 py-5 rounded-[20px] text-[17px] shadow-sm border border-gray-200 hover:bg-gray-50 hover:border-gray-300 transition-all hover:-translate-y-1 w-full sm:w-auto"
-            >
-              <Sparkles
-                className="w-5 h-5 text-teal-500 shrink-0"
-                strokeWidth={2.5}
-              />
-              Eligibility Hub (AI)
-            </Link>
-            <Link
-              href="/costing"
-              className="inline-flex items-center gap-3 bg-white text-[#475569] font-bold px-9 py-5 rounded-[20px] text-[17px] shadow-sm border border-gray-200 hover:bg-gray-50 hover:border-gray-300 transition-all hover:-translate-y-1 w-full sm:w-auto"
-            >
-              <Calculator
-                className="w-5 h-5 text-emerald-500 flex-shrink-0"
-                strokeWidth={2.5}
-              />
-              Cost Estimator (NPR)
+              Get Started
+              <ArrowRight className="w-5 h-5" />
             </Link>
           </div>
 
-          <p className="fade-up delay-400 mt-8 text-[13px] font-bold text-gray-400 uppercase tracking-widest flex items-center justify-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-            100% Free. No Login Required.
-          </p>
-        </div>
+          {/* Right Content - Student Image */}
+          <div className="relative flex justify-center lg:justify-end">
+            <div className="relative w-[400px] lg:w-[500px] aspect-square">
+              <div className="absolute inset-x-0 bottom-0 top-[10%] bg-blue-50 rounded-full -z-10 blur-2xl" />
+              <Image
+                src="/hero-student.png"
+                alt="Student Abroad"
+                width={600}
+                height={600}
+                className="relative z-10 object-contain drop-shadow-2xl"
+                priority
+              />
 
-        {/* ── HIGH FIDELITY MOCKUP PREVIEW ── */}
-        <div className="fade-up focus-in delay-500 relative max-w-[1000px] mx-auto mt-20 z-20">
-          <div className="absolute -inset-1.5 bg-linear-to-b from-[#3366FF]/20 to-transparent rounded-[32px] blur-xl opacity-70" />
-          <div className="relative rounded-[28px] border border-white/50 bg-white/40 backdrop-blur-2xl shadow-[0_20px_80px_-20px_rgba(0,0,0,0.1)] overflow-hidden">
-            {/* Fake Browser Titlebar */}
-            <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100 bg-white/60">
-              <div className="flex gap-2">
-                <div className="w-3 h-3 rounded-full bg-slate-300" />
-                <div className="w-3 h-3 rounded-full bg-slate-300" />
-                <div className="w-3 h-3 rounded-full bg-slate-300" />
-              </div>
-              <div className="flex items-center gap-1.5 bg-gray-100/80 px-4 py-1.5 rounded-full text-[12px] font-medium text-gray-500">
-                <Globe2 className="w-3 h-3" /> nextdegree.com/matches
-              </div>
-              <div className="w-12" /> {/* spacer for flex centering */}
-            </div>
-
-            {/* Fake Dashboard Content */}
-            <div className="p-4 md:p-8 bg-gray-50/50 flex flex-col md:flex-row gap-6 items-center">
-              {/* Fake form input stack */}
-              <div className="flex-1 w-full space-y-4">
-                <div className="h-4 w-32 bg-gray-200 rounded-full mb-6" />
-                <div className="h-[52px] w-full bg-white rounded-2xl border border-gray-100 shadow-sm flex items-center px-4 gap-3">
-                  <Search className="w-5 h-5 text-blue-500" />
-                  <div className="h-2 w-48 bg-gray-100 rounded-full" />
+              {/* Floating Cards */}
+              <div className="absolute left-[-20px] bottom-[20%] z-20 bg-white p-3 rounded-2xl shadow-2xl flex items-center gap-3 border border-gray-100 animate-float">
+                <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center">
+                  <Users className="w-5 h-5 text-white" />
                 </div>
-                <div className="h-[52px] w-full bg-white rounded-2xl border border-blue-400 ring-4 ring-blue-500/10 shadow-sm flex items-center px-4 gap-3">
-                  <div className="w-6 h-6 rounded-full bg-[#17a38b]/20 flex items-center justify-center">
-                    <div className="w-2 h-2 rounded-full bg-[#17a38b]" />
-                  </div>
-                  <div className="font-bold text-gray-700 text-sm">
-                    Computer Science
-                  </div>
+                <div>
+                  <div className="text-[15px] font-black leading-none">1600+</div>
+                  <div className="text-[10px] text-gray-400 font-bold uppercase">Active Students</div>
                 </div>
               </div>
 
-              {/* Fake result card */}
-              <div className="flex-1 w-full bg-white rounded-3xl p-6 shadow-xl shadow-blue-500/5 relative overflow-hidden border border-gray-100">
-                <div className="absolute top-0 right-0 w-24 h-24 bg-[#3366FF]/5 rounded-bl-[100px]" />
-                <div className="flex justify-between items-start mb-4">
-                  <div className="flex-1">
-                    <div className="h-5 w-48 bg-gray-800 rounded-lg mb-2" />
-                    <div className="h-3 w-24 bg-gray-300 rounded-full flex gap-1 mb-6"></div>
-                  </div>
-                  <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center">
-                    <TrendingUp className="w-5 h-5 text-emerald-600" />
-                  </div>
+              <div className="absolute right-[-10px] top-[40%] z-20 bg-white p-3 rounded-2xl shadow-2xl flex items-center gap-3 border border-gray-100 animate-float-slow">
+                <div className="w-10 h-10 rounded-full bg-red-500 flex items-center justify-center">
+                  <Building2 className="w-5 h-5 text-white" />
                 </div>
-                <div className="flex gap-3 mt-4">
-                  <div className="px-3 py-1.5 bg-gray-50 rounded-lg text-xs font-bold text-gray-500">
-                    💰 $15,000/yr
-                  </div>
-                  <div className="px-3 py-1.5 bg-gray-50 rounded-lg text-xs font-bold text-gray-500">
-                    📈 45% Accept
-                  </div>
+                <div>
+                  <div className="text-[15px] font-black leading-none">1000+</div>
+                  <div className="text-[10px] text-gray-400 font-bold uppercase">Partner Universities</div>
                 </div>
               </div>
             </div>
@@ -265,339 +139,887 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── BRANDING LOGOS ── */}
-      <section className="py-10 border-y border-gray-200/60 bg-white">
-        <div className="max-w-[1240px] mx-auto px-6 flex flex-wrap justify-center gap-8 md:gap-16 items-center flex-col md:flex-row">
-          <span className="text-sm font-bold text-gray-400 uppercase tracking-widest text-center">
-            Powered by live structured intelligence from
-          </span>
-          <div className="flex flex-wrap justify-center gap-8 md:gap-16">
-            {TRUST_BADGES.map((b, i) => {
-              const Icon = b.icon;
-              return (
-                <div
-                  key={i}
-                  className="flex items-center gap-2 group cursor-default"
-                >
-                  <Icon className="w-6 h-6 text-gray-300 group-hover:text-[#3366FF] transition-colors" />
-                  <span className="text-[17px] font-black text-gray-400 group-hover:text-gray-900 transition-colors tracking-tight">
-                    {b.label}
-                  </span>
-                </div>
-              );
-            })}
+      {/* ── TRUST BAR ── */}
+      <section className="py-12 bg-white border-t border-gray-50 drop-shadow-sm">
+        <div className="max-w-[1280px] mx-auto px-6 lg:px-12 flex flex-wrap justify-center lg:justify-between items-center gap-8">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-full bg-blue-50 flex items-center justify-center">
+              <Globe2 className="w-6 h-6 text-[#3366FF]" />
+            </div>
+            <div>
+              <div className="text-[20px] font-black">160+ Countries</div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-full bg-blue-50 flex items-center justify-center">
+              <Building2 className="w-6 h-6 text-[#3366FF]" />
+            </div>
+            <div>
+              <div className="text-[20px] font-black">1000+ Universities</div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-full bg-blue-50 flex items-center justify-center">
+              <Users className="w-6 h-6 text-[#3366FF]" />
+            </div>
+            <div>
+              <div className="text-[20px] font-black">5000+ Students Helped</div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-full bg-blue-50 flex items-center justify-center">
+              <Headphones className="w-6 h-6 text-[#3366FF]" />
+            </div>
+            <div>
+              <div className="text-[20px] font-black">24/7 Student Support</div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* ── BENTO GRID FEATURES ── */}
-      <section id="features" className="py-32 px-6 lg:px-8">
-        <div className="max-w-[1240px] mx-auto">
+      {/* ── IDEAL DESTINATION SECTION ── */}
+      <section className="py-24 px-6 lg:px-12 bg-white overflow-hidden">
+        <div className="max-w-[1280px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+          {/* Left: Overlapping Images */}
+          <div className="relative">
+            <div className="relative w-full aspect-4/3 rounded-[32px] overflow-hidden shadow-2xl z-10">
+              <Image
+                src="/students-laptop.png"
+                alt="Students using laptop"
+                fill
+                className="object-cover"
+              />
+            </div>
+            
+            {/* Overlapping Image 2 */}
+            <div className="absolute -bottom-12 -right-12 w-[60%] aspect-4/3 rounded-[24px] overflow-hidden shadow-2xl z-20 border-8 border-white">
+              <Image
+                src="/students-reading.png"
+                alt="Students reading"
+                fill
+                className="object-cover"
+              />
+            </div>
+
+            {/* Acceptance Badge */}
+            <div className="absolute top-[10%] -right-8 z-30 w-32 h-32 lg:w-40 lg:h-40 bg-[#3366FF] rounded-full flex flex-col items-center justify-center text-white border-[6px] border-white shadow-xl animate-float">
+              <span className="text-2xl lg:text-3xl font-black">95%</span>
+              <span className="text-[10px] lg:text-[12px] font-bold uppercase tracking-wider text-center px-2">Acceptance Rate</span>
+            </div>
+
+            {/* Decorative background shape */}
+            <div className="absolute -top-10 -left-10 w-40 h-40 bg-blue-50 rounded-full blur-3xl -z-10" />
+          </div>
+
+          {/* Right: Content */}
+          <div className="fade-up relative">
+            <h2 className="text-[40px] lg:text-[56px] font-extrabold leading-[1.1] mb-6 tracking-tight text-[#0f172a]">
+              Find Your Ideal Study Destination
+            </h2>
+            <p className="text-[18px] text-gray-500 mb-10 leading-relaxed font-medium">
+              We&apos;ve simplified the process of exploring universities and applying for your study program. Discover top universities, scholarship opportunities, and more in just a few clicks.
+            </p>
+
+            <ul className="space-y-5 mb-12">
+              {[
+                "Easily Explore Top Universities",
+                "Access Programs in 160+ Countries",
+                "Find Scholarships & Financial Aid",
+              ].map((item) => (
+                <li key={item} className="flex items-center gap-4 text-[17px] font-bold text-gray-700">
+                  <div className="w-6 h-6 rounded-full border-2 border-blue-100 flex items-center justify-center text-[#3366FF] bg-blue-50 shrink-0">
+                    <CheckCircle2 className="w-4 h-4" />
+                  </div>
+                  {item}
+                </li>
+              ))}
+            </ul>
+
+            <Link
+              href="/register"
+              className="inline-flex items-center gap-3 bg-[#3366FF] text-white font-bold px-10 py-5 rounded-2xl text-[18px] shadow-xl shadow-blue-500/25 hover:bg-[#2952cc] transition-all hover:scale-[1.05]"
+            >
+              Create an Student Account
+              <ArrowRight className="w-5 h-5" />
+            </Link>
+
+            {/* Book outline svg decoration */}
+            <div className="absolute -bottom-20 -right-20 opacity-[0.03] pointer-events-none text-[#0f172a]">
+              <svg width="300" height="300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.5">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+              </svg>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── SOLUTIONS GRID SECTION ── */}
+      <section className="py-24 px-6 lg:px-12 bg-[#F4F7FF] relative overflow-hidden">
+        {/* Soft background blobs for the wavy look */}
+        <div className="absolute top-0 left-0 w-full h-[500px] bg-white pointer-events-none" style={{ clipPath: "ellipse(80% 50% at 50% 0%)" }} />
+        <div className="absolute bottom-0 left-0 w-full h-[300px] bg-white pointer-events-none" style={{ clipPath: "ellipse(80% 50% at 50% 100%)" }} />
+        
+        <div className="max-w-[1280px] mx-auto relative z-10 text-center text-sans">
+          <div className="max-w-4xl mx-auto mb-20">
+            <h2 className="text-[40px] lg:text-[56px] font-extrabold leading-[1.1] mb-6 tracking-tight text-[#0f172a]">
+              Find Every Solution, From Applications to <span className="text-[#3366FF]">Accommodations</span>
+            </h2>
+            <p className="text-[18px] text-gray-500 leading-relaxed font-medium max-w-3xl mx-auto">
+              Access our full 360 Solutions, covering everything from application to arrival. Get instant language test vouchers, explore financial services, and invest in your future with flexible student loans. It&apos;s all here.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+            {[
+              {
+                title: "GIC Program",
+                desc: "Guaranteed Investment Certificate for international students in Canada.",
+              },
+              {
+                title: "Foreign Exchange",
+                desc: "Get competitive rates for currency exchange and international transfers.",
+              },
+              {
+                title: "Banking",
+                desc: "Open international student bank accounts with ease and convenience.",
+              },
+              {
+                title: "Visa Services",
+                desc: "Complete visa assistance and documentation support for your journey.",
+              },
+              {
+                title: "Accommodations",
+                desc: "Find safe and affordable housing near your chosen university.",
+              },
+              {
+                title: "Program Search",
+                desc: "Discover programs that match your interests and career goals.",
+              },
+              {
+                title: "Instant Applications",
+                desc: "Submit applications to multiple universities with one streamlined process.",
+              },
+              {
+                title: "Language Tests",
+                desc: "Access IELTS, TOEFL, and other language test vouchers instantly.",
+              },
+            ].map((sol, i) => (
+              <div 
+                key={i} 
+                className="bg-white p-8 rounded-[32px] border border-gray-50 shadow-sm hover:shadow-xl transition-all group text-center flex flex-col items-center"
+              >
+                <div className="w-12 h-12 rounded-xl bg-blue-50 text-[#3366FF] flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                  </svg>
+                </div>
+                <h4 className="text-[19px] font-bold text-gray-900 mb-3">{sol.title}</h4>
+                <p className="text-[14px] text-gray-500 leading-relaxed font-medium">
+                  {sol.desc}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          <Link
+            href="/register"
+            className="inline-flex items-center gap-3 bg-[#3366FF] text-white font-bold px-10 py-5 rounded-2xl text-[17px] shadow-xl shadow-blue-500/25 hover:bg-[#2952cc] transition-all hover:scale-[1.05]"
+          >
+            Register as a Student
+            <ArrowRight className="w-5 h-5" />
+          </Link>
+        </div>
+      </section>
+
+      {/* ── TESTIMONIALS SECTION ── */}
+      <section className="py-24 px-6 lg:px-12 bg-white">
+        <div className="max-w-[1280px] mx-auto">
+          <div className="text-center mb-16 fade-up">
+            <h2 className="text-[40px] lg:text-[52px] font-extrabold text-[#0f172a] mb-4">
+              What Our Students Have to Say
+            </h2>
+            <p className="text-gray-500 text-lg font-medium">
+              Hear from real international students about their experience.
+            </p>
+          </div>
+
+          <div className="relative flex items-center justify-center gap-8 overflow-hidden py-10">
+            {/* Side Card (Hint) */}
+            <div className="hidden lg:block w-[300px] opacity-20 blur-[2px] shrink-0 pointer-events-none">
+              <div className="bg-[#F8FAFF] p-10 rounded-[40px] border border-gray-100 relative">
+                <Quote className="absolute right-10 top-10 w-12 h-12 text-[#3366FF]/20" />
+                <p className="text-gray-400 text-lg leading-relaxed mb-8">
+                  I tried [applying to institutions] and it took months, and months for me to get an answer...
+                </p>
+              </div>
+            </div>
+
+            {/* Main Testimonial Card */}
+            <div className="w-full max-w-[900px] bg-[#F8FAFF] rounded-[48px] p-8 lg:p-12 border border-gray-50 shadow-xl shadow-blue-500/5 relative z-10 fade-up">
+              <div className="flex flex-col lg:row gap-12 items-center">
+                <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_2fr] gap-12 items-center">
+                  <div className="relative w-full aspect-square rounded-[32px] overflow-hidden shadow-2xl">
+                    <Image
+                      src="/testimonial-1.png"
+                      alt="Maria Smith"
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                  
+                  <div className="relative">
+                    <Quote className="absolute -top-10 right-0 w-16 h-16 text-[#3366FF]/10" />
+                    <p className="text-[20px] lg:text-[24px] text-gray-700 leading-relaxed mb-8 font-medium">
+                      &quot;I tried [applying to institutions] and it took months, and months, and months for me to get an answer from a school. But then I stumbled upon ApplyBoard, and it was like an answer from heaven.&quot;
+                    </p>
+                    <div>
+                      <h4 className="text-[18px] font-black text-gray-900 uppercase tracking-wider">Maria Smith</h4>
+                      <p className="text-gray-400 font-bold text-sm uppercase">Computer Science Student, University of Greenwich</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Side Card (Hint) */}
+            <div className="hidden lg:block w-[300px] opacity-20 blur-[2px] shrink-0 pointer-events-none">
+              <div className="bg-[#F8FAFF] p-10 rounded-[40px] border border-gray-100">
+                 <div className="relative w-full aspect-square rounded-[24px] overflow-hidden mb-6">
+                    <Image src="/testimonial-2.png" alt="Student" fill className="object-cover" />
+                 </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Navigation Controls */}
+          <div className="flex flex-col items-center gap-8 mt-12">
+            <div className="flex items-center gap-6">
+              <button className="w-12 h-12 rounded-full border border-gray-200 flex items-center justify-center text-[#3366FF] hover:bg-gray-50 transition-all">
+                <ChevronLeft className="w-6 h-6" />
+              </button>
+              
+              <div className="flex gap-2.5">
+                <div className="w-2.5 h-2.5 rounded-full bg-gray-200" />
+                <div className="w-2.5 h-2.5 rounded-full bg-[#3366FF]" />
+                <div className="w-2.5 h-2.5 rounded-full bg-gray-200" />
+                <div className="w-2.5 h-2.5 rounded-full bg-gray-200" />
+                <div className="w-2.5 h-2.5 rounded-full bg-gray-200" />
+              </div>
+
+              <button className="w-12 h-12 rounded-full border border-gray-200 flex items-center justify-center text-[#3366FF] hover:bg-gray-50 transition-all">
+                <ChevronRight className="w-6 h-6" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── TRUSTED UNIVERSITIES SECTION ── */}
+      <section className="py-24 px-6 lg:px-12 bg-white">
+        <div className="max-w-[1280px] mx-auto">
+          <div className="text-center mb-16 fade-up">
+            <h3 className="text-[#3366FF] font-black tracking-[0.2em] uppercase text-xs mb-4">
+              Trusted Partners
+            </h3>
+            <h2 className="text-[40px] lg:text-[48px] font-extrabold text-[#0f172a] leading-tight max-w-4xl mx-auto">
+              Trusted by 1,500+ Universities, Colleges and Schools Worldwide
+            </h2>
+          </div>
+
+          {/* Country Tabs */}
+          <div className="flex flex-wrap justify-center gap-4 mb-16 px-4">
+            {[
+              { label: "Canada", flag: "🇨🇦", active: true },
+              { label: "United-States", flag: "🇺🇸" },
+              { label: "United Kingdom", flag: "🇬🇧" },
+              { label: "Australia", flag: "🇦🇺" },
+              { label: "Germany", flag: "🇩🇪" },
+              { label: "Ireland", flag: "🇮🇪" },
+            ].map((country) => (
+              <button
+                key={country.label}
+                className={`flex items-center gap-3 px-6 py-3 rounded-2xl font-bold transition-all border ${
+                  country.active
+                    ? "bg-blue-50 border-[#3366FF] text-[#3366FF] shadow-sm"
+                    : "bg-[#F8FAFF] border-transparent text-gray-500 hover:bg-blue-50/50"
+                }`}
+              >
+                <span className="text-xl">{country.flag}</span>
+                {country.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Universities Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+            {[
+              {
+                name: "University of Oxford",
+                location: "Oxford, United Kingdom",
+                rank: "#1 Global",
+                tuition: "$39,000",
+                intake: "Sep 2026",
+                image: "https://images.unsplash.com/photo-1541339907198-e08756ebafe3?auto=format&fit=crop&q=80&w=800",
+              },
+              {
+                name: "University of Melbourne",
+                location: "Melbourne, Australia",
+                rank: "#7 Global",
+                tuition: "$32,000",
+                intake: "Sep 2026",
+                image: "https://images.unsplash.com/photo-1592280771190-3e2e4d571952?auto=format&fit=crop&q=80&w=800",
+              },
+              {
+                name: "University of Singapore",
+                location: "Singapore",
+                rank: "#23 Global",
+                tuition: "$17,000",
+                intake: "Sep 2026",
+                image: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&q=80&w=800",
+              },
+            ].map((uni) => (
+              <div 
+                key={uni.name} 
+                className="bg-white rounded-[32px] border border-gray-100 shadow-xl shadow-blue-500/5 group overflow-hidden hover:-translate-y-2 transition-all"
+              >
+                <div className="relative h-[240px] w-full">
+                  <Image
+                    src={uni.image}
+                    alt={uni.name}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                  <div className="absolute top-4 left-4 flex gap-2">
+                    <div className="bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-sm border border-white">
+                      <Trophy className="w-3.5 h-3.5 text-[#3366FF]" />
+                      <span className="text-[11px] font-black text-[#3366FF]">{uni.rank}</span>
+                    </div>
+                    <div className="bg-[#3366FF] px-3 py-1.5 rounded-full shadow-sm">
+                      <span className="text-[11px] font-bold text-white">Scholarship Available</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="p-8">
+                  <h4 className="text-[22px] font-black text-gray-900 mb-2 leading-tight">{uni.name}</h4>
+                  <div className="flex items-center gap-2 text-gray-400 mb-8">
+                    <MapPin className="w-4 h-4" />
+                    <span className="text-[14px] font-medium">{uni.location}</span>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4 mb-8">
+                    <div>
+                      <p className="text-[12px] text-gray-400 font-bold uppercase mb-1">Tuition/Year</p>
+                      <p className="text-[18px] font-black text-gray-900">{uni.tuition}</p>
+                    </div>
+                    <div>
+                      <p className="text-[12px] text-gray-400 font-bold uppercase mb-1">Next Intake</p>
+                      <div className="flex items-center gap-2 text-gray-900">
+                        <Calendar className="w-4 h-4 text-gray-500" />
+                        <span className="text-[16px] font-black">{uni.intake}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <button className="w-full h-[54px] bg-[#3366FF] text-white font-bold rounded-2xl hover:bg-[#2952cc] transition-all shadow-lg shadow-blue-500/20 active:scale-[0.98]">
+                    View Details
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="text-center">
+            <Link
+              href="/matches"
+              className="inline-flex items-center gap-3 bg-[#3366FF] text-white font-bold px-10 py-5 rounded-2xl text-[17px] shadow-xl shadow-blue-500/25 hover:bg-[#2952cc] transition-all hover:scale-[1.05]"
+            >
+              Explore More Canadian Institutions
+              <ArrowRight className="w-5 h-5" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ── RECRUITMENT PARTNERS SECTION ── */}
+      <section className="py-24 px-6 lg:px-12 bg-[#F4F7FF] relative overflow-hidden">
+        {/* Soft background blobs */}
+        <div className="absolute top-[10%] left-[-10%] w-[40%] h-[60%] bg-blue-50/50 rounded-full blur-[120px] -z-10" />
+        <div className="absolute bottom-[10%] right-[-10%] w-[40%] h-[60%] bg-white rounded-full blur-[100px] -z-10" />
+        
+        <div className="max-w-[1280px] mx-auto relative z-10">
+          <div className="text-center mb-16 fade-up">
+            <div className="inline-flex items-center px-6 py-2 rounded-full bg-blue-50 text-[#3366FF] font-black tracking-wider text-[11px] uppercase mb-6 shadow-sm border border-blue-100/50">
+              Recruitment Partners
+            </div>
+            <h2 className="text-[40px] lg:text-[52px] font-extrabold text-[#0f172a] leading-tight max-w-4xl mx-auto">
+              How We Help Recruitment Partners
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            {/* Left Side: Cards & CTA */}
+            <div className="space-y-12">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                {[
+                  {
+                    title: "150,000+ Programs",
+                    desc: "Access programs at 1,500+ academic institutions globally",
+                    icon: BookOpen,
+                  },
+                  {
+                    title: "AI-Powered Tools",
+                    desc: "Benefit from 95% application success rate technology",
+                    icon: Sparkles,
+                  },
+                  {
+                    title: "Complete Support",
+                    desc: "From language tests to student loans and accommodations",
+                    icon: Briefcase,
+                  },
+                  {
+                    title: "Dedicated Team",
+                    desc: "Expert support and resources to grow your agency",
+                    icon: Handshake,
+                  },
+                ].map((item, i) => (
+                  <div key={i} className="bg-white p-8 rounded-[32px] border border-gray-50 shadow-sm hover:shadow-xl transition-all group">
+                    <div className="w-12 h-12 rounded-2xl bg-blue-50 text-[#3366FF] flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                      <item.icon className="w-6 h-6" />
+                    </div>
+                    <h4 className="text-[20px] font-black text-gray-900 mb-2">{item.title}</h4>
+                    <p className="text-[14px] text-gray-400 font-medium leading-relaxed">
+                      {item.desc}
+                    </p>
+                  </div>
+                ))}
+              </div>
+
+              <Link
+                href="/register?partner=1"
+                className="inline-flex items-center gap-3 bg-[#3366FF] text-white font-bold px-10 py-5 rounded-2xl text-[17px] shadow-xl shadow-blue-500/25 hover:bg-[#2952cc] transition-all hover:scale-[1.05]"
+              >
+                Join Our Network
+                <ArrowRight className="w-5 h-5" />
+              </Link>
+            </div>
+
+            {/* Right Side: Bento Grid Images */}
+            <div className="grid grid-cols-2 lg:grid-cols-[1fr_1.2fr] gap-6 h-[500px] lg:h-[600px]">
+              <div className="flex flex-col gap-6 h-full">
+                {/* Horizontal Image */}
+                <div className="flex-1 relative rounded-[32px] overflow-hidden shadow-2xl">
+                  <Image
+                    src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80&w=800"
+                    alt="Team working"
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+                {/* Stats Card */}
+                <div className="h-[200px] bg-[#3366FF] rounded-[32px] p-8 flex flex-col justify-end text-white shadow-xl shadow-blue-500/30 relative overflow-hidden group">
+                  <div className="absolute -top-4 -right-4 w-24 h-24 bg-white/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />
+                  <GraduationCap className="w-10 h-10 mb-4 opacity-50" />
+                  <div className="text-[36px] font-black leading-none mb-1">1.3M+</div>
+                  <div className="text-blue-100 font-bold text-sm tracking-wide">Students Helped</div>
+                </div>
+              </div>
+
+              {/* Large Vertical Image */}
+              <div className="relative rounded-[40px] overflow-hidden shadow-2xl">
+                <Image
+                  src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=800"
+                  alt="Professional Partner"
+                  fill
+                  className="object-cover"
+                />
+                <div className="absolute inset-0 bg-linear-to-t from-gray-900/40 via-transparent to-transparent" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── CTA BANNER SECTION ── */}
+      <section className="py-24 px-6 lg:px-12 bg-white">
+        <div className="max-w-[1280px] mx-auto bg-[#3366FF] rounded-[48px] h-auto lg:h-[350px] flex flex-col lg:flex-row items-center relative overflow-hidden shadow-2xl shadow-blue-500/20">
+          {/* Decorative Circles */}
+          <div className="absolute right-[5%] top-1/2 -translate-y-1/2 w-[500px] h-[500px] border-40 border-white/10 rounded-full" />
+          <div className="absolute right-[10%] top-1/2 -translate-y-1/2 w-[350px] h-[350px] border-20 border-white/5 rounded-full" />
+          
+          {/* Mortarboard Icon Overlay */}
+          <div className="absolute left-[5%] top-1/2 -translate-y-1/2 opacity-10 pointer-events-none">
+             <GraduationCap className="w-[300px] h-[300px] text-white" />
+          </div>
+
+          <div className="flex-1 p-10 lg:p-20 relative z-10 text-center lg:text-left">
+            <h2 className="text-[32px] lg:text-[44px] font-extrabold text-white mb-4 leading-tight">
+              Ready to Start Your Journey?
+            </h2>
+            <p className="text-blue-100 text-[18px] mb-10 max-w-xl font-medium">
+              Create a free account and get personalized university recommendations based on your profile.
+            </p>
+            <Link
+              href="/register"
+              className="inline-flex items-center gap-2 bg-white text-[#3366FF] font-bold px-10 py-5 rounded-2xl text-[17px] hover:bg-gray-50 transition-all hover:scale-105 shadow-xl shadow-black/5"
+            >
+              Get Started Free
+              <ArrowRight className="w-5 h-5" />
+            </Link>
+          </div>
+
+          <div className="hidden lg:block relative w-[450px] h-full shrink-0 self-end">
+             <Image
+                src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&q=80&w=800"
+                alt="Graduated Student"
+                fill
+                className="object-cover object-top"
+             />
+          </div>
+        </div>
+      </section>
+
+
+      {/* ── FEATURES ── */}
+      <section className="py-32 px-6 lg:px-12 bg-[#FAFBFF]">
+        <div className="max-w-[1280px] mx-auto">
           <div className="text-center max-w-2xl mx-auto mb-16">
             <h2 className="text-[#3366FF] font-black tracking-[0.2em] uppercase text-xs mb-4">
-              The NextDegree Advantage
+              Our Core Features
             </h2>
-            <h3 className="font-extrabold text-[36px] md:text-[54px] text-[#0f172a] leading-[1.1] tracking-tight mb-6">
-              Smarter matching. <br className="hidden md:block" /> No
-              spreadsheets.
+            <h3 className="font-extrabold text-[42px] leading-[1.1] mb-6 tracking-tight">
+              Smarter matching for your future.
             </h3>
-            <p className="text-[19px] text-[#64748b] font-medium leading-relaxed">
-              We ditched the biased agency recommendations. Instead, we use live
-              API data to score every program against your exact academic and
-              financial profile.
-            </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-[300px] md:auto-rows-[340px]">
-            {/* BENTO CARD 1: Large Span */}
-            <div className="md:col-span-2 rounded-[32px] bg-white border border-gray-200 p-8 md:p-12 flex flex-col justify-between overflow-hidden relative group hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-300">
-              <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[radial-gradient(circle_at_top_right,#3366FF15,transparent_50%)] opacity-0 group-hover:opacity-100 transition-duration-700 pointer-events-none" />
-              <div className="relative z-10 w-16 h-16 rounded-[20px] bg-blue-50 text-blue-600 flex items-center justify-center mb-6 shadow-sm border border-blue-100">
-                <Brain className="w-8 h-8" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="bg-white p-10 rounded-[32px] border border-gray-100 shadow-sm hover:shadow-xl transition-all group font-sans">
+              <div className="w-16 h-16 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mb-8 bg-linear-to-br from-blue-50 to-blue-100">
+                <GraduationCap className="w-8 h-8" />
               </div>
-              <div className="relative z-10">
-                <h4 className="text-[28px] font-black text-[#0f172a] mb-3 tracking-tight">
-                  Algorithmic Match Scoring
-                </h4>
-                <p className="text-[17px] font-medium text-[#64748b] mb-0 max-w-md leading-relaxed">
-                  Enter your exact budget, IELTS score, and degree timeline. We
-                  run it against 6,000+ data nodes to return precisely what
-                  you&apos;re eligible for.
-                </p>
-              </div>
-              {/* Decor visual inside card */}
-              <div className="absolute -bottom-10 -right-10 w-[60%] h-[70%] bg-gray-50 rounded-tl-3xl border-t border-l border-gray-200 p-6 flex flex-col gap-4 shadow-2xl skew-x-[-10deg] rotate-[-5deg] group-hover:-translate-y-4 group-hover:-translate-x-4 transition-transform duration-500">
-                <div className="w-full bg-white h-12 rounded-xl shadow-sm border border-gray-100 flex items-center px-4 gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-emerald-500" />
-                  <div className="w-24 h-2 bg-gray-200 rounded-full" />
-                </div>
-                <div className="w-full bg-white h-12 rounded-xl shadow-sm border border-gray-100 flex items-center px-4 gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-emerald-500" />
-                  <div className="w-32 h-2 bg-gray-200 rounded-full" />
-                </div>
-              </div>
+              <h4 className="text-[24px] font-bold mb-4">AI Scorecard Analysis</h4>
+              <p className="text-gray-500 leading-relaxed font-medium">
+                Our proprietary AI engine analyzes your exact academic profile against thousands of program requirements.
+              </p>
             </div>
 
-            {/* BENTO CARD 2: Vertical */}
-            <div className="md:col-span-1 rounded-[32px] bg-[#0A2540] p-8 md:p-12 flex flex-col justify-between overflow-hidden relative group shadow-lg">
-              <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10" />
-              <div className="relative z-10 w-16 h-16 rounded-[20px] bg-white/10 text-emerald-400 flex items-center justify-center mb-6 backdrop-blur-md">
-                <Wallet className="w-8 h-8" />
+            <div className="bg-white p-10 rounded-[32px] border border-gray-100 shadow-sm hover:shadow-xl transition-all group font-sans">
+              <div className="w-16 h-16 rounded-2xl bg-teal-50 text-teal-600 flex items-center justify-center mb-8 bg-linear-to-br from-teal-50 to-teal-100">
+                <Globe2 className="w-8 h-8" />
               </div>
-              <div className="relative z-10">
-                <h4 className="text-[28px] font-black text-white mb-3 tracking-tight leading-tight">
-                  Strictly Budget-Aware
-                </h4>
-                <p className="text-[17px] font-medium text-blue-100/70 mb-0 leading-relaxed">
-                  Filter out programs you can&apos;t afford. Zero hidden fees.
-                  Know the exact tuition before you apply.
-                </p>
-              </div>
+              <h4 className="text-[24px] font-bold mb-4">Global Reach</h4>
+              <p className="text-gray-500 leading-relaxed font-medium">
+                Access universities across 160+ countries, with real-time updates on tuition and deadlines.
+              </p>
             </div>
 
-            {/* BENTO CARD 3: Horizontal Half */}
-            <div className="md:col-span-1 rounded-[32px] bg-white border border-gray-200 p-8 md:p-10 flex flex-col justify-between overflow-hidden relative group hover:border-teal-500/50 transition-colors">
-              <div className="relative z-10 w-14 h-14 rounded-full bg-teal-50 text-teal-600 flex items-center justify-center mb-6 border border-teal-100">
-                <Sparkles className="w-7 h-7" />
+            <div className="bg-white p-10 rounded-[32px] border border-gray-100 shadow-sm hover:shadow-xl transition-all group font-sans">
+              <div className="w-16 h-16 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center mb-8 bg-linear-to-br from-red-50 to-red-100">
+                <CheckCircle2 className="w-8 h-8" />
               </div>
-              <div className="relative z-10">
-                <h4 className="text-[24px] font-black text-[#0f172a] mb-2 tracking-tight">
-                  Study Gap Checker
-                </h4>
-                <p className="text-[15px] font-medium text-[#64748b] leading-relaxed">
-                  Worried about your study gap? Our AI tool checks eligibility for USA, Canada, UK & more.
-                </p>
-                <Link
-                  href="/eligibility"
-                  className="mt-4 inline-flex items-center gap-2 text-teal-600 font-bold hover:gap-3 transition-all text-sm"
-                >
-                  Analyze Gap <ArrowRight className="w-4 h-4" />
-                </Link>
-              </div>
-            </div>
-
-            <div className="md:col-span-2 rounded-[32px] bg-linear-to-br from-emerald-50 to-teal-50 border border-emerald-100 p-8 md:p-10 flex flex-col sm:flex-row items-center justify-between overflow-hidden relative group shadow-[0_4px_20px_rgba(0,0,0,0.02)]">
-              <div className="relative z-10 flex-1 pr-6">
-                <div className="w-14 h-14 rounded-full bg-white text-emerald-600 flex items-center justify-center mb-6 shadow-sm">
-                  <Calculator className="w-7 h-7" />
-                </div>
-                <h4 className="text-[28px] font-black text-[#0f172a] mb-3 tracking-tight">
-                  Cost Estimator in NPR
-                </h4>
-                <p className="text-[17px] font-medium text-[#64748b] leading-relaxed max-w-sm">
-                  Switch from USD to NPR instantly. Use our global living cost
-                  index to calculate rent, food, and tuition in localized
-                  currency.
-                </p>
-                <Link
-                  href="/costing"
-                  className="mt-6 inline-flex items-center gap-2 text-emerald-600 font-bold hover:gap-3 transition-all"
-                >
-                  Try Estimator <ArrowRight className="w-4 h-4" />
-                </Link>
-              </div>
-              {/* Visual decor */}
-              <div className="w-full sm:w-[300px] h-full flex items-center justify-center p-4">
-                <div className="bg-white rounded-3xl shadow-xl p-6 border border-emerald-100 rotate-3 group-hover:rotate-0 transition-transform duration-500">
-                  <div className="w-12 h-2 bg-slate-100 rounded-full mb-4" />
-                  <div className="text-2xl font-black text-slate-900 mb-1">
-                    रू 15,40,000
-                  </div>
-                  <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                    Total Annual Cost (NPR)
-                  </div>
-                </div>
-              </div>
+              <h4 className="text-[24px] font-bold mb-4">Verified Data</h4>
+              <p className="text-gray-500 leading-relaxed font-medium">
+                Every program and scholarship in our database is verified through official government and university APIs.
+              </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ── METRICS (Clean Data Row) ── */}
-      <section className="py-24 border-y border-gray-200 bg-white">
-        <div className="max-w-[1240px] mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-y-12 divide-x divide-gray-100">
-          {STATS.map((s, idx) => (
-            <div
-              key={idx}
-              className="flex flex-col items-center px-4 text-center"
-            >
-              <div className="text-[44px] md:text-[56px] font-black text-[#0f172a] tracking-tighter mb-1">
-                {s.value}
-              </div>
-              <div className="text-[14px] font-bold text-gray-400 uppercase tracking-widest">
-                {s.label}
-              </div>
+      {/* ── FAQ SECTION ── */}
+      <section className="py-24 px-6 lg:px-12 bg-white">
+        <div className="max-w-[1280px] mx-auto grid grid-cols-1 lg:grid-cols-[1fr_1.5fr] gap-20">
+          {/* Left: Content */}
+          <div className="fade-up">
+            <div className="inline-flex items-center px-5 py-1.5 rounded-full border border-blue-200 bg-blue-50 text-[#3366FF] text-[12px] font-black tracking-widest uppercase mb-8">
+              FAQ
             </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ── COUNTRIES ── */}
-      <section id="countries" className="py-32 px-6 lg:px-8 bg-[#FAFBFF]">
-        <div className="max-w-[1240px] mx-auto">
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
-            <div className="max-w-2xl">
-              <h2 className="text-[#17a38b] font-black tracking-[0.2em] uppercase text-xs mb-4">
-                Destinations
-              </h2>
-              <h3 className="font-extrabold text-[36px] md:text-[54px] text-[#0f172a] leading-[1.1] tracking-tight">
-                7 top countries.
-                <br /> Unified in one seamless flow.
-              </h3>
-            </div>
-            <p className="text-[18px] text-[#64748b] font-medium leading-relaxed max-w-sm pb-2">
-              Access live structured data from world-class global ranking
-              indices and scorecards.
+            <h2 className="text-[40px] lg:text-[56px] font-extrabold text-[#0f172a] leading-tight mb-8">
+              Frequently Asked Questions
+            </h2>
+            <p className="text-[18px] text-gray-500 font-medium leading-relaxed max-w-md">
+              Still wondering about studying abroad, and how NextDegree can get you there? Read these answers to our most commonly asked questions.
             </p>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-5">
-            {COUNTRIES.map((c) => (
-              <CountryCard
-                key={c.name}
-                flag={c.flag}
-                name={c.name}
-                universities={c.universities}
-                color={c.color}
-              />
+          {/* Right: Accordion */}
+          <div className="space-y-4">
+            <FAQAccordion />
+          </div>
+        </div>
+      </section>
+
+      {/* ── CHOOSE YOUR PATH SECTION ── */}
+      <section className="py-24 px-6 lg:px-12 bg-[#F8FAFF]">
+        <div className="max-w-[1280px] mx-auto">
+          <div className="text-center mb-16 fade-up">
+            <div className="inline-flex items-center px-6 py-2 rounded-full bg-white text-gray-900 font-bold tracking-wider text-[11px] uppercase mb-6 shadow-sm border border-gray-100">
+              Choose Your Path
+            </div>
+            <h2 className="text-[40px] lg:text-[52px] font-extrabold text-[#0f172a] mb-6">
+              Get Started With NextDegree
+            </h2>
+            <p className="text-gray-500 text-lg font-medium max-w-2xl mx-auto">
+              Join thousands of students, partners, and institutions transforming international education worldwide
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {[
+              {
+                title: "Student",
+                badge: "Most Popular",
+                desc: "Are you ready to pursue your international education dreams? Join our platform and access opportunities worldwide.",
+                features: ["Free university search & comparison", "Expert counseling & guidance", "Application & visa assistance"],
+                btn: "Sign Up For Free",
+                img: "https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&q=80&w=800",
+                link: "/register"
+              },
+              {
+                title: "Recruitment Partner",
+                badge: "For Agents",
+                desc: "Expand your reach and streamline student recruitment with our comprehensive partner network.",
+                features: ["Access to global institutions", "Advanced management tools", "Commission tracking system"],
+                btn: "Become a Recruitment Partner",
+                img: "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&q=80&w=800",
+                link: "/register?partner=1"
+              },
+              {
+                title: "Partner Institution",
+                badge: "For Institutions",
+                desc: "Connect with quality students globally and grow your international enrollment effectively.",
+                features: ["1,500+ partner institutions", "Qualified student applications", "Dedicated support team"],
+                btn: "Become a Partner Institution",
+                img: "https://images.unsplash.com/photo-1491333078588-55b6733c7de6?auto=format&fit=crop&q=80&w=800",
+                link: "/register?institution=1"
+              }
+            ].map((path, i) => (
+              <div key={i} className="bg-white rounded-[40px] overflow-hidden border border-gray-100 shadow-xl shadow-blue-500/5 hover:-translate-y-2 transition-all group flex flex-col h-full">
+                <div className="relative h-[240px] w-full">
+                  <Image
+                    src={path.img}
+                    alt={path.title}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                  <div className="absolute top-6 right-6">
+                    <div className="bg-white/90 backdrop-blur-md px-4 py-1.5 rounded-full flex items-center gap-2 shadow-sm border border-white">
+                      <Trophy className="w-3.5 h-3.5 text-[#3366FF]" />
+                      <span className="text-[11px] font-black text-[#3366FF]">{path.badge}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-10 flex flex-col flex-1">
+                  <h3 className="text-[28px] font-black text-gray-900 mb-4">{path.title}</h3>
+                  <p className="text-gray-500 font-medium leading-relaxed mb-8 flex-1">
+                    {path.desc}
+                  </p>
+
+                  <ul className="space-y-4 mb-10">
+                    {path.features.map((f, j) => (
+                      <li key={j} className="flex items-center gap-3 text-[15px] font-bold text-gray-700">
+                        <div className="w-5 h-5 rounded-full bg-blue-50 text-[#3366FF] flex items-center justify-center shrink-0">
+                          <CheckCircle2 className="w-3 h-3" />
+                        </div>
+                        {f}
+                      </li>
+                    ))}
+                  </ul>
+
+                  <Link
+                    href={path.link}
+                    className="w-full h-[60px] bg-[#3366FF] text-white font-bold rounded-2xl flex items-center justify-center gap-2 hover:bg-[#2952cc] transition-all shadow-lg shadow-blue-500/20"
+                  >
+                    {path.btn}
+                    <ArrowRight className="w-5 h-5" />
+                  </Link>
+                </div>
+              </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── HOW IT WORKS (Timeline Grid) ── */}
-      <section
-        id="how-it-works"
-        className="py-32 px-6 relative overflow-hidden bg-white border-t border-gray-100"
-      >
-        <div className="relative max-w-[1240px] mx-auto">
-          <div className="text-center max-w-3xl mx-auto mb-20">
-            <h2 className="text-[#8b5cf6] font-black tracking-[0.2em] uppercase text-xs mb-4">
-              The Process
-            </h2>
-            <h3 className="font-extrabold text-[36px] md:text-[54px] text-[#0f172a] leading-[1.1] tracking-tight mb-6">
-              From zero to shortlist.
-              <br /> Just 4 simple steps.
-            </h3>
-          </div>
-
-          <div className="relative grid grid-cols-1 md:grid-cols-4 gap-x-8 gap-y-12">
-            {/* Visual Line connector for desktop */}
-            <div className="hidden md:block absolute top-[40px] left-0 w-full h-1 bg-gray-100 rounded-full z-0" />
-            <div className="hidden md:block absolute top-[40px] left-0 w-1/2 h-1 bg-gradient-to-r from-blue-500/50 to-transparent rounded-full z-0" />
-
-            {[
-              {
-                step: "01",
-                icon: GraduationCap,
-                title: "Your Profile",
-                desc: "Enter your degree level, GPA, and intended field of study.",
-                color: "text-blue-600",
-                bg: "bg-blue-50",
-                border: "border-blue-200",
-              },
-              {
-                step: "02",
-                icon: FileSearch,
-                title: "Test Scores",
-                desc: "Add your latest IELTS, TOEFL, or PTE scores for exact matching.",
-                color: "text-teal-600",
-                bg: "bg-teal-50",
-                border: "border-teal-200",
-              },
-              {
-                step: "03",
-                icon: Wallet,
-                title: "Strict Budget",
-                desc: "Set your max yearly tuition limit across any currency.",
-                color: "text-purple-600",
-                bg: "bg-purple-50",
-                border: "border-purple-200",
-              },
-              {
-                step: "04",
-                icon: Sparkles,
-                title: "View Matches",
-                desc: "We scan the database and surface only the ones that fit you.",
-                color: "text-amber-600",
-                bg: "bg-amber-50",
-                border: "border-amber-200",
-              },
-            ].map((s) => {
-              const Icon = s.icon;
-              return (
-                <div
-                  key={s.step}
-                  className="relative z-10 flex flex-col items-start md:items-center md:text-center group"
-                >
-                  <div
-                    className={`w-[80px] h-[80px] rounded-2xl ${s.bg} border ${s.border} flex flex-col items-center justify-center mb-8 shadow-sm group-hover:-translate-y-2 transition-transform duration-300`}
-                  >
-                    <span className={`text-[12px] font-black ${s.color}`}>
-                      {s.step}
-                    </span>
-                    <Icon
-                      className={`w-6 h-6 ${s.color} mt-1`}
-                      strokeWidth={2.5}
-                    />
-                  </div>
-                  <h4 className="text-[22px] font-black text-[#0f172a] mb-3 tracking-tight">
-                    {s.title}
-                  </h4>
-                  <p className="text-[16px] text-[#64748b] font-medium leading-relaxed">
-                    {s.desc}
-                  </p>
-                </div>
-              );
-            })}
-          </div>
+      {/* CTA Section */}
+      <section className="py-24 px-6 lg:px-12">
+        <div className="max-w-[1200px] mx-auto bg-[#3366FF] rounded-[48px] p-12 lg:p-24 text-center text-white relative overflow-hidden shadow-2xl">
+          <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+          <h2 className="text-[40px] lg:text-[56px] font-extrabold mb-6 leading-none">
+            Find your dream <br />university today.
+          </h2>
+          <p className="text-blue-100 text-[20px] mb-12 max-w-xl mx-auto font-medium">
+            Join thousands of students who have already started their global journey with NextDegree.
+          </p>
+          <Link
+            href="/matches"
+            className="inline-flex items-center gap-3 bg-white text-[#3366FF] font-bold px-10 py-5 rounded-2xl text-[18px] hover:bg-gray-50 transition-all hover:scale-105 shadow-xl"
+          >
+            Start Matching Free
+            <ArrowRight className="w-5 h-5" />
+          </Link>
         </div>
       </section>
 
-      {/* ── EPIC CTA SECTION ── */}
-      <section className="py-32 px-6 lg:px-8 relative overflow-hidden bg-[#fafbff]">
-        {/* Soft Background Plate */}
-        <div className="absolute inset-x-6 lg:inset-x-auto lg:left-1/2 lg:-translate-x-1/2 lg:w-full lg:max-w-[1240px] inset-y-10 rounded-[48px] bg-linear-to-br from-[#0A2540] via-[#0A2540] to-[#1e3b8a] shadow-2xl overflow-hidden">
-          {/* Abstract glows inside CTA */}
-          <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-blue-500/20 rounded-full blur-[120px]" />
-          <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-teal-500/10 rounded-full blur-[120px]" />
-
-          <div className="relative text-center py-24 px-6 sm:px-12 z-10 h-full flex flex-col justify-center items-center">
-            <div className="w-24 h-24 rounded-[28px] bg-gradient-to-br from-[#3366FF] to-blue-400 p-[2px] mx-auto mb-10 shadow-2xl">
-              <div className="w-full h-full bg-[#0A2540] rounded-[26px] flex items-center justify-center">
-                <GraduationCap
-                  className="w-10 h-10 text-white"
-                  strokeWidth={2}
-                />
+      {/* ── FOOTER SECTION ── */}
+      <footer className="bg-[#F0F4FF] pt-24 pb-12 px-6 lg:px-12 border-t border-blue-100">
+        <div className="max-w-[1280px] mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 lg:gap-8 mb-20">
+            {/* Brand & Address */}
+            <div className="lg:col-span-1">
+              <Link href="/" className="text-[24px] font-black text-[#0f172a] mb-8 block">
+                NextDegree
+              </Link>
+              <div className="text-gray-500 font-medium leading-relaxed mb-8">
+                <p>101 Frederick St,</p>
+                <p>Kitchener, ON</p>
+                <p>N2H 6R2</p>
+              </div>
+              <div className="flex items-center gap-5">
+                <Link href="#" className="text-[#3366FF] hover:scale-110 transition-transform">
+                  <Facebook className="w-5 h-5" />
+                </Link>
+                <Link href="#" className="text-[#3366FF] hover:scale-110 transition-transform">
+                  <Twitter className="w-5 h-5" />
+                </Link>
+                <Link href="#" className="text-[#3366FF] hover:scale-110 transition-transform">
+                  <Instagram className="w-5 h-5" />
+                </Link>
+                <Link href="#" className="text-[#3366FF] hover:scale-110 transition-transform">
+                  <Linkedin className="w-5 h-5" />
+                </Link>
+                <Link href="#" className="text-[#3366FF] hover:scale-110 transition-transform">
+                  <Youtube className="w-5 h-5" />
+                </Link>
               </div>
             </div>
 
-            <h2
-              className="font-black text-white mb-6 leading-[1.1] tracking-tight drop-shadow-md"
-              style={{ fontSize: "clamp(40px, 5vw, 68px)" }}
-            >
-              Find your absolute <br />
-              best match today.
-            </h2>
-            <p className="text-[20px] md:text-[24px] font-medium text-blue-100/70 mb-14 leading-relaxed max-w-2xl mx-auto">
-              Skip the agency fees and Google stress. Take control of your
-              academic future in less than 2 minutes.
+            {/* Product Column */}
+            <div>
+              <h4 className="text-[17px] font-black text-[#0f172a] mb-8 uppercase tracking-wider">Product</h4>
+              <ul className="space-y-4">
+                <li><Link href="#" className="text-gray-500 font-bold hover:text-[#3366FF] transition-colors">Features</Link></li>
+                <li><Link href="#" className="text-gray-500 font-bold hover:text-[#3366FF] transition-colors">Pricing</Link></li>
+                <li><Link href="#" className="text-gray-500 font-bold hover:text-[#3366FF] transition-colors">Case studies</Link></li>
+                <li><Link href="#" className="text-gray-500 font-bold hover:text-[#3366FF] transition-colors">Reviews</Link></li>
+                <li><Link href="#" className="text-gray-500 font-bold hover:text-[#3366FF] transition-colors">Updates</Link></li>
+              </ul>
+            </div>
+
+            {/* Destinations Column */}
+            <div>
+              <h4 className="text-[17px] font-black text-[#0f172a] mb-8 uppercase tracking-wider">Destinations</h4>
+              <ul className="space-y-4">
+                <li><Link href="#" className="text-gray-500 font-bold hover:text-[#3366FF] transition-colors">Australia</Link></li>
+                <li><Link href="#" className="text-gray-500 font-bold hover:text-[#3366FF] transition-colors">Canada</Link></li>
+                <li><Link href="#" className="text-gray-500 font-bold hover:text-[#3366FF] transition-colors">Germany</Link></li>
+                <li><Link href="#" className="text-gray-500 font-bold hover:text-[#3366FF] transition-colors">Ireland</Link></li>
+                <li><Link href="#" className="text-gray-500 font-bold hover:text-[#3366FF] transition-colors">United Kingdom</Link></li>
+              </ul>
+            </div>
+
+            {/* About Column */}
+            <div>
+              <h4 className="text-[17px] font-black text-[#0f172a] mb-8 uppercase tracking-wider">About</h4>
+              <ul className="space-y-4">
+                <li><Link href="#" className="text-gray-500 font-bold hover:text-[#3366FF] transition-colors">Our Story</Link></li>
+                <li><Link href="#" className="text-gray-500 font-bold hover:text-[#3366FF] transition-colors">Careers</Link></li>
+                <li><Link href="#" className="text-gray-500 font-bold hover:text-[#3366FF] transition-colors">Press and Media</Link></li>
+                <li><Link href="#" className="text-gray-500 font-bold hover:text-[#3366FF] transition-colors">Contact</Link></li>
+              </ul>
+            </div>
+
+            {/* Resources Column */}
+            <div>
+              <h4 className="text-[17px] font-black text-[#0f172a] mb-8 uppercase tracking-wider">Resources</h4>
+              <ul className="space-y-4">
+                <li><Link href="#" className="text-gray-500 font-bold hover:text-[#3366FF] transition-colors">Blog</Link></li>
+                <li><Link href="#" className="text-gray-500 font-bold hover:text-[#3366FF] transition-colors">Webinar</Link></li>
+                <li><Link href="#" className="text-gray-500 font-bold hover:text-[#3366FF] transition-colors">NextDegree Insights</Link></li>
+                <li><Link href="#" className="text-gray-500 font-bold hover:text-[#3366FF] transition-colors">Contact</Link></li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Bottom Bar */}
+          <div className="pt-12 border-t border-blue-200/50 flex flex-col md:flex-row justify-between items-center gap-6">
+            <p className="text-gray-400 font-medium text-[15px]">
+              Copyright © 2022 NextDegree Inc
             </p>
+            <div className="flex items-center gap-8 text-[15px] font-medium text-gray-400">
+              <p>All Rights Reserved</p>
+              <div className="flex items-center gap-4">
+                <Link href="#" className="text-[#3366FF] underline underline-offset-4 hover:text-[#2952cc]">Terms and Conditions</Link>
+                <div className="w-px h-4 bg-gray-300" />
+                <Link href="#" className="text-[#3366FF] underline underline-offset-4 hover:text-[#2952cc]">Privacy Policy</Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+}
 
-            <Link
-              href="/matches"
-              className="inline-flex items-center justify-center gap-3 bg-white text-[#0A2540] hover:bg-gray-50 font-black px-12 py-6 rounded-2xl text-[18px] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_50px_-10px_rgba(255,255,255,0.2)]"
-            >
-              <Zap className="w-6 h-6 fill-blue-600 text-blue-600" /> Start
-              Matching Free
-            </Link>
+function FAQAccordion() {
+  const [openIndex, setOpenIndex] = useState<number | null>(0);
 
-            <p className="mt-8 text-[14px] font-bold text-blue-300/50 uppercase tracking-widest flex items-center gap-2">
-              <BadgeCheck className="w-4 h-4" /> No Credit Card Required
+  const faqs = [
+    {
+      q: "How does NextDegree help students?",
+      a: "NextDegree simplifies the entire study abroad journey. We use AI to match your profile with over 150,000 programs worldwide, handle your applications, and even assist with visa and accommodation services.",
+    },
+    {
+      q: "Does NextDegree charge students any fees?",
+      a: "Using NextDegree to search and apply to many of our partner institutions is completely free for students. We provide transparent information about any specific processing fees if they apply to certain programs.",
+    },
+    {
+      q: "Which countries can I study in through NextDegree?",
+      a: "We have partners in over 160 countries, including popular destinations like Canada, the USA, the UK, Australia, Germany, and Ireland, as well as many emerging education hubs.",
+    },
+    {
+      q: "How do I know if I am eligible for a program?",
+      a: "Our platform features an AI-driven eligibility checker. Once you complete your profile, we'll automatically show you which programs you're likely to be accepted into based on your GPA and test scores.",
+    },
+    {
+      q: "Can I apply for scholarships on the platform?",
+      a: "Yes! We list thousands of scholarships. Our matching engine specifically highlights financial aid opportunities that you are eligible for, helping you reduce the cost of your education.",
+    },
+  ];
+
+  return (
+    <>
+      {faqs.map((faq, i) => (
+        <div 
+          key={i} 
+          className={`rounded-[24px] overflow-hidden transition-all duration-300 ${openIndex === i ? "bg-[#F1F6FF]" : "bg-[#F8FAFF] hover:bg-blue-50/50"}`}
+        >
+          <button
+            onClick={() => setOpenIndex(openIndex === i ? null : i)}
+            className="w-full px-8 py-7 flex items-center justify-between text-left group"
+          >
+            <span className={`text-[18px] font-bold transition-colors ${openIndex === i ? "text-[#3366FF]" : "text-gray-900"}`}>
+              {faq.q}
+            </span>
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-all ${openIndex === i ? "bg-[#3366FF] text-white rotate-180" : "bg-white text-gray-400 border border-gray-100"}`}>
+              {openIndex === i ? <Minus className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+            </div>
+          </button>
+          
+          <div 
+            className={`px-8 transition-all duration-300 ease-in-out overflow-hidden ${openIndex === i ? "max-h-[300px] pb-8 opacity-100" : "max-h-0 opacity-0"}`}
+          >
+            <p className="text-gray-500 font-medium leading-relaxed">
+              {faq.a}
             </p>
           </div>
         </div>
-      </section>
-    </div>
+      ))}
+    </>
   );
 }

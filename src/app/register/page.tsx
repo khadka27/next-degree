@@ -1,23 +1,20 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import {
-  GraduationCap,
-  User,
   Eye,
   EyeOff,
-  CheckCircle2,
-  ChevronLeft,
-  ChevronRight,
-  Globe,
-  Sparkles,
   AlertCircle,
+  ChevronRight,
+  ChevronLeft,
+  Sparkles,
+  User,
+  Globe,
 } from "lucide-react";
 
-/* ─── Constants ─── */
 const COUNTRIES_LIST = [
   "Nepal", "India", "Bangladesh", "Pakistan", "Sri Lanka", "China",
   "Vietnam", "Philippines", "Nigeria", "Ghana", "Kenya", "Ethiopia",
@@ -27,184 +24,74 @@ const COUNTRIES_LIST = [
   "France", "Netherlands", "Ireland", "New Zealand", "Singapore",
 ];
 
-/* ─── Step Definitions ─── */
 const STEPS = [
-  { title: "Account Setup", subtitle: "Create your login credentials", icon: User },
+  { title: "Account Setup", subtitle: "Login credentials", icon: User },
   { title: "Your Background", subtitle: "Tell us where you're from", icon: Globe },
 ];
 
-/* ─── Input field component ─── */
-function Field({
-  label,
-  children,
-  error,
-}: {
-  label: string;
-  children: React.ReactNode;
-  error?: string;
-}) {
-  return (
-    <div className="flex flex-col gap-1.5">
-      <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">
-        {label}
-      </label>
-      {children}
-      {error && (
-        <p className="text-xs text-red-400 flex items-center gap-1 mt-0.5">
-          <AlertCircle className="w-3 h-3" /> {error}
-        </p>
-      )}
-    </div>
-  );
-}
-
-/* ─── Glass Input ─── */
-function GlassInput({
-  type = "text",
-  placeholder,
-  value,
-  onChange,
-  suffix,
-  disabled,
-  autoComplete,
-}: {
-  type?: string;
-  placeholder: string;
-  value: string;
-  onChange: (v: string) => void;
-  suffix?: React.ReactNode;
-  disabled?: boolean;
-  autoComplete?: string;
-}) {
-  return (
-    <div className="relative">
-      <input
-        type={type}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        disabled={disabled}
-        autoComplete={autoComplete}
-        className="w-full h-[52px] bg-white/5 border border-white/10 rounded-2xl px-4 text-white placeholder:text-slate-500 text-sm font-medium outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all disabled:opacity-50"
-      />
-      {suffix && (
-        <div className="absolute right-3 top-1/2 -translate-y-1/2">{suffix}</div>
-      )}
-    </div>
-  );
-}
-
-/* ─── Select ─── */
-function GlassSelect({
-  placeholder,
-  options,
-  value,
-  onChange,
-}: {
-  placeholder: string;
-  options: string[];
-  value: string;
-  onChange: (v: string) => void;
-}) {
-  return (
-    <select
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      className="w-full h-[52px] bg-white/5 border border-white/10 rounded-2xl px-4 text-sm font-medium outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all appearance-none cursor-pointer text-white [&>option]:bg-[#0f0f1a] [&>option]:text-white"
-    >
-      <option value="" disabled>
-        {placeholder}
-      </option>
-      {options.map((o) => (
-        <option key={o} value={o}>
-          {o}
-        </option>
-      ))}
-    </select>
-  );
-}
-
 export default function RegisterPage() {
   const router = useRouter();
-
-  // Step state
   const [step, setStep] = useState(0);
+  const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [serverError, setServerError] = useState("");
-  const [success, setSuccess] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Form data
   const [form, setForm] = useState({
     name: "",
     username: "",
     email: "",
     password: "",
     confirmPassword: "",
-    // Background
     nationality: "",
     currentCountry: "",
     gpa: "",
   });
 
-  const [errors, setErrors] = useState<Record<string, string>>({});
-
-  const set = (k: string, v: any) => {
+  const handleChange = (k: string, v: string) => {
     setForm((p) => ({ ...p, [k]: v }));
     setErrors((p) => ({ ...p, [k]: "" }));
+    setServerError("");
   };
 
-  /* ─── Validation per step ─── */
   const validateStep = () => {
     const e: Record<string, string> = {};
-
     if (step === 0) {
       if (!form.name.trim()) e.name = "Full name is required.";
       if (!form.username.trim()) e.username = "Username is required.";
-      if (form.username.length < 3) e.username = "Username must be at least 3 characters.";
-      if (!/^[a-zA-Z0-9_]+$/.test(form.username)) e.username = "Only letters, numbers, and underscores.";
+      if (form.username.length < 3) e.username = "At least 3 characters.";
       if (!form.email) e.email = "Email is required.";
-      if (!/\S+@\S+\.\S+/.test(form.email)) e.email = "Invalid email format.";
       if (!form.password) e.password = "Password is required.";
-      if (form.password.length < 8) e.password = "At least 8 characters.";
-      if (form.password !== form.confirmPassword) e.confirmPassword = "Passwords do not match.";
+      if (form.password.length < 8) e.password = "Min. 8 characters.";
+      if (form.password !== form.confirmPassword) e.confirmPassword = "Passwords don't match.";
+    } else {
+      if (!form.nationality) e.nationality = "Required.";
+      if (!form.currentCountry) e.currentCountry = "Required.";
     }
-
-    if (step === 1) {
-      if (!form.nationality) e.nationality = "Please select your nationality.";
-      if (!form.currentCountry) e.currentCountry = "Please select your current country.";
-    }
-
     setErrors(e);
     return Object.keys(e).length === 0;
   };
 
   const handleNext = () => {
-    if (!validateStep()) return;
-    if (step < STEPS.length - 1) {
-      setStep(step + 1);
-    } else {
-      handleSubmit();
+    if (validateStep()) {
+      if (step < STEPS.length - 1) setStep(step + 1);
+      else handleSubmit();
     }
   };
 
   const handleSubmit = async () => {
     setSubmitting(true);
     setServerError("");
+
     try {
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: form.name,
+          ...form,
           username: form.username.toLowerCase(),
           email: form.email.toLowerCase(),
-          password: form.password,
-          nationality: form.nationality,
-          currentCountry: form.currentCountry,
-          gpa: form.gpa,
-          // Set defaults for missing match fields
+          // Default extra fields for matching API
           preferredCountry: "",
           degreeLevel: "",
           fieldOfStudy: "",
@@ -216,249 +103,269 @@ export default function RegisterPage() {
           intake: "",
         }),
       });
+
       const data = await res.json();
       if (!res.ok) {
-        setServerError(data.error || "Registration failed. Please try again.");
+        setServerError(data.error || "Registration failed.");
         return;
       }
-      setSuccess(true);
-      setTimeout(() => router.push("/login?registered=1"), 2000);
+
+      router.push("/login?registered=1");
     } catch {
-      setServerError("Something went wrong. Please check your connection.");
+      setServerError("Something went wrong. Please try again.");
     } finally {
       setSubmitting(false);
     }
   };
 
-  /* ─── Success screen ─── */
-  if (success) {
-    return (
-      <div className="min-h-screen bg-[#07070f] flex items-center justify-center p-6">
-        <div className="text-center fade-up">
-          <div className="w-20 h-20 bg-emerald-500/20 border-2 border-emerald-500/40 rounded-full flex items-center justify-center mx-auto mb-6">
-            <CheckCircle2 className="w-10 h-10 text-emerald-400" />
-          </div>
-          <h2 className="text-2xl font-black text-white mb-2">Account Created! 🎉</h2>
-          <p className="text-slate-400 text-sm mb-1">Welcome to NextDegree, {form.name}!</p>
-          <p className="text-slate-500 text-xs">Redirecting you to login...</p>
-        </div>
-      </div>
-    );
-  }
-
-  const currentStep = STEPS[step];
-  const StepIcon = currentStep.icon;
-
   return (
-    <div className="min-h-screen bg-[#07070f] flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Background glows */}
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-violet-600/10 rounded-full blur-3xl pointer-events-none" />
-
-      <div className="w-full max-w-md relative z-10">
-        {/* Header */}
-        <div className="text-center mb-8 fade-up">
-          <div className="inline-flex items-center gap-2 bg-indigo-500/10 border border-indigo-500/20 rounded-full px-4 py-2 mb-5">
-            <GraduationCap className="w-4 h-4 text-indigo-400" />
-            <span className="text-xs font-bold text-indigo-400 uppercase tracking-widest">NextDegree</span>
-          </div>
-          <h1 className="text-3xl font-black text-white mb-2 leading-tight">
-            Start Your Journey
-          </h1>
-          <p className="text-slate-400 text-sm">
-            Already have an account?{" "}
-            <Link href="/login" className="text-indigo-400 font-bold hover:text-indigo-300 transition-colors">
-              Sign in
-            </Link>
-          </p>
+    <div className="min-h-screen bg-white flex flex-col font-sans">
+      <div className="flex-1 flex flex-col lg:flex-row relative">
+        {/* Left Side: Image */}
+        <div className="hidden lg:block lg:w-[40%] relative overflow-hidden">
+          <Image
+            src="/signup-bg.png"
+            alt="Library"
+            fill
+            className="object-cover"
+            priority
+          />
+          <div className="absolute inset-0 bg-linear-to-r from-transparent via-transparent to-white/10" />
         </div>
 
-        {/* Step indicator */}
-        <div className="flex items-center gap-2 mb-6 px-1">
-          {STEPS.map((s, i) => (
-            <div key={i} className="flex-1 flex items-center gap-2">
-              <div className={`flex-1 h-1 rounded-full transition-all duration-500 ${i <= step ? "bg-indigo-500" : "bg-white/10"}`} />
-            </div>
-          ))}
-        </div>
+        {/* Right Side: Form Container */}
+        <div className="flex-1 relative flex items-center justify-center p-6 lg:p-12 overflow-hidden bg-[#F4F7FF]">
+          {/* Slanted background decoration */}
+          <div 
+            className="absolute left-[-150px] top-0 bottom-0 w-[300px] bg-white hidden lg:block"
+            style={{ 
+              clipPath: "polygon(100% 0, 0 0, 100% 100%)",
+              transform: "translateX(-1px)"
+            }}
+          />
 
-        {/* Card */}
-        <div className="bg-white/3 border border-white/10 rounded-3xl p-7 backdrop-blur-sm shadow-2xl fade-up">
-          {/* Step header */}
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 bg-indigo-500/15 border border-indigo-500/25 rounded-2xl flex items-center justify-center shrink-0">
-              <StepIcon className="w-5 h-5 text-indigo-400" />
-            </div>
-            <div>
-              <p className="text-xs font-bold text-indigo-400 uppercase tracking-widest">
-                Step {step + 1} of {STEPS.length}
-              </p>
-              <h2 className="text-base font-black text-white leading-tight">
-                {currentStep.title}
-              </h2>
-              <p className="text-xs text-slate-500">{currentStep.subtitle}</p>
-            </div>
-          </div>
-
-          {/* SERVER ERROR */}
-          {serverError && (
-            <div className="mb-5 bg-red-500/10 border border-red-500/30 rounded-2xl p-4 flex items-start gap-3">
-              <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
-              <p className="text-sm text-red-300">{serverError}</p>
-            </div>
-          )}
-
-          {/* ─── STEP 0: Account Setup ─── */}
-          {step === 0 && (
-            <div className="space-y-4">
-              <Field label="Full Name" error={errors.name}>
-                <GlassInput
-                  placeholder="Jane Doe"
-                  value={form.name}
-                  onChange={(v) => set("name", v)}
-                  autoComplete="name"
-                />
-              </Field>
-              <Field label="Username" error={errors.username}>
-                <GlassInput
-                  placeholder="janedoe123"
-                  value={form.username}
-                  onChange={(v) => set("username", v.toLowerCase().replace(/\s/g, ""))}
-                  autoComplete="username"
-                  suffix={
-                    form.username.length >= 3 && /^[a-zA-Z0-9_]+$/.test(form.username) ? (
-                      <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                    ) : null
-                  }
-                />
-              </Field>
-              <Field label="Email Address" error={errors.email}>
-                <GlassInput
-                  type="email"
-                  placeholder="jane@example.com"
-                  value={form.email}
-                  onChange={(v) => set("email", v)}
-                  autoComplete="email"
-                />
-              </Field>
-              <Field label="Password" error={errors.password}>
-                <GlassInput
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Min. 8 characters"
-                  value={form.password}
-                  onChange={(v) => set("password", v)}
-                  autoComplete="new-password"
-                  suffix={
-                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="text-slate-400 hover:text-white transition-colors">
-                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
-                  }
-                />
-                {form.password && (
-                  <div className="flex gap-1 mt-1">
-                    {[1, 2, 3, 4].map((i) => (
-                      <div
-                        key={i}
-                        className={`flex-1 h-1 rounded-full transition-all ${
-                          form.password.length >= i * 3
-                            ? form.password.length < 8
-                              ? "bg-amber-500"
-                              : "bg-emerald-500"
-                            : "bg-white/10"
-                        }`}
-                      />
-                    ))}
+          <div className="w-full max-w-[520px] relative z-10 fade-up">
+            {/* Header */}
+            <div className="mb-10 text-center lg:text-left">
+              <h2 className="text-[20px] font-bold text-gray-400 mb-1">Welcome To!</h2>
+              <h1 className="text-[42px] lg:text-[52px] font-black text-[#3366FF] leading-none mb-6">NextDegree</h1>
+              
+              {/* Step indicator */}
+              <div className="flex items-center gap-3">
+                {STEPS.map((s, i) => (
+                  <div key={i} className="flex-1 h-1.5 rounded-full overflow-hidden bg-gray-200">
+                    <div 
+                      className={`h-full bg-[#3366FF] transition-all duration-500 ${i <= step ? "w-full" : "w-0"}`}
+                    />
                   </div>
-                )}
-              </Field>
-              <Field label="Confirm Password" error={errors.confirmPassword}>
-                <GlassInput
-                  type={showConfirm ? "text" : "password"}
-                  placeholder="Repeat your password"
-                  value={form.confirmPassword}
-                  onChange={(v) => set("confirmPassword", v)}
-                  autoComplete="new-password"
-                  suffix={
-                    <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="text-slate-400 hover:text-white transition-colors">
-                      {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
-                  }
-                />
-              </Field>
+                ))}
+              </div>
             </div>
-          )}
 
-          {/* ─── STEP 1: Background ─── */}
-          {step === 1 && (
-            <div className="space-y-4">
-              <Field label="Your Nationality" error={errors.nationality}>
-                <GlassSelect
-                  placeholder="Select your nationality"
-                  options={COUNTRIES_LIST}
-                  value={form.nationality}
-                  onChange={(v) => set("nationality", v)}
-                />
-              </Field>
-              <Field label="Current Country of Residence" error={errors.currentCountry}>
-                <GlassSelect
-                  placeholder="Where do you currently live?"
-                  options={COUNTRIES_LIST}
-                  value={form.currentCountry}
-                  onChange={(v) => set("currentCountry", v)}
-                />
-              </Field>
-              <Field label="GPA (Optional)">
-                <GlassInput
-                  type="number"
-                  placeholder="e.g. 3.7 (out of 4.0)"
-                  value={form.gpa}
-                  onChange={(v) => set("gpa", v)}
-                />
-              </Field>
-            </div>
-          )}
-
-          {/* Navigation */}
-          <div className="flex gap-3 mt-6">
-            {step > 0 && (
-              <button
-                type="button"
-                onClick={() => setStep(step - 1)}
-                className="h-[52px] px-5 rounded-2xl bg-white/5 border border-white/10 text-white font-bold text-sm hover:bg-white/10 transition-all flex items-center gap-2"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </button>
+            {/* Error Message */}
+            {serverError && (
+              <div className="mb-6 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl flex items-center gap-3 text-sm">
+                <AlertCircle className="w-5 h-5 shrink-0" />
+                {serverError}
+              </div>
             )}
-            <button
-              type="button"
-              onClick={handleNext}
-              disabled={submitting}
-              className="flex-1 h-[52px] rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-indigo-500/25 hover:-translate-y-0.5 active:translate-y-0"
-            >
-              {submitting ? (
-                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              ) : step === STEPS.length - 1 ? (
-                <>
-                  <Sparkles className="w-4 h-4" />
-                  Create Account
-                </>
-              ) : (
-                <>
-                  Continue
-                  <ChevronRight className="w-4 h-4" />
-                </>
-              )}
-            </button>
+
+            {/* Form Card */}
+            <div className="bg-white border border-gray-100 rounded-[32px] p-8 shadow-xl shadow-blue-500/5">
+              <div className="flex items-center gap-4 mb-8">
+                <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-[#3366FF]">
+                  {step === 0 ? <User className="w-6 h-6" /> : <Globe className="w-6 h-6" />}
+                </div>
+                <div>
+                  <h3 className="text-xl font-black text-gray-900">{STEPS[step].title}</h3>
+                  <p className="text-sm text-gray-400 font-medium">{STEPS[step].subtitle}</p>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                {step === 0 && (
+                  <>
+                    <InputField
+                      label="Full Name"
+                      placeholder="Jane Doe"
+                      value={form.name}
+                      error={errors.name}
+                      onChange={(v: string) => handleChange("name", v)}
+                    />
+                    <InputField
+                      label="Username"
+                      placeholder="janedoe123"
+                      value={form.username}
+                      error={errors.username}
+                      onChange={(v: string) => handleChange("username", v.replace(/\s/g, ""))}
+                    />
+                    <InputField
+                      label="Email Address"
+                      type="email"
+                      placeholder="jane@example.com"
+                      value={form.email}
+                      error={errors.email}
+                      onChange={(v: string) => handleChange("email", v)}
+                    />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <InputField
+                        label="Password"
+                        type={showPassword ? "text" : "password"}
+                        placeholder="••••••••"
+                        value={form.password}
+                        error={errors.password}
+                        onChange={(v: string) => handleChange("password", v)}
+                        suffix={
+                          <button 
+                            type="button" 
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="text-gray-300 hover:text-gray-500"
+                          >
+                            {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                          </button>
+                        }
+                      />
+                      <InputField
+                        label="Confirm"
+                        type={showPassword ? "text" : "password"}
+                        placeholder="••••••••"
+                        value={form.confirmPassword}
+                        error={errors.confirmPassword}
+                        onChange={(v: string) => handleChange("confirmPassword", v)}
+                      />
+                    </div>
+                  </>
+                )}
+
+                {step === 1 && (
+                  <>
+                    <SelectField
+                      label="Nationality"
+                      placeholder="Select country"
+                      options={COUNTRIES_LIST}
+                      value={form.nationality}
+                      error={errors.nationality}
+                      onChange={(v: string) => handleChange("nationality", v)}
+                    />
+                    <SelectField
+                      label="Current Residence"
+                      placeholder="Where do you live?"
+                      options={COUNTRIES_LIST}
+                      value={form.currentCountry}
+                      error={errors.currentCountry}
+                      onChange={(v: string) => handleChange("currentCountry", v)}
+                    />
+                    <InputField
+                      label="GPA (optional)"
+                      type="number"
+                      placeholder="e.g. 3.8"
+                      value={form.gpa}
+                      onChange={(v: string) => handleChange("gpa", v)}
+                    />
+                  </>
+                )}
+              </div>
+
+              {/* Navigation */}
+              <div className="flex gap-4 mt-10">
+                {step > 0 && (
+                  <button
+                    onClick={() => setStep(step - 1)}
+                    className="h-[60px] px-6 rounded-2xl bg-gray-50 border border-gray-100 text-gray-500 font-bold hover:bg-gray-100 transition-all flex items-center justify-center"
+                  >
+                    <ChevronLeft className="w-5 h-5" />
+                  </button>
+                )}
+                <button
+                  onClick={handleNext}
+                  disabled={submitting}
+                  className="flex-1 h-[60px] bg-[#3366FF] text-white font-bold rounded-2xl text-[17px] shadow-lg shadow-blue-500/20 hover:bg-[#2952cc] transition-all flex items-center justify-center gap-2 hover:-translate-y-0.5"
+                >
+                  {submitting ? "Processing..." : step === 0 ? (
+                    <>Next Step <ChevronRight className="w-5 h-5" /></>
+                  ) : (
+                    <><Sparkles className="w-5 h-5" /> Create Account</>
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <p className="text-center mt-8 text-[14px] font-semibold text-gray-400">
+              Already has an account?{" "}
+              <Link href="/login" className="text-[#3366FF] font-bold hover:underline transition-all">
+                Sign In
+              </Link>
+            </p>
           </div>
         </div>
-
-        {/* Footer */}
-        <p className="text-center text-xs text-slate-600 mt-6">
-          By registering you agree to our{" "}
-          <span className="text-slate-400 cursor-pointer hover:text-white transition-colors">Terms</span> and{" "}
-          <span className="text-slate-400 cursor-pointer hover:text-white transition-colors">Privacy Policy</span>.
-        </p>
       </div>
+    </div>
+  );
+}
+
+function InputField({ 
+  label, 
+  placeholder, 
+  value, 
+  onChange, 
+  type = "text", 
+  error, 
+  suffix 
+}: {
+  label: string;
+  placeholder: string;
+  value: string;
+  onChange: (v: string) => void;
+  type?: string;
+  error?: string;
+  suffix?: React.ReactNode;
+}) {
+  return (
+    <div className="space-y-1.5">
+      <label className="text-[12px] font-black text-gray-400 uppercase tracking-widest px-1">{label}</label>
+      <div className="relative">
+        <input
+          type={type}
+          placeholder={placeholder}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className={`w-full h-[54px] bg-gray-50/50 border ${error ? "border-red-200" : "border-gray-100"} rounded-xl px-4 text-[15px] font-medium text-gray-700 outline-none focus:border-[#3366FF]/30 focus:bg-white transition-all`}
+        />
+        {suffix && <div className="absolute right-4 top-1/2 -translate-y-1/2">{suffix}</div>}
+      </div>
+      {error && <p className="text-[11px] text-red-500 font-bold px-1">{error}</p>}
+    </div>
+  );
+}
+
+function SelectField({ 
+  label, 
+  placeholder, 
+  options, 
+  value, 
+  onChange, 
+  error 
+}: {
+  label: string;
+  placeholder: string;
+  options: string[];
+  value: string;
+  onChange: (v: string) => void;
+  error?: string;
+}) {
+  return (
+    <div className="space-y-1.5">
+      <label className="text-[12px] font-black text-gray-400 uppercase tracking-widest px-1">{label}</label>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className={`w-full h-[54px] bg-gray-50/50 border ${error ? "border-red-200" : "border-gray-100"} rounded-xl px-4 text-[15px] font-medium text-gray-700 outline-none focus:border-[#3366FF]/30 focus:bg-white transition-all appearance-none cursor-pointer`}
+      >
+        <option value="" disabled>{placeholder}</option>
+        {options.map((o: string) => <option key={o} value={o}>{o}</option>)}
+      </select>
+      {error && <p className="text-[11px] text-red-500 font-bold px-1">{error}</p>}
     </div>
   );
 }
