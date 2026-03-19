@@ -2,7 +2,15 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { Menu, X, GraduationCap, User, ArrowRight, ChevronDown, LayoutDashboard } from "lucide-react";
+import Image from "next/image";
+import {
+  Menu,
+  X,
+  User,
+  ArrowRight,
+  ChevronDown,
+  LayoutDashboard,
+} from "lucide-react";
 import { useSession } from "next-auth/react";
 
 interface SubLink {
@@ -24,20 +32,44 @@ const NAV_LINKS: NavLink[] = [
     label: "Find Programs",
     hasDropdown: true,
     sublinks: [
-      { href: "/search", label: "University Search", desc: "Search over 15,000 global programs" },
-      { href: "/matches", label: "AI Matcher", desc: "Get personalized university recommendations" },
-    ]
+      {
+        href: "/search",
+        label: "University Search",
+        desc: "Search over 15,000 global programs",
+      },
+      {
+        href: "/matches",
+        label: "AI Matcher",
+        desc: "Get personalized university recommendations",
+      },
+    ],
   },
   {
     href: "#",
     label: "Tools & Resources",
     hasDropdown: true,
     sublinks: [
-      { href: "/eligibility", label: "Eligibility Checker", desc: "Check your admission chances" },
-      { href: "/costing", label: "Cost Estimator", desc: "Calculate your total study expenses" },
-      { href: "/visa-rate", label: "Visa Success Rate", desc: "Check your visa approval chances" },
-      { href: "/dashboard", label: "Student Dashboard", desc: "Manage your applications & profile" },
-    ]
+      {
+        href: "/eligibility",
+        label: "Eligibility Checker",
+        desc: "Check your admission chances",
+      },
+      {
+        href: "/costing",
+        label: "Cost Estimator",
+        desc: "Calculate your total study expenses",
+      },
+      {
+        href: "/visa-rate",
+        label: "Visa Success Rate",
+        desc: "Check your visa approval chances",
+      },
+      {
+        href: "/dashboard",
+        label: "Student Dashboard",
+        desc: "Manage your applications & profile",
+      },
+    ],
   },
   { href: "/scholarships", label: "Scholarships" },
 ];
@@ -65,12 +97,17 @@ export default function Navbar() {
       >
         <div className="max-w-[1280px] mx-auto flex items-center justify-between px-6 lg:px-12">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 group no-underline">
-            <div className="w-10 h-10 rounded-xl bg-[#3366FF] flex items-center justify-center text-white shadow-lg shadow-blue-500/30 group-hover:scale-110 transition-transform duration-300">
-              <GraduationCap className="w-6 h-6" />
-            </div>
-            <div className={`text-xl font-black tracking-tight transition-colors duration-300 text-[#0f172a]`}>
-              Next<span className="text-[#3366FF]">Degree</span>
+          <Link
+            href="/"
+            className="flex items-center gap-2.5 group no-underline"
+          >
+            <div className="relative w-[160px] h-[45px] group-hover:scale-105 transition-transform duration-300">
+              <Image
+                src="/logo.png"
+                alt="AbroadLift Logo"
+                fill
+                className="object-contain"
+              />
             </div>
           </Link>
 
@@ -86,7 +123,9 @@ export default function Navbar() {
                 >
                   {l.label}
                   {l.hasDropdown && (
-                    <ChevronDown className={`w-4 h-4 transition-transform group-hover:rotate-180 ${scrolled ? "text-blue-400!" : "text-blue-500!"}`} />
+                    <ChevronDown
+                      className={`w-4 h-4 transition-transform group-hover:rotate-180 ${scrolled ? "text-blue-400!" : "text-blue-500!"}`}
+                    />
                   )}
                 </Link>
 
@@ -99,8 +138,12 @@ export default function Navbar() {
                           href={sub.href}
                           className="flex flex-col p-4 rounded-2xl hover:bg-emerald-50/50 group/sub transition-all"
                         >
-                          <span className="text-sm font-black text-gray-900 group-hover/sub:text-[#009dff] transition-colors">{sub.label}</span>
-                          <span className="text-[11px] text-gray-400 font-medium">{sub.desc}</span>
+                          <span className="text-sm font-black text-gray-900 group-hover/sub:text-[#009dff] transition-colors">
+                            {sub.label}
+                          </span>
+                          <span className="text-[11px] text-gray-400 font-medium">
+                            {sub.desc}
+                          </span>
                         </Link>
                       ))}
                     </div>
@@ -110,17 +153,17 @@ export default function Navbar() {
             ))}
 
             {isAdmin && (
-               <li className="relative group py-4">
-                 <Link
-                   href="/admin"
-                   className={`text-[15px] font-black transition-all flex items-center gap-1.5 hover:text-blue-600! ${
-                     scrolled ? "text-blue-600!" : "text-blue-700!"
-                   }`}
-                 >
-                   <LayoutDashboard className="w-4 h-4" />
-                   Admin Panel
-                 </Link>
-               </li>
+              <li className="relative group py-4">
+                <Link
+                  href="/admin"
+                  className={`text-[15px] font-black transition-all flex items-center gap-1.5 hover:text-blue-600! ${
+                    scrolled ? "text-blue-600!" : "text-blue-700!"
+                  }`}
+                >
+                  <LayoutDashboard className="w-4 h-4" />
+                  Admin Panel
+                </Link>
+              </li>
             )}
           </ul>
 
@@ -146,7 +189,11 @@ export default function Navbar() {
               className={`lg:hidden w-11 h-11 flex justify-center items-center rounded-2xl border transition-all shadow-sm bg-white border-gray-100 text-gray-900`}
               onClick={() => setMobileOpen(!mobileOpen)}
             >
-              {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              {mobileOpen ? (
+                <X className="w-6 h-6" />
+              ) : (
+                <Menu className="w-6 h-6" />
+              )}
             </button>
           </div>
         </div>
@@ -180,14 +227,14 @@ export default function Navbar() {
               </div>
             ))}
             {isAdmin && (
-               <Link
-                 href="/admin"
-                 onClick={() => setMobileOpen(false)}
-                 className="text-xl font-extrabold text-blue-700! hover:text-blue-600! transition-colors flex items-center gap-2"
-               >
-                 <LayoutDashboard className="w-5 h-5 text-blue-600" />
-                 Admin Panel
-               </Link>
+              <Link
+                href="/admin"
+                onClick={() => setMobileOpen(false)}
+                className="text-xl font-extrabold text-blue-700! hover:text-blue-600! transition-colors flex items-center gap-2"
+              >
+                <LayoutDashboard className="w-5 h-5 text-blue-600" />
+                Admin Panel
+              </Link>
             )}
             <div className="h-px bg-gray-100 my-2" />
             <Link

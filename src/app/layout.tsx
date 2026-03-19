@@ -3,7 +3,7 @@ import "./globals.css";
 import ClientWrapper from "@/components/ClientWrapper";
 
 export const metadata: Metadata = {
-  title: "NextDegree — Find Universities That Actually Fit You",
+  title: "AbroadLift — Find Universities That Actually Fit You",
   description:
     "Enter your English score, budget, and dream country. We instantly match you against 6,000+ programs across 7 countries — no login, no fees.",
   keywords: [
@@ -15,11 +15,11 @@ export const metadata: Metadata = {
     "college match",
   ],
   openGraph: {
-    title: "NextDegree — Find Universities That Actually Fit You",
+    title: "AbroadLift — Find Universities That Actually Fit You",
     description:
       "Real-time university matching powered by government-grade education APIs.",
-    url: "https://nextdegree.app",
-    siteName: "NextDegree",
+    url: "https://abroadlift.com",
+    siteName: "AbroadLift",
     type: "website",
   },
 };

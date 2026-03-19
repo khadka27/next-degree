@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import {
   GraduationCap,
   ShieldCheck,
@@ -53,14 +54,16 @@ export default function Footer() {
           <div className="max-w-xs">
             <Link
               href="/"
-              className="flex items-center gap-2.5 group mb-5 w-fit no-underline"
+              className="group mb-8 block w-fit no-underline"
             >
-              <div className="w-10 h-10 rounded-[14px] bg-linear-to-br from-[#17a38b] to-[#128a7e] flex items-center justify-center shadow-lg shadow-teal-500/20 group-hover:scale-[1.05] transition-transform duration-300">
-                <span className="text-white font-black text-lg">N</span>
+              <div className="relative w-[200px] h-[60px] group-hover:scale-105 transition-transform duration-300">
+                <Image
+                  src="/logo.png"
+                  alt="AbroadLift Logo"
+                  fill
+                  className="object-contain object-left"
+                />
               </div>
-              <span className="font-black text-2xl tracking-tight text-gray-900 group-hover:text-teal-700 transition-colors">
-                NextDegree
-              </span>
             </Link>
 
             <p className="text-sm text-blue-900 leading-relaxed font-semibold mb-8 pr-4">
@@ -105,7 +108,7 @@ export default function Footer() {
         {/* Bottom bar */}
         <div className="border-t border-gray-200 pt-8 flex flex-col md:flex-row items-center justify-between gap-6">
           <p className="text-[13px] font-black text-center md:text-left" style={{ color: "#1e3a8a" }}>
-            © {year} NextDegree — Built for students attempting to change the
+            © {year} AbroadLift — Built for students attempting to change the
             world.
           </p>
 
