@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/db";
+import { University } from "@prisma/client";
 import { calculateMatchEligibility } from "@/lib/matching";
 
 export async function GET(req: Request) {
@@ -27,7 +28,7 @@ export async function GET(req: Request) {
       },
     });
 
-    const matches = universities.map((university) => {
+    const matches = universities.map((university: University) => {
       return {
         ...university,
         eligibility: calculateMatchEligibility(profile, university),
