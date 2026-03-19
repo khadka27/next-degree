@@ -30,9 +30,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="overflow-x-hidden">
       <body
-        className="bg-white text-[#0f172a] antialiased"
+        className="bg-white text-[#0f172a] antialiased overflow-x-hidden"
         suppressHydrationWarning={true}
       >
         <ClientWrapper>{children}</ClientWrapper>

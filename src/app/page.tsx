@@ -103,7 +103,7 @@ export default function HomePage() {
 
           {/* Right Content - Student Image */}
           <div className="relative flex justify-center lg:justify-end">
-            <div className="relative w-[400px] lg:w-[500px] aspect-square">
+            <div className="relative w-full max-w-[320px] sm:max-w-[400px] lg:max-w-[500px] aspect-square mx-auto lg:mx-0">
               <div className="absolute inset-x-0 bottom-0 top-[10%] bg-blue-50 rounded-full -z-10 blur-2xl" />
               <Image
                 src="/hero-student.png"
@@ -115,7 +115,7 @@ export default function HomePage() {
               />
 
               {/* Floating Cards */}
-              <div className="absolute left-[-20px] bottom-[20%] z-20 bg-white p-3 rounded-2xl shadow-2xl flex items-center gap-3 border border-gray-100 animate-float">
+              <div className="hidden sm:flex absolute left-[-20px] bottom-[20%] z-20 bg-white p-3 rounded-2xl shadow-2xl items-center gap-3 border border-gray-100 animate-float">
                 <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center">
                   <Users className="w-5 h-5 text-white" />
                 </div>
@@ -125,7 +125,7 @@ export default function HomePage() {
                 </div>
               </div>
 
-              <div className="absolute right-[-10px] top-[40%] z-20 bg-white p-3 rounded-2xl shadow-2xl flex items-center gap-3 border border-gray-100 animate-float-slow">
+              <div className="hidden sm:flex absolute right-[-10px] top-[40%] z-20 bg-white p-3 rounded-2xl shadow-2xl items-center gap-3 border border-gray-100 animate-float-slow">
                 <div className="w-10 h-10 rounded-full bg-red-500 flex items-center justify-center">
                   <Building2 className="w-5 h-5 text-white" />
                 </div>
