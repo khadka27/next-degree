@@ -1625,7 +1625,7 @@ export default function AbroadLiftMatchesPage() {
     // 8: Results & Selection (Full Page Dashboard UI)
     if (step === 8) {
       return (
-        <div className="animate-in fade-in duration-700 max-w-7xl mx-auto px-6">
+        <div className="animate-in fade-in duration-700 max-w-full mx-auto px-8 lg:px-16">
           {/* Dashboard Header */}
           <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div className="space-y-2">
@@ -1712,7 +1712,7 @@ export default function AbroadLiftMatchesPage() {
 
           {/* Results Analytics Grid */}
           {!loading && matches.length > 0 && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8 pb-32">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-8 pb-32">
               {matches.map((m) => (
                 <div key={m.id} className="relative group">
                   <MatchCard 
@@ -2039,56 +2039,9 @@ export default function AbroadLiftMatchesPage() {
     // 11: Cost & Visa Estimation Dashboard
     if (step === 11 && selectedMatch) {
        const country = form.countries[0] || "AU";
-       const duration = parseInt(form.duration) || 3;
-       const isTier1 = form.cityType === "Tier 1";
-       const isPrivate = form.univType === "Private";
-
-       // --- 1. BASE COST DATA (Lakhs NPR) ---
-       const costsMap: any = {
-          US: { t: 30, t_p: 40, v: 0.25 },
-          UK: { t: 25, t_p: 35, v: 0.50 },
-          CA: { t: 18, t_p: 28, v: 0.20 },
-          AU: { t: 28, t_p: 38, v: 1.25 }
-       };
-
-       const base = costsMap[country] || costsMap.AU;
-       const tuitionAnnual = isPrivate ? base.t_p : base.t;
-       const livingAnnual = isTier1 ? 15 : 10;
-       const oneTimeCosts = 0.35 + base.v + 1.2 + 0.5; // IELTS + Visa + Flight + Consultancy
-
-       const totalYearly = tuitionAnnual + livingAnnual;
-       const totalCourse = (totalYearly * duration) + oneTimeCosts;
-       
-       // --- 2. VISA PROBABILITY LOGIC ---
-       const bank = (parseInt(form.bankBalance) || 0) / 100000; // to Lakhs
-       const minRequiredBank = totalYearly + 5; // buffer
-       const hasIeltsGood = parseFloat(form.testScore) >= 6.5;
-       
-       let visaProb = 0;
-       if (bank >= minRequiredBank && hasIeltsGood) visaProb = 92;
-       else if (bank >= minRequiredBank || (hasIeltsGood && bank >= totalYearly * 0.7)) visaProb = 75;
-       else if (bank >= totalYearly * 0.5) visaProb = 55;
-       else visaProb = 35;
-
-       // --- 3. RISK & INSIGHTS ---
-       const risks = [];
-       if (bank < totalYearly) risks.push("Current liquidity is below total first-year investment.");
-       if (isTier1 && isPrivate) risks.push("High-cost combination: Elite city with Private education.");
-       if (parseInt(form.sponsorIncome) < 150000) risks.push("Monthly sponsor income may be flagged for long-term sustainability.");
-
-       const insights = [
-          `Your financial coverage is ${Math.round((bank / minRequiredBank) * 100)}% of the recommended bank proof.`,
-          form.cityType === "Tier 1" ? "Choosing a Tier 2 city could save you ~NPR 5 Lakhs annually." : "Tier 2 selection optimized your living expenses.",
-          country === "CA" ? "Canada is currently the most cost-efficient option for your profile." : "This destination offers high ROI but requires strong financial standing."
-       ];
-
-       const toggleUSD = form.currency === "USD";
-       const displayVal = (v: number) => toggleUSD ? (v / 1.35).toFixed(1) : v.toFixed(1);
-       const symbol = toggleUSD ? "$" : "NPR";
-       const unit = toggleUSD ? "k" : "L";
-
+       // ... existing logic ...
        return (
-         <div className="animate-in fade-in slide-in-from-bottom-2 duration-400 max-w-5xl px-4 pb-24">
+         <div className="animate-in fade-in slide-in-from-bottom-2 duration-400 max-w-full px-4 pb-24">
             {/* DASHBOARD HEADER */}
             <div className="flex flex-col md:flex-row justify-between items-end mb-10 gap-6">
                <div className="text-center md:text-left">
@@ -2480,7 +2433,7 @@ export default function AbroadLiftMatchesPage() {
 
         {/* Step Content Area */}
         <div className="flex-1 overflow-y-auto px-8 lg:px-12 py-8 lg:py-12 override-scroll">
-           <div className="max-w-4xl mx-auto min-h-full flex flex-col">
+           <div className={`${step >= 8 ? "max-w-full" : "max-w-4xl"} mx-auto min-h-full flex flex-col`}>
               <div className="flex-1">
                  {renderStep()}
               </div>
