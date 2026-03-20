@@ -86,6 +86,18 @@ interface Form {
   ielsWriting: string;
   ielsListening: string;
   ielsSpeaking: string;
+  toeflReading: string;
+  toeflWriting: string;
+  toeflListening: string;
+  toeflSpeaking: string;
+  pteReading: string;
+  pteWriting: string;
+  pteListening: string;
+  pteSpeaking: string;
+  duoLiteracy: string;
+  duoComprehension: string;
+  duoConversation: string;
+  duoProduction: string;
   greVerbal: string;
   greQuant: string;
   greAwa: string;
@@ -102,6 +114,7 @@ interface Form {
   budget: string;
   currency: string;
   intake: string;
+  aptitudeTest: string;
   programTags: string[];
   scholarship: boolean;
   name: string;
@@ -387,6 +400,7 @@ const DEF: Form = {
   field: "",
   program: "",
   intake: "",
+  aptitudeTest: "NONE",
   programTags: [],
   testType: "IELTS",
   testScore: "",
@@ -394,6 +408,18 @@ const DEF: Form = {
   ielsWriting: "",
   ielsListening: "",
   ielsSpeaking: "",
+  toeflReading: "",
+  toeflWriting: "",
+  toeflListening: "",
+  toeflSpeaking: "",
+  pteReading: "",
+  pteWriting: "",
+  pteListening: "",
+  pteSpeaking: "",
+  duoLiteracy: "",
+  duoComprehension: "",
+  duoConversation: "",
+  duoProduction: "",
   greVerbal: "",
   greQuant: "",
   greAwa: "",
@@ -1316,15 +1342,67 @@ export default function AbroadLiftMatchesPage() {
     // 5: English
     if (step === 5) {
       const calculateOverall = () => {
-        if (form.testType !== "IELTS") return;
-        const r = parseFloat(form.ielsReading) || 0;
-        const w = parseFloat(form.ielsWriting) || 0;
-        const l = parseFloat(form.ielsListening) || 0;
-        const s = parseFloat(form.ielsSpeaking) || 0;
-        if (r && w && l && s) {
-          const avg = (r + w + l + s) / 4;
-          const rounded = Math.round(avg * 2) / 2;
-          updateForm("testScore", rounded.toString());
+        if (form.testType === "IELTS") {
+          const r = parseFloat(form.ielsReading) || 0;
+          const w = parseFloat(form.ielsWriting) || 0;
+          const l = parseFloat(form.ielsListening) || 0;
+          const s = parseFloat(form.ielsSpeaking) || 0;
+          if (r && w && l && s) {
+            const avg = (r + w + l + s) / 4;
+            updateForm("testScore", (Math.round(avg * 2) / 2).toString());
+          }
+        } else if (form.testType === "TOEFL") {
+          const r = parseInt(form.toeflReading) || 0;
+          const w = parseInt(form.toeflWriting) || 0;
+          const l = parseInt(form.toeflListening) || 0;
+          const s = parseInt(form.toeflSpeaking) || 0;
+          updateForm("testScore", (r + w + l + s).toString());
+        } else if (form.testType === "PTE") {
+          const r = parseInt(form.pteReading) || 0;
+          const w = parseInt(form.pteWriting) || 0;
+          const l = parseInt(form.pteListening) || 0;
+          const s = parseInt(form.pteSpeaking) || 0;
+          if (r && w && l && s) {
+            updateForm("testScore", Math.round((r + w + l + s) / 4).toString());
+          }
+        } else if (form.testType === "Duolingo") {
+          const l = parseInt(form.duoLiteracy) || 0;
+          const c = parseInt(form.duoComprehension) || 0;
+          const co = parseInt(form.duoConversation) || 0;
+          const p = parseInt(form.duoProduction) || 0;
+          if (l && c && co && p) {
+            updateForm("testScore", Math.round((l + c + co + p) / 4).toString());
+          }
+        }
+      };
+
+      const getFields = () => {
+        switch(form.testType) {
+          case "IELTS": return [
+            { k: "ielsReading", l: "Reading", placeholder: "6.5", max: 9, step: 0.5 },
+            { k: "ielsWriting", l: "Writing", placeholder: "6.0", max: 9, step: 0.5 },
+            { k: "ielsListening", l: "Listening", placeholder: "7.0", max: 9, step: 0.5 },
+            { k: "ielsSpeaking", l: "Speaking", placeholder: "6.5", max: 9, step: 0.5 }
+          ];
+          case "TOEFL": return [
+            { k: "toeflReading", l: "Reading", placeholder: "25", max: 30, step: 1 },
+            { k: "toeflWriting", l: "Writing", placeholder: "24", max: 30, step: 1 },
+            { k: "toeflListening", l: "Listening", placeholder: "26", max: 30, step: 1 },
+            { k: "toeflSpeaking", l: "Speaking", placeholder: "25", max: 30, step: 1 }
+          ];
+          case "PTE": return [
+            { k: "pteReading", l: "Reading", placeholder: "65", max: 90, step: 1 },
+            { k: "pteWriting", l: "Writing", placeholder: "60", max: 90, step: 1 },
+            { k: "pteListening", l: "Listening", placeholder: "70", max: 90, step: 1 },
+            { k: "pteSpeaking", l: "Speaking", placeholder: "65", max: 90, step: 1 }
+          ];
+          case "Duolingo": return [
+            { k: "duoLiteracy", l: "Literacy", placeholder: "115", max: 160, step: 5 },
+            { k: "duoComprehension", l: "Comprehension", placeholder: "120", max: 160, step: 5 },
+            { k: "duoConversation", l: "Conversation", placeholder: "105", max: 160, step: 5 },
+            { k: "duoProduction", l: "Production", placeholder: "110", max: 160, step: 5 }
+          ];
+          default: return [];
         }
       };
 
@@ -1332,7 +1410,7 @@ export default function AbroadLiftMatchesPage() {
         <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 max-w-2xl px-4">
           <div className="mb-10 text-center">
             <h2 className="text-3xl font-black text-slate-900 mb-2">Language Proficiency</h2>
-            <p className="text-gray-500 font-medium"> universities require verified proof of English skills.</p>
+            <p className="text-gray-500 font-medium">Standardized tests required for international admissions.</p>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-10">
@@ -1352,63 +1430,42 @@ export default function AbroadLiftMatchesPage() {
             })}
           </div>
 
-          {form.testType === "IELTS" ? (
-             <div className="space-y-8 animate-in fade-in zoom-in-95 duration-500">
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                   {[
-                     { k: "ielsReading", l: "Reading" },
-                     { k: "ielsWriting", l: "Writing" },
-                     { k: "ielsListening", l: "Listening" },
-                     { k: "ielsSpeaking", l: "Speaking" }
-                   ].map((band) => (
-                      <div key={band.k} className="bg-white rounded-2xl border border-slate-100 p-4 shadow-sm focus-within:border-blue-500 transition-all text-center">
-                        <label className="block text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3">{band.l}</label>
-                        <input 
-                           type="number" 
-                           step="0.5"
-                           min="0"
-                           max="9"
-                           value={(form as any)[band.k]}
-                           onChange={(e) => {
-                              updateForm(band.k as keyof Form, e.target.value);
-                              setTimeout(calculateOverall, 50);
-                           }}
-                           placeholder="6.5"
-                           className="w-full text-3xl font-black text-center text-slate-900 outline-none bg-transparent placeholder:text-slate-100"
-                        />
-                      </div>
-                   ))}
-                </div>
+          <div className="space-y-8 animate-in fade-in zoom-in-95 duration-500">
+             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                {getFields().map((field) => (
+                   <div key={field.k} className="bg-white rounded-2xl border border-slate-100 p-4 shadow-sm focus-within:border-blue-500 transition-all text-center">
+                     <label className="block text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3">{field.l}</label>
+                     <input 
+                        type="number" 
+                        step={field.step}
+                        min="0"
+                        max={field.max}
+                        value={(form as any)[field.k]}
+                        onChange={(e) => {
+                           updateForm(field.k as keyof Form, e.target.value);
+                           setTimeout(calculateOverall, 50);
+                        }}
+                        placeholder={field.placeholder}
+                        className="w-full text-2xl font-black text-center text-slate-900 outline-none bg-transparent placeholder:text-slate-100"
+                     />
+                   </div>
+                ))}
+             </div>
 
-                <div className="p-8 bg-slate-900 rounded-[32px] text-white flex flex-col md:flex-row items-center gap-8 relative overflow-hidden shadow-2xl shadow-slate-900/40">
-                   <div className="absolute top-0 right-0 p-8 opacity-10">
-                      <Sparkles className="w-24 h-24" />
-                   </div>
-                   <div className="text-center md:text-left flex-1 z-10">
-                      <p className="text-[10px] font-black uppercase tracking-[0.3em] text-blue-400 mb-2">Auto-Calculated Band</p>
-                      <h3 className="text-4xl font-black mb-1 italic">Overall IELTS Band</h3>
-                      <p className="text-slate-400 text-xs font-medium">Each section ≥ 6.0 is essential for top-tier admissions.</p>
-                   </div>
-                   <div className="w-24 h-24 rounded-[32px] bg-blue-600 flex items-center justify-center text-4xl font-black shadow-lg shadow-blue-500/20 z-10">
-                      {form.testScore || "0"}
-                   </div>
+             <div className="p-8 bg-slate-900 rounded-[32px] text-white flex flex-col md:flex-row items-center gap-8 relative overflow-hidden shadow-2xl shadow-slate-900/40">
+                <div className="absolute top-0 right-0 p-8 opacity-10">
+                   <Sparkles className="w-24 h-24" />
+                </div>
+                <div className="text-center md:text-left flex-1 z-10">
+                   <p className="text-[10px] font-black uppercase tracking-[0.3em] text-blue-400 mb-2">Aggregate Result</p>
+                   <h3 className="text-4xl font-black mb-1 italic">Overall {form.testType}</h3>
+                   <p className="text-slate-400 text-xs font-medium">Automatic conversion enabled for all sectional inputs.</p>
+                </div>
+                <div className="w-24 h-24 rounded-[32px] bg-blue-600 flex items-center justify-center text-3xl font-black shadow-lg shadow-blue-500/20 z-10">
+                   {form.testScore || "0"}
                 </div>
              </div>
-          ) : (
-            <div className="bg-white rounded-[40px] border border-slate-100 p-12 shadow-sm transition-all focus-within:border-blue-600 focus-within:ring-8 focus-within:ring-blue-500/5 text-center max-w-md mx-auto">
-              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-8 italic italic italic italic italic italic italic">
-                Enter Your {form.testType} Overall Result
-              </label>
-              <input
-                type="number"
-                value={form.testScore}
-                onChange={(e) => updateForm("testScore", e.target.value)}
-                placeholder={`${TESTS.find((x) => x.v === form.testType)?.eg || "6.5"}`}
-                className="w-full text-7xl font-black text-center text-slate-900 outline-none bg-transparent placeholder:text-slate-50"
-                autoFocus
-              />
-            </div>
-          )}
+          </div>
         </div>
       );
     }
@@ -1528,52 +1585,50 @@ export default function AbroadLiftMatchesPage() {
                </div>
             </section>
 
-            {/* 2. Graduate Standardized Tests (Optional for UG) */}
-            {isGraduate && (
-              <section className="space-y-6 animate-in slide-in-from-top-2">
-                 <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                       <div className="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center text-indigo-600">
-                          <BookOpen className="w-5 h-5" />
-                       </div>
-                       <h3 className="text-xl font-black text-slate-900">Standardized Tests</h3>
-                    </div>
-                    <div className="flex bg-slate-100 p-1 rounded-xl">
-                       {["GRE", "GMAT", "NONE"].map(t => (
-                          <button key={t} onClick={() => updateForm("testType", t === "NONE" ? "IELTS" : t)} className={`px-3 py-1.5 rounded-lg text-[10px] font-black tracking-widest transition-all ${form.testType === t || (t === "NONE" && form.testType !== "GRE" && form.testType !== "GMAT") ? "bg-white text-indigo-600 shadow-sm" : "text-slate-400 hover:text-slate-600"}`}>
-                             {t}
-                          </button>
-                       ))}
-                    </div>
-                 </div>
+            {/* 2. Standardized Tests (Optional) */}
+            <section className="space-y-6">
+               <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                     <div className="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center text-indigo-600">
+                        <BookOpen className="w-5 h-5" />
+                     </div>
+                     <h3 className="text-xl font-black text-slate-900">Standardized Tests <span className="text-[10px] text-slate-400 font-bold ml-2 uppercase tracking-widest">(Optional)</span></h3>
+                  </div>
+                  <div className="flex bg-slate-100 p-1 rounded-xl">
+                     {["GRE", "GMAT", "NONE"].map(t => (
+                        <button key={t} onClick={() => updateForm("aptitudeTest", t)} className={`px-4 py-1.5 rounded-lg text-[10px] font-black tracking-widest transition-all ${form.aptitudeTest === t ? "bg-white text-indigo-600 shadow-sm" : "text-slate-400 hover:text-slate-600"}`}>
+                           {t}
+                        </button>
+                     ))}
+                  </div>
+               </div>
 
-                 {form.testType === "GRE" && (
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 animate-in zoom-in-95">
-                       <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm focus-within:border-indigo-500 transition-all">
-                         <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Verbal (130-170)</label>
-                         <input type="number" value={form.greVerbal} onChange={(e) => updateForm("greVerbal", e.target.value)} placeholder="155" className="w-full text-xl font-black text-slate-900 outline-none bg-transparent" />
-                       </div>
-                       <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm focus-within:border-indigo-500 transition-all">
-                         <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Quant (130-170)</label>
-                         <input type="number" value={form.greQuant} onChange={(e) => updateForm("greQuant", e.target.value)} placeholder="165" className="w-full text-xl font-black text-slate-900 outline-none bg-transparent" />
-                       </div>
-                       <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm focus-within:border-indigo-500 transition-all">
-                         <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">AWA (0-6)</label>
-                         <input type="number" step="0.5" value={form.greAwa} onChange={(e) => updateForm("greAwa", e.target.value)} placeholder="4.0" className="w-full text-xl font-black text-slate-900 outline-none bg-transparent" />
-                       </div>
-                    </div>
-                 )}
+               {form.aptitudeTest === "GRE" && (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 animate-in zoom-in-95 duration-300">
+                     <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm focus-within:border-indigo-500 transition-all">
+                       <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Verbal (130-170)</label>
+                       <input type="number" value={form.greVerbal} onChange={(e) => updateForm("greVerbal", e.target.value)} placeholder="155" className="w-full text-xl font-black text-slate-900 outline-none bg-transparent" />
+                     </div>
+                     <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm focus-within:border-indigo-500 transition-all">
+                       <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Quant (130-170)</label>
+                       <input type="number" value={form.greQuant} onChange={(e) => updateForm("greQuant", e.target.value)} placeholder="165" className="w-full text-xl font-black text-slate-900 outline-none bg-transparent" />
+                     </div>
+                     <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm focus-within:border-indigo-500 transition-all">
+                       <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">AWA (0-6)</label>
+                       <input type="number" step="0.5" value={form.greAwa} onChange={(e) => updateForm("greAwa", e.target.value)} placeholder="4.0" className="w-full text-xl font-black text-slate-900 outline-none bg-transparent" />
+                     </div>
+                  </div>
+               )}
 
-                 {form.testType === "GMAT" && (
-                    <div className="max-w-xs animate-in zoom-in-95">
-                       <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm focus-within:border-indigo-500 transition-all">
-                         <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Total Score (200-800)</label>
-                         <input type="number" value={form.gmatTotal} onChange={(e) => updateForm("gmatTotal", e.target.value)} placeholder="700" className="w-full text-xl font-black text-slate-900 outline-none bg-transparent" />
-                       </div>
-                    </div>
-                 )}
-              </section>
-            )}
+               {form.aptitudeTest === "GMAT" && (
+                  <div className="max-w-xs animate-in zoom-in-95 duration-300">
+                     <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm focus-within:border-indigo-500 transition-all">
+                       <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Total GMAT Score (200-800)</label>
+                       <input type="number" value={form.gmatTotal} onChange={(e) => updateForm("gmatTotal", e.target.value)} placeholder="700" className="w-full text-xl font-black text-slate-900 outline-none bg-transparent" />
+                     </div>
+                  </div>
+               )}
+            </section>
 
             <section className="space-y-6">
                <div className="flex items-center gap-3">
