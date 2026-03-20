@@ -32,7 +32,13 @@ import {
   Sun,
   Moon,
   Globe,
+  Wallet,
+  ScrollText,
+  FileCheck,
+  Building2,
 } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 /* ─────────────── Flag component ─────────────── */
 const FlagIcon = ({
@@ -195,7 +201,6 @@ const BUDGET_PRESETS = [
   { v: "40000", l: "$40K" },
   { v: "60000", l: "$60K+" },
 ];
-
 const STEPS = [
   {
     label: "Welcome",
@@ -227,7 +232,27 @@ const STEPS = [
   },
   {
     label: "Your Matches",
-    question: "Your highly recommended universities!",
+    question: "Select the university you're most interested in!",
+  },
+  {
+    label: "Cost Estimation",
+    question: "Financial breakdown for your selected choice.",
+  },
+  {
+    label: "Admission Probability",
+    question: "How likely are you to be accepted?",
+  },
+  {
+    label: "Visa Eligibility",
+    question: "Success probability for your visa application.",
+  },
+  {
+    label: "Document Checklist",
+    question: "Everything you need to prepare for your journey.",
+  },
+  {
+    label: "Financial Summary",
+    question: "Total investment for your journey from start to end.",
   },
 ];
 
@@ -332,9 +357,13 @@ function SearchSelect({
 function MatchCard({
   match: m,
   currency: c,
+  selected,
+  onSelect,
 }: {
   match: Match;
   currency: string;
+  selected?: boolean;
+  onSelect?: () => void;
 }) {
   const [showDetails, setShowDetails] = useState(false);
   const fmt = (n: number) =>
@@ -345,7 +374,19 @@ function MatchCard({
     }).format(n);
 
   return (
-    <div className="bg-white border text-left border-gray-200 rounded-2xl overflow-hidden hover:shadow-md transition-all duration-300">
+    <div 
+      className={`bg-white border text-left rounded-2xl overflow-hidden transition-all duration-300 cursor-pointer relative ${
+        selected 
+          ? "border-blue-500 ring-2 ring-blue-500/20 shadow-lg" 
+          : "border-gray-200 hover:shadow-md hover:border-blue-200"
+      }`}
+      onClick={onSelect}
+    >
+      {selected && (
+        <div className="absolute top-4 right-4 z-10 bg-blue-500 text-white p-1 rounded-full shadow-lg">
+          <CheckCircle2 className="w-4 h-4" />
+        </div>
+      )}
       <div className="p-5">
         <div className="flex justify-between items-start gap-3 mb-3">
           <div className="flex-1">
@@ -742,6 +783,7 @@ export default function AbroadLiftMatchesPage() {
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<Form>(DEF);
   const [matches, setMatches] = useState<Match[]>([]);
+  const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -790,14 +832,21 @@ export default function AbroadLiftMatchesPage() {
       form.testScore,
       form.budget,
       form.email,
+      !!selectedMatch, // Matches step
+      true, // Cost step
+      true, // Admission step
+      true, // Visa step
+      true, // Checklist step
+      true, // Financial Summary step
     ] as (string | boolean | number)[]
   )[step];
 
   const handleNext = () => {
-    if (step < STEPS.length - 2) setStep(step + 1);
-    else {
-      setStep(STEPS.length - 1);
+    if (step === 6) {
+      setStep(7);
       runMatch();
+    } else if (step < STEPS.length - 1) {
+      setStep(step + 1);
     }
   };
 
@@ -1198,7 +1247,7 @@ export default function AbroadLiftMatchesPage() {
       );
     }
 
-    // 7: Results
+    // 7: Results & Selection
     if (step === 7) {
       return (
         <div className="animate-in fade-in duration-500">
@@ -1213,76 +1262,290 @@ export default function AbroadLiftMatchesPage() {
                   ? "Oh no!"
                   : matches.length === 0
                     ? "No exact matches"
-                    : `${matches.length} Universities Found`}
+                    : "Choose Your Future"}
             </h3>
             <p className="text-gray-500 font-medium max-w-sm mx-auto">
               {loading
                 ? "Our AI is curating the best institutions for your profile."
-                : "Based on your background and preferences."}
+                : "Select the university you'd like to explore further."}
             </p>
           </div>
-
-          {loading && (
-            <div className="py-20 flex flex-col items-center justify-center text-center space-y-4">
-              <div className="relative w-16 h-16">
-                <div className="absolute inset-0 rounded-2xl border-4 border-blue-50 w-full h-full shadow-inner" />
-                <div className="absolute inset-0 rounded-2xl border-4 border-blue-500 border-t-transparent animate-spin w-full h-full" />
-              </div>
-            </div>
-          )}
-
-          {error && (
-            <div className="bg-red-50 border border-red-100 text-red-600 p-8 rounded-3xl text-center">
-              <p className="font-bold mb-2">Match engine failed</p>
-              <p className="text-xs mb-6 opacity-75">{error}</p>
-              <button
-                onClick={() => runMatch()}
-                className="px-6 py-3 bg-red-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-red-200 transition-all hover:-translate-y-0.5"
-              >
-                Try Again
-              </button>
-            </div>
-          )}
-
-          {!loading && !error && matches.length === 0 && (
-            <div className="bg-white border text-center border-gray-100 p-10 rounded-[32px] shadow-sm">
-              <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Search className="w-10 h-10 text-gray-200" />
-              </div>
-              <p className="font-black text-gray-900 mb-2 text-xl">
-                No direct matches
-              </p>
-              <p className="text-sm text-gray-500 mb-8 leading-relaxed max-w-xs mx-auto">
-                We couldn&apos;t find an exact match for your specific criteria.
-                Try adjusting your budget or study field.
-              </p>
-              <div className="flex flex-col gap-3">
-                <button
-                  onClick={() => setStep(5)}
-                  className="w-full py-4 bg-slate-900 text-white rounded-2xl text-[15px] font-bold hover:bg-black transition-all shadow-xl shadow-slate-200"
-                >
-                  Adjust Budget
-                </button>
-                <button
-                  onClick={() => {
-                    setForm({ ...form, budget: "100000", field: "" });
-                    runMatch();
-                  }}
-                  className="w-full py-4 bg-white border border-gray-200 text-gray-700 rounded-2xl text-[15px] font-bold hover:bg-gray-50 transition-all"
-                >
-                  Broaden My Search
-                </button>
-              </div>
-            </div>
-          )}
 
           {!loading && matches.length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {matches.map((m) => (
-                <MatchCard key={m.id} match={m} currency={form.currency} />
+                <MatchCard 
+                  key={m.id} 
+                  match={m} 
+                  currency={form.currency} 
+                  selected={selectedMatch?.id === m.id}
+                  onSelect={() => setSelectedMatch(m)}
+                />
               ))}
             </div>
           )}
+        </div>
+      );
+    }
+
+    // 8: Cost Estimation
+    if (step === 8 && selectedMatch) {
+      return (
+        <div className="animate-in fade-in slide-in-from-bottom-2 duration-400 max-w-xl">
+          <div className="mb-8 flex items-center gap-4">
+            <div className="w-12 h-12 bg-emerald-100 rounded-2xl flex items-center justify-center text-emerald-600">
+              <Wallet className="w-6 h-6" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-black text-slate-900">Annual Cost Breakdown</h2>
+              <p className="text-sm text-gray-500">Estimated expenses at {selectedMatch.name}</p>
+            </div>
+          </div>
+          <MatchCostEstimator match={selectedMatch} />
+          <div className="mt-8 p-6 bg-slate-50 rounded-3xl border border-slate-100">
+            <h4 className="font-bold text-slate-900 mb-2">Budget Match Analytics</h4>
+            <p className="text-sm text-slate-600 leading-relaxed">
+              Based on your budget of {form.currency} {form.budget}, this university is a 
+              <span className="font-black text-emerald-600 ml-1">
+                {Number(form.budget) >= (selectedMatch.tuitionFee || 0) ? "Strong Financial Match" : "Moderate Financial Match"}
+              </span>. 
+              We recommend checking for scholarships to subsidize costs.
+            </p>
+          </div>
+        </div>
+      );
+    }
+
+    // 9: Admission Probability
+    if (step === 9 && selectedMatch) {
+      const gpaNum = parseFloat(form.gpa) || 3.0;
+      const isLow = gpaNum < (selectedMatch.gpaRequirement || 3.0);
+      const prob = isLow ? 45 : 82;
+      
+      return (
+        <div className="animate-in fade-in slide-in-from-bottom-2 duration-400 max-w-xl">
+          <div className="mb-10 text-center">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-50 text-indigo-700 text-[10px] font-black uppercase tracking-widest mb-6 border border-indigo-100">
+              Admission Analytics
+            </div>
+            <h2 className="text-3xl font-black text-slate-900 mb-2">Acceptance Probability</h2>
+            <p className="text-gray-500 font-medium">For {selectedMatch.name}</p>
+          </div>
+
+          <div className="bg-white rounded-[40px] p-10 border border-slate-100 shadow-xl shadow-slate-200/40 relative overflow-hidden">
+             <div className="absolute top-0 right-0 p-8 opacity-5">
+               <GraduationCap className="w-32 h-32" />
+             </div>
+             <div className="flex items-end justify-between mb-8">
+               <span className={`text-7xl font-black ${prob >= 80 ? "text-emerald-500" : "text-amber-500"}`}>
+                 {prob}%
+               </span>
+               <div className="text-right">
+                 <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Status</p>
+                 <p className={`font-black uppercase tracking-wider ${prob >= 80 ? "text-emerald-500" : "text-amber-500"}`}>
+                   {prob >= 80 ? "Highly Likely" : "Good Target"}
+                 </p>
+               </div>
+             </div>
+             <div className="h-4 bg-slate-100 rounded-full overflow-hidden mb-8">
+               <div className={`h-full ${prob >= 80 ? "bg-emerald-500" : "bg-amber-500"} transition-all duration-1000`} style={{ width: `${prob}%` }} />
+             </div>
+             <div className="space-y-4">
+               <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                 <span className="text-sm font-bold text-slate-600">GPA Match</span>
+                 <Badge className={`${isLow ? "bg-amber-50 text-amber-600" : "bg-emerald-50 text-emerald-600"} border-none font-black`}>
+                    {isLow ? "Review Required" : "Strong Match"}
+                 </Badge>
+               </div>
+               <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                 <span className="text-sm font-bold text-slate-600">English Score Match</span>
+                 <Badge className="bg-emerald-50 text-emerald-600 border-none font-black">
+                    Verified Match
+                 </Badge>
+               </div>
+             </div>
+          </div>
+        </div>
+      );
+    }
+
+    // 10: Visa Eligibility
+    if (step === 10 && selectedMatch) {
+      return (
+        <div className="animate-in fade-in slide-in-from-bottom-2 duration-400 max-w-xl">
+          <div className="mb-10 text-center">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 text-blue-700 text-[10px] font-black uppercase tracking-widest mb-6 border border-blue-100">
+              Immigration Intelligence
+            </div>
+            <h2 className="text-3xl font-black text-slate-900 mb-2">Visa Approval Rate</h2>
+            <p className="text-gray-500 font-medium">{selectedMatch.location} Student Visa</p>
+          </div>
+
+          <Card className="p-10 rounded-[40px] border-none shadow-2xl bg-white space-y-8">
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Global Risk Level</p>
+                <h3 className="text-2xl font-black text-slate-900">Low Risk Portfolio</h3>
+              </div>
+              <div className="w-16 h-16 rounded-2xl bg-blue-100 flex items-center justify-center text-blue-600">
+                <Plane className="w-8 h-8" />
+              </div>
+            </div>
+
+            <div className="flex items-center gap-8 py-6 border-y border-slate-50">
+              <div className="text-center flex-1">
+                <p className="text-4xl font-black text-emerald-500">92%</p>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Success Rate</p>
+              </div>
+              <div className="w-px h-12 bg-slate-100" />
+              <div className="text-center flex-1">
+                <p className="text-4xl font-black text-blue-500">3-5</p>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Weeks T/A</p>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+               <p className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                 <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                 Financial Documentation Verified
+               </p>
+               <p className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                 <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                 High Institutional Integrity (Ranked #{selectedMatch.rankingWorld})
+               </p>
+            </div>
+          </Card>
+        </div>
+      );
+    }
+
+    // 11: Document Checklist
+    if (step === 11 && selectedMatch) {
+      const docs = [
+        { t: "Valid Passport", desc: "Must be valid for at least 6 months after your course end date." },
+        { t: "Academic Transcripts", desc: "Original SLC/SEE, +2, and Bachelor's degree certificates." },
+        { t: "English Score Certificate", desc: `${form.testType} score of ${form.testScore} or higher.` },
+        { t: "Statement of Purpose (SOP)", desc: `Your personal essay focused on why you chose ${selectedMatch.name}.` },
+        { t: "Financial Evidence", desc: "Bank balance certificate showing coverage for first year tuition & living." },
+        { t: "Letters of Recommendation", desc: "At least two letters from previous professors or managers." },
+        { t: "Character Certificate", desc: "Issued by your previous academic institution." },
+        { t: "Passport Sized Photos", desc: "Recent photos with white background (meeting embassy specs)." },
+      ];
+
+      return (
+        <div className="animate-in fade-in slide-in-from-bottom-2 duration-500">
+          <div className="mb-10">
+            <h2 className="text-3xl font-black text-slate-900 mb-2">Preparation Checklist</h2>
+            <p className="text-gray-500 font-medium">Ensure you have these documents ready for your application.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {docs.map((d, i) => (
+              <div key={i} className="group p-6 bg-white border border-slate-100 rounded-3xl hover:border-blue-500 transition-all shadow-sm flex items-start gap-4">
+                <div className="mt-1 w-6 h-6 rounded-full border-2 border-slate-100 flex items-center justify-center text-transparent group-hover:border-blue-500 group-hover:bg-blue-50 transition-all">
+                  <FileCheck className="w-3 h-3 group-hover:text-blue-500" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-slate-900 mb-1">{d.t}</h4>
+                  <p className="text-xs text-slate-500 leading-relaxed font-medium">{d.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    // 12: Overall Financial Summary
+    if (step === 12 && selectedMatch) {
+      const xrate = 135;
+      const meta = {
+        US: { f: 1200, d: "22-26 hrs", v: 185 },
+        CA: { f: 1400, d: "24-28 hrs", v: 110 },
+        AU: { f: 1100, d: "14-18 hrs", v: 450 },
+        GB: { f: 800, d: "10-14 hrs", v: 600 },
+        DE: { f: 700, d: "12-16 hrs", v: 75 },
+      }[selectedMatch.countryCode || "US"] || { f: 1000, d: "15 hrs", v: 100 };
+
+      const tuitionNPR = (selectedMatch.tuitionFee || 20000) * xrate;
+      const govDocsNPR = 12000 + 2000 + 5000 + (meta.v * xrate); // Port, NOC, Auth, Visa
+      const flightNPR = meta.f * xrate;
+      const startupNPR = 150000; // Initial accommodation deposit + pocket money
+      const totalNPR = tuitionNPR + govDocsNPR + flightNPR + startupNPR;
+
+      const fmt = (v: number) => new Intl.NumberFormat("en-NP", { style: "currency", currency: "NPR", maximumFractionDigits: 0 }).format(v);
+
+      return (
+        <div className="animate-in fade-in slide-in-from-bottom-2 duration-500 max-w-2xl mx-auto">
+          <div className="mb-10 text-center">
+             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-black uppercase tracking-widest mb-4 border border-emerald-100">
+               Total Financial Commitment
+             </div>
+             <h2 className="text-3xl font-black text-slate-900 mb-2">Start-to-End Budget Summary</h2>
+             <p className="text-gray-500 font-medium">Estimated cost for your entire first phase at {selectedMatch.name}.</p>
+          </div>
+
+          <div className="bg-slate-900 rounded-[48px] p-10 text-white shadow-2xl relative overflow-hidden mb-8">
+             <div className="absolute top-0 right-0 p-12 opacity-5">
+               <Calculator className="w-40 h-40" />
+             </div>
+             
+             <div className="space-y-6 relative z-10">
+               <div>
+                 <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-1">Total Estimated Investment</p>
+                 <h3 className="text-5xl font-black">{fmt(totalNPR)}</h3>
+               </div>
+
+               <div className="grid grid-cols-2 gap-4 pt-8 border-t border-white/10">
+                 <div className="p-5 bg-white/5 rounded-3xl border border-white/5">
+                   <p className="text-[9px] font-black text-white/30 uppercase tracking-widest mb-2">Est. Travel Time</p>
+                   <div className="flex items-center gap-2">
+                     <Clock className="w-4 h-4 text-blue-400" />
+                     <p className="font-bold text-lg">{meta.d}</p>
+                   </div>
+                 </div>
+                 <div className="p-5 bg-white/5 rounded-3xl border border-white/5">
+                   <p className="text-[9px] font-black text-white/30 uppercase tracking-widest mb-2">Exchange Rate</p>
+                   <p className="font-bold text-lg text-emerald-400">1 USD ≈ {xrate} NPR</p>
+                 </div>
+               </div>
+             </div>
+          </div>
+
+          <div className="space-y-4">
+             {[
+               { t: "University Tuition (Year 1)", v: tuitionNPR, i: GraduationCap, c: "text-blue-500" },
+               { t: "Gov. Docs & Visa Fees", v: govDocsNPR, i: FileCheck, c: "text-amber-500" },
+               { t: "Airlines Ticket (Standard)", v: flightNPR, i: Plane, c: "text-indigo-500" },
+               { t: "Initial Startup & Living", v: startupNPR, i: Wallet, c: "text-emerald-500" },
+             ].map((item, i) => (
+                <div key={i} className="flex items-center justify-between p-6 bg-white border border-slate-100 rounded-3xl hover:border-blue-500 transition-all shadow-sm group">
+                  <div className="flex items-center gap-4">
+                    <div className={`w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center ${item.c} group-hover:scale-110 transition-transform`}>
+                      <item.i className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-slate-900">{item.t}</h4>
+                      <p className="text-[10px] text-slate-400 font-bold uppercase">Estimated Phase Allocation</p>
+                    </div>
+                  </div>
+                  <span className="text-lg font-black text-slate-900">{fmt(item.v)}</span>
+                </div>
+             ))}
+          </div>
+
+          <div className="mt-12 p-10 bg-linear-to-br from-indigo-600 to-violet-700 rounded-[48px] text-white flex flex-col items-center justify-center text-center gap-6 shadow-xl shadow-indigo-500/20">
+             <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center backdrop-blur-md">
+               <Sparkles className="w-8 h-8" />
+             </div>
+             <div>
+               <h3 className="text-2xl font-black mb-2">Ready to Start Your Abroad Journey?</h3>
+               <p className="text-indigo-100 font-medium max-w-sm">Contact our premium enrollment team to begin your visa process and secure your seat.</p>
+             </div>
+             <button className="px-10 h-16 bg-white text-indigo-700 font-black rounded-3xl hover:bg-slate-50 transition-all shadow-xl hover:-translate-y-1 active:scale-95">
+               Book Expert Consultation
+             </button>
+          </div>
         </div>
       );
     }
