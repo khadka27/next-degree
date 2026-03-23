@@ -1077,6 +1077,67 @@ export default function AbroadLiftMatchesPage() {
     }
   };
 
+  const getEligibilityScore = (f: Form) => {
+    let score = 0;
+    
+    // 1. English (30%)
+    const eng = parseFloat(f.testScore) || 0;
+    if (f.testType === "IELTS") {
+      if (eng >= 7.5) score += 30;
+      else if (eng >= 7.0) score += 25;
+      else if (eng >= 6.5) score += 20;
+      else if (eng >= 6.0) score += 15;
+      else score += 5;
+    } else if (f.testType === "TOEFL") {
+      if (eng >= 100) score += 30;
+      else if (eng >= 90) score += 25;
+      else if (eng >= 80) score += 20;
+      else score += 10;
+    } else {
+      if (eng >= 70) score += 30; // PTE/Duo general
+      else if (eng >= 60) score += 20;
+      else score += 10;
+    }
+
+    // 2. Aptitude (25%)
+    if (f.aptitudeTest === "GRE") {
+      const total = (parseInt(f.greVerbal) || 130) + (parseInt(f.greQuant) || 130);
+      if (total >= 320) score += 25;
+      else if (total >= 310) score += 20;
+      else if (total >= 300) score += 15;
+      else score += 5;
+    } else if (f.aptitudeTest === "GMAT") {
+       const total = parseInt(f.gmatTotal) || 200;
+       if (total >= 700) score += 25;
+       else if (total >= 650) score += 20;
+       else if (total >= 600) score += 15;
+       else score += 5;
+    } else {
+       score += 15; // Baseline for no-aptitude programs
+    }
+
+    // 3. Academics (25%)
+    let acad = 0;
+    const gpa = parseFloat(f.gpa) || 3.0;
+    if (gpa >= 3.8) acad = 25;
+    else if (gpa >= 3.5) acad = 20;
+    else if (gpa >= 3.0) acad = 15;
+    else acad = 10;
+    
+    const bk = parseInt(f.backlogs) || 0;
+    if (bk > 0) acad = Math.max(0, acad - (bk * 2));
+    score += acad;
+
+    // 4. Finance (20%)
+    const bal = parseInt(f.bankBalance) || 0;
+    if (bal >= 6000000) score += 20;
+    else if (bal >= 4000000) score += 15;
+    else if (bal >= 2000000) score += 10;
+    else score += 5;
+
+    return Math.min(100, score);
+  };
+
   const renderStep = () => {
     // 0: Welcome
     if (step === 0) {
@@ -1986,69 +2047,14 @@ export default function AbroadLiftMatchesPage() {
 
     // 10: Advanced Eligibility Checker & AI Insights
     if (step === 10 && selectedMatch) {
-       // --- SCORING LOGIC ---
-       let score = 0;
+       const score = getEligibilityScore(form);
        const insights = [];
        const suggestions = [];
 
-       // 1. IELTS (30%)
-       const ielts = parseFloat(form.testScore) || 0;
-       if (ielts >= 7.5) score += 30;
-       else if (ielts >= 7.0) score += 25;
-       else if (ielts >= 6.5) score += 20;
-       else if (ielts >= 6.0) score += 15;
-       else score += 5;
-
        if (parseFloat(form.ielsWriting) < 6.0) insights.push("Writing band is below the preferred 6.0 threshold.");
-       if (ielts < 6.5) suggestions.push("Consider retaking IELTS to reach 6.5+ for top-tier university access.");
-
-       // 2. GRE/GMAT (25%)
-       const isGrad = form.degree.includes("Master") || form.degree.includes("Doctoral");
-       let graduateWeight = 25;
-       if (form.testType === "GRE") {
-          const total = (parseInt(form.greVerbal) || 130) + (parseInt(form.greQuant) || 130);
-          if (total >= 320) score += 25;
-          else if (total >= 310) score += 20;
-          else if (total >= 300) score += 15;
-          else score += 5;
-          if (parseInt(form.greQuant) >= 160) insights.push("Your strong GRE Quant score is excellent for STEM programs.");
-       } else if (form.testType === "GMAT") {
-          const total = parseInt(form.gmatTotal) || 200;
-          if (total >= 700) score += 25;
-          else if (total >= 650) score += 20;
-          else if (total >= 600) score += 15;
-          else score += 5;
-       } else {
-          // If no GRE/GMAT, we redistribute to Academics for UG
-          graduateWeight = 0;
-          score += 15; // Baseline for no-test required programs
-       }
-
-       // 3. Academics (25%)
-       let acadScore = 0;
-       const gpa = parseFloat(form.gpa) || 3.0;
-       if (gpa >= 3.8) acadScore = 25;
-       else if (gpa >= 3.5) acadScore = 20;
-       else if (gpa >= 3.0) acadScore = 15;
-       else acadScore = 10;
-       
-       const bk = parseInt(form.backlogs) || 0;
-       if (bk > 5) {
-          acadScore -= 10;
-          insights.push(`${bk} backlogs may raise questions during institutional screening.`);
-       }
-       score += Math.max(0, acadScore);
-
-       // 4. Finance (20%)
-       const balance = parseInt(form.bankBalance) || 0;
-       if (balance >= 6000000) score += 20;
-       else if (balance >= 4000000) score += 15;
-       else if (balance >= 2500000) score += 10;
-       else {
-          score += 5;
-          insights.push("Current bank balance is on the lower end for visa financial proof.");
-          suggestions.push("Strengthen financial dossier with property evaluation or education loan.");
-       }
+       if ((parseFloat(form.testScore) || 0) < 6.5) suggestions.push("Consider retaking the English test to reach a top-tier band (6.5/90+) for better matching.");
+       if (parseInt(form.backlogs) > 5) insights.push("High backlog count may require a strong SOP to explain academic progression.");
+       if (parseInt(form.bankBalance) < 4000000) suggestions.push("Strengthen financial dossier to avoid potential visa flags regarding liquidity.");
 
        const status = score >= 80 ? "Eligible" : score >= 60 ? "Moderate" : "High Risk";
        const colorClass = score >= 80 ? "text-emerald-500" : score >= 60 ? "text-amber-500" : "text-rose-500";
@@ -2465,7 +2471,13 @@ export default function AbroadLiftMatchesPage() {
     // 13: Final Phase Financial Oracle & Roadmap
     if (step === 13 && selectedMatch) {
        const duration = parseInt(form.duration) || 3;
-       const tuitionAnnual = selectedMatch.tuitionFee || 25000;
+       const eligScore = getEligibilityScore(form);
+       const scholPercent = eligScore >= 90 ? 50 : eligScore >= 80 ? 20 : 0;
+       
+       const baseTuitionAnnual = selectedMatch.tuitionFee || 25000;
+       const totalScholSavings = (baseTuitionAnnual * (scholPercent / 100)) * duration;
+       
+       const tuitionAnnual = baseTuitionAnnual * (1 - scholPercent / 100);
        const livingAnnual = 12000;
        const oneTime = 3500; 
        
@@ -2520,14 +2532,42 @@ export default function AbroadLiftMatchesPage() {
                   </p>
                </div>
                
-               <div className="bg-blue-600 text-white p-10 rounded-[48px] shadow-2xl shadow-blue-500/20 text-center scale-105 ring-8 ring-blue-50">
-                  <p className="text-[10px] font-black text-blue-200 uppercase tracking-[0.3em] mb-4">Total Net Investment</p>
-                  <h3 className="text-5xl font-black italic">
-                     <span className="text-blue-200 text-2xl mr-1 non-italic font-medium">{symbol}</span>
-                     {displayVal(totalInvestment)}
-                     <span className="text-blue-200 text-3xl ml-1">{unit}</span>
-                  </h3>
-                  <p className="text-[9px] font-bold text-blue-100 mt-4 uppercase tracking-widest">Calculated to End-of-Degree</p>
+               <div className="relative group">
+                  <div className={`bg-${scholPercent > 0 ? "emerald-600 shadow-emerald-500/20" : "blue-600 shadow-blue-500/20"} text-white p-10 rounded-[48px] shadow-2xl text-center scale-105 ring-8 ring-blue-50 transition-all`}>
+                     <p className="text-[10px] font-black opacity-80 uppercase tracking-[0.3em] mb-4">{scholPercent > 0 ? "Scholarship Applied" : "Total Net Investment"}</p>
+                     <h3 className="text-5xl font-black italic">
+                        <span className="opacity-60 text-2xl mr-1 non-italic font-medium">{symbol}</span>
+                        {displayVal(totalInvestment)}
+                        <span className="opacity-60 text-3xl ml-1">{unit}</span>
+                     </h3>
+                     {scholPercent > 0 && (
+                        <div className="mt-4 px-4 py-1.5 rounded-full bg-white/20 text-[9px] font-black uppercase tracking-widest inline-flex items-center gap-2">
+                          <Sparkles className="w-3 h-3" />
+                          Saved {symbol}{displayVal(totalScholSavings)}{unit} via Merit
+                        </div>
+                     )}
+                     <p className="text-[9px] font-bold opacity-60 mt-4 uppercase tracking-widest">Calculated to End-of-Degree</p>
+                  </div>
+                  
+                  {/* Scholarship Eligibility Card */}
+                  <div className="mt-6 p-6 rounded-3xl bg-white border border-slate-100 shadow-lg animate-in slide-in-from-top-4 duration-700">
+                     <div className="flex items-center justify-between mb-4">
+                        <h4 className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Merit Eligibility</h4>
+                        <span className={`text-xs font-black ${eligScore >= 80 ? "text-emerald-500" : "text-slate-400"}`}>{eligScore}% Score</span>
+                     </div>
+                     <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                           <span className="text-[10px] font-bold text-slate-600">Scholarship Status</span>
+                           <span className={`text-[10px] font-black uppercase ${scholPercent > 0 ? "text-emerald-600" : "text-rose-500"}`}>{scholPercent > 0 ? `GRANTED (${scholPercent}%)` : "NOT ELIGIBLE"}</span>
+                        </div>
+                        <div className="h-1.5 w-full bg-slate-50 rounded-full overflow-hidden">
+                           <div className={`h-full transition-all duration-1000 ${eligScore >= 80 ? "bg-emerald-500" : "bg-slate-200"}`} style={{ width: `${eligScore}%` }} />
+                        </div>
+                        <p className="text-[8px] font-medium text-slate-400 leading-tight">
+                           {eligScore >= 90 ? "Extraordinary profile. 50% President's Merit Scholarship deducted." : eligScore >= 80 ? "Strong profile. 20% Excellence Scholarship deducted." : "Score 80%+ to unlock merit-based tuition reductions."}
+                        </p>
+                     </div>
+                  </div>
                </div>
             </div>
 
@@ -2754,30 +2794,64 @@ export default function AbroadLiftMatchesPage() {
           </div>
         )}
 
-        {/* Top Navbar */}
-        <div className="px-8 py-6 lg:px-12 lg:py-8 flex justify-between items-center z-30 print:hidden">
-           <div className="flex items-center gap-6">
-              {step >= 8 && (
-                 <div className="flex items-center gap-2 group cursor-pointer" onClick={() => setStep(1)}>
-                    <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/20 group-hover:scale-110 transition-transform">
-                       <GraduationCap className="text-white w-4 h-4" />
-                    </div>
-                    <span className="font-black text-lg tracking-tight text-slate-900">AbroadLift</span>
-                 </div>
-              )}
-              {step > 0 && step < 8 && (
-                 <button onClick={handleBack} className="group flex items-center gap-2 text-slate-400 hover:text-slate-900 transition-colors font-black text-xs uppercase tracking-widest">
-                    <ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
-                    Back
-                 </button>
-              )}
-           </div>
-           
-           <div className="flex items-center gap-4">
-              <span className="text-[10px] font-black text-slate-300 tracking-widest hidden sm:inline">OFFICIAL ADMISSIONS PORTAL</span>
-              <button className="px-5 py-2 rounded-xl bg-slate-50 text-[10px] font-black text-slate-500 hover:bg-slate-100 transition-colors border border-slate-100">HELP CENTER</button>
-           </div>
-        </div>
+         <div className="px-8 py-6 lg:px-12 lg:py-8 flex justify-between items-center z-30 print:hidden bg-white/80 backdrop-blur-md border-b border-slate-50 sticky top-0">
+            <div className="flex items-center gap-6">
+               {step >= 8 ? (
+                  <div className="flex items-center gap-3 group cursor-pointer" onClick={() => setStep(1)}>
+                     <div className="w-10 h-10 rounded-2xl bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/20 group-hover:scale-110 transition-transform">
+                        <GraduationCap className="text-white w-5 h-5" />
+                     </div>
+                     <div className="flex flex-col">
+                        <span className="font-black text-lg tracking-tight text-slate-900 leading-none">AbroadLift</span>
+                        <span className="text-[9px] font-black text-blue-600 uppercase tracking-widest mt-1">Intelligence</span>
+                     </div>
+                  </div>
+               ) : step > 0 && (
+                  <button onClick={handleBack} className="group flex items-center gap-2 text-slate-400 hover:text-slate-900 transition-colors font-black text-xs uppercase tracking-widest">
+                     <ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+                     Back
+                  </button>
+               )}
+            </div>
+
+            {/* Analysis Navigation Integrated into Navbar (For Post-Match Steps 9-13) */}
+            {step >= 9 && step <= 13 && (
+               <div className="hidden lg:flex items-center gap-6 bg-slate-50 p-2 pl-6 rounded-2xl border border-slate-100 shadow-sm animate-in fade-in slide-in-from-top-4 duration-500">
+                  <div className="flex flex-col">
+                     <span className="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em]">Current Stage</span>
+                     <span className="text-xs font-black text-slate-900 italic">{STEPS[step]?.label}</span>
+                  </div>
+                  <div className="h-4 w-px bg-slate-200" />
+                  <div className="flex items-center gap-3 pr-2">
+                     <button 
+                        onClick={() => setStep(step === 9 ? 8 : step - 1)}
+                        className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-slate-200 text-slate-500 transition-all"
+                     >
+                        <ChevronLeft className="w-4 h-4" />
+                     </button>
+                     <div className="flex gap-1">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                           <div key={i} className={`w-1.5 h-1.5 rounded-full transition-all ${i + 9 <= step ? "bg-blue-600 w-4" : "bg-slate-200"}`} />
+                        ))}
+                     </div>
+                     <button 
+                        onClick={() => setStep(step + 1)}
+                        disabled={step === 13}
+                        className={`h-10 px-6 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all ${
+                           step < 13 ? "bg-slate-900 text-white hover:bg-black shadow-lg shadow-slate-900/10" : "bg-slate-100 text-slate-200 cursor-not-allowed"
+                        }`}
+                     >
+                        {step === 13 ? "Completed" : "Next Stage"}
+                     </button>
+                  </div>
+               </div>
+            )}
+            
+            <div className="flex items-center gap-4">
+               <span className="text-[10px] font-black text-slate-300 tracking-widest hidden sm:inline">OFFICIAL ADMISSIONS PORTAL</span>
+               <button className="px-5 py-2 rounded-xl bg-slate-50 text-[10px] font-black text-slate-500 hover:bg-slate-100 transition-colors border border-slate-100">HELP CENTER</button>
+            </div>
+         </div>
 
         {/* Step Indicator Sub-header */}
         {step > 0 && step < 8 && (
@@ -2813,34 +2887,6 @@ export default function AbroadLiftMatchesPage() {
                 </div>
               )}
 
-              {/* Analysis Navigation Footer (Post-Match) */}
-              {step >= 9 && step <= 13 && (
-                <div className="mt-10 pt-10 border-t border-slate-50 flex items-center justify-between pb-10 print:hidden">
-                   <div className="flex flex-col">
-                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Analysis View</span>
-                      <span className="text-sm font-bold text-slate-900">{STEPS[step]?.label}</span>
-                   </div>
-                   <div className="flex gap-4">
-                      <button 
-                         onClick={() => setStep(step === 9 ? 8 : step - 1)}
-                         className="h-14 px-8 rounded-2xl bg-slate-50 text-slate-900 font-bold text-sm border border-slate-100 hover:bg-slate-100 transition-all flex items-center gap-2"
-                      >
-                         <ChevronLeft className="w-5 h-5" />
-                         Back
-                      </button>
-                      <button 
-                         onClick={() => setStep(step + 1)}
-                         disabled={step === 13}
-                         className={`h-14 px-10 rounded-2xl font-black text-sm transition-all flex items-center gap-3 shadow-xl ${
-                           step < 13 ? "bg-blue-600 text-white hover:bg-blue-700 hover:scale-105 shadow-blue-500/20" : "bg-slate-100 text-slate-300 cursor-not-allowed"
-                         }`}
-                      >
-                         {step === 13 ? "Finish Review" : "Next Stage"}
-                         {step < 13 && <ChevronLeft className="w-5 h-5 rotate-180" strokeWidth={3} />}
-                      </button>
-                   </div>
-                </div>
-              )}
            </div>
         </div>
 
