@@ -31,8 +31,16 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="overflow-x-hidden">
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=Outfit:wght@400;700;900&display=swap"
+          rel="stylesheet"
+        />
+      </head>
       <body
-        className="bg-white text-[#0f172a] antialiased overflow-x-hidden"
+        className="bg-white text-[#0f172a] antialiased overflow-x-hidden font-inter"
         suppressHydrationWarning={true}
       >
         <ClientWrapper>{children}</ClientWrapper>

@@ -30,9 +30,6 @@ interface StudyCostResponse {
   monthly_npr: number;
 }
 import Link from "next/link";
-import { Inter } from "next/font/google";
-
-const inter = Inter({ subsets: ["latin"] });
 
 const COUNTRIES = [
   {
@@ -103,7 +100,7 @@ export default function CostingPage() {
   };
 
   return (
-    <div className={`min-h-screen bg-[#f8fafc] ${inter.className}`}>
+    <div className={`min-h-screen bg-[#f8fafc]`} style={{fontFamily: 'Inter, sans-serif'}}>
 
 
       <main className="pt-24 pb-20 px-4 max-w-7xl mx-auto">

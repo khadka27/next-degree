@@ -21,12 +21,8 @@ import {
 } from "lucide-react";
 import { CA, US, AU, GB, DE, IE, NL } from "country-flag-icons/react/3x2";
 import Link from "next/link";
-import { Inter, Outfit } from "next/font/google";
 import { RECOMMENDED_UNIVERSITIES } from "@/lib/data/universityMetaData";
 import NextImage from "next/image";
-
-const inter = Inter({ subsets: ["latin"] });
-const outfit = Outfit({ subsets: ["latin"] });
 
 /* ─────────────── Flag Component ─────────────── */
 const FlagIcon = ({
@@ -147,7 +143,7 @@ function AcceptanceRateFinder() {
   return (
     <div className="mt-24 pt-24 border-t border-slate-200">
       <div className="text-center max-w-2xl mx-auto mb-12">
-        <h2 className={`text-4xl font-black text-slate-900 mb-4 ${outfit.className}`}>
+        <h2 className={`text-4xl font-black text-slate-900 mb-4`} style={{fontFamily: 'Outfit, sans-serif'}}>
           University <span className="text-teal-600">Acceptance Rate</span> Finder
         </h2>
         <p className="text-slate-500">
@@ -332,7 +328,7 @@ export default function EligibilityHub() {
   };
 
   return (
-    <div className={`min-h-screen bg-[#F8FAFC] pb-20 ${inter.className}`}>
+    <div className={`min-h-screen bg-[#F8FAFC] pb-20`} style={{fontFamily: 'Inter, sans-serif'}}>
       <main className="max-w-7xl mx-auto px-6 pt-12">
         <header className="mb-12">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
@@ -343,7 +339,7 @@ export default function EligibilityHub() {
               <Sparkles className="w-4 h-4" /> AI-Powered Admissions Assistant
             </div>
           </div>
-          <h1 className={`text-5xl font-black text-slate-900 mb-4 max-w-3xl leading-tight ${outfit.className}`}>
+          <h1 className={`text-5xl font-black text-slate-900 mb-4 max-w-3xl leading-tight`} style={{fontFamily: 'Outfit, sans-serif'}}>
             Check Your <span className="text-transparent bg-clip-text bg-linear-to-r from-teal-600 to-emerald-500">Eligibility</span> for International Universities
           </h1>
           <p className="text-slate-500 text-lg max-w-2xl">
