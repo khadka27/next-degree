@@ -3336,6 +3336,47 @@ export default function AbroadLiftMatchesPage() {
         UK: { v: 600 },
       }[selectedMatch.countryCode as "US" | "CA" | "AU" | "UK"] || { v: 100 };
 
+      const finalEstimateBands = [
+        {
+          key: "budget",
+          label: "Budget (Europe)",
+          minLakh: 10,
+          maxLakh: 25,
+        },
+        {
+          key: "average",
+          label: "Average (Canada/Australia)",
+          minLakh: 25,
+          maxLakh: 45,
+        },
+        {
+          key: "premium",
+          label: "Premium (USA/UK)",
+          minLakh: 38,
+          maxLakh: 70,
+        },
+      ] as const;
+
+      const selectedBandKey =
+        selectedMatch.countryCode === "US" || selectedMatch.countryCode === "UK"
+          ? "premium"
+          : selectedMatch.countryCode === "CA" ||
+              selectedMatch.countryCode === "AU"
+            ? "average"
+            : "budget";
+
+      const selectedFinalBand =
+        finalEstimateBands.find((band) => band.key === selectedBandKey) ||
+        finalEstimateBands[0];
+
+      const lakhToNpr = (lakh: number) => lakh * 100000;
+      const formatUsd = (npr: number) =>
+        new Intl.NumberFormat("en-US", {
+          style: "currency",
+          currency: "USD",
+          maximumFractionDigits: 0,
+        }).format(npr / USD_TO_NPR);
+
       return (
         <div className="animate-in fade-in slide-in-from-bottom-2 duration-500 max-w-full px-8 lg:px-16 pb-32">
           {/* 1. Header Spotlight */}
@@ -3670,6 +3711,57 @@ export default function AbroadLiftMatchesPage() {
                     Your roadmap is ready for export.
                   </p>
                 </div>
+
+                <div className="w-full p-6 rounded-3xl border border-slate-100 bg-slate-50 text-left">
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3">
+                    Total Cost (Final Estimate)
+                  </p>
+
+                  <div className="space-y-2">
+                    {finalEstimateBands.map((band) => {
+                      const isSelected = band.key === selectedBandKey;
+                      const minNpr = lakhToNpr(band.minLakh);
+                      const maxNpr = lakhToNpr(band.maxLakh);
+                      return (
+                        <div
+                          key={band.key}
+                          className={`p-3 rounded-2xl border transition-all ${
+                            isSelected
+                              ? "bg-white border-blue-300 shadow-sm"
+                              : "bg-transparent border-slate-200"
+                          }`}
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <span
+                              className={`text-xs font-black ${
+                                isSelected ? "text-blue-700" : "text-slate-700"
+                              }`}
+                            >
+                              {band.label}
+                            </span>
+                            <span className="text-xs font-black text-slate-900">
+                              {band.minLakh} - {band.maxLakh} lakh NPR
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-slate-500 font-medium mt-1">
+                            {formatUsd(minNpr)} - {formatUsd(maxNpr)}
+                          </p>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <div className="mt-4 p-3 rounded-2xl bg-blue-600 text-white">
+                    <p className="text-[10px] font-black uppercase tracking-widest opacity-80 mb-1">
+                      Selected Destination Band
+                    </p>
+                    <p className="text-sm font-black">
+                      {selectedFinalBand.label}: {selectedFinalBand.minLakh} -{" "}
+                      {selectedFinalBand.maxLakh} lakh NPR
+                    </p>
+                  </div>
+                </div>
+
                 <div className="w-full space-y-4">
                   <button
                     onClick={() => window.print()}
