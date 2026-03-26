@@ -105,7 +105,7 @@ export default function RegisterScreen() {
 
               <TouchableOpacity
                 style={styles.signUpButton}
-                onPress={() => router.push("/explore")}
+                onPress={() => router.push("/setup/country")}
               >
                 <Text style={styles.signUpButtonText}>Create Account</Text>
                 <Feather name="arrow-right" size={20} color="white" />
