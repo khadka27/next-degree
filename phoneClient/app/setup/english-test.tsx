@@ -147,7 +147,13 @@ export default function EnglishTestSelection() {
                     <Text style={[styles.inputLabel, { zIndex: 1 }]}>Overall Score</Text>
                     <TextInput
                       style={[styles.textInput, { zIndex: 1 }]}
-                      placeholder="e.g. 7.5"
+                      placeholder={
+                        testType === "IELTS" ? "e.g. 7.5" :
+                        testType === "PTE" ? "e.g. 65" :
+                        testType === "TOEFL" ? "e.g. 100" :
+                        testType === "Duolingo" ? "e.g. 120" :
+                        "e.g. 7.5"
+                      }
                       placeholderTextColor={COLORS.textGray}
                       value={score}
                       onChangeText={setScore}
@@ -155,7 +161,7 @@ export default function EnglishTestSelection() {
                     />
                   </View>
                 )}
-              </View>
+              </Animated.View>
             )}
 
             {hasTakenTest === false && (
@@ -178,7 +184,7 @@ export default function EnglishTestSelection() {
             {hasTakenTest !== null && (
               <TouchableOpacity
                 style={[styles.continueButton, { marginTop: 40 }]}
-                onPress={() => router.push("/explore")}
+                onPress={() => router.push("/setup/financial")}
               >
                 <Text style={styles.continueButtonText}>Continue</Text>
               </TouchableOpacity>

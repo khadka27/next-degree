@@ -97,7 +97,7 @@ export default function LoginScreen() {
 
               <TouchableOpacity
                 style={styles.signInButton}
-                onPress={() => router.push("/setup/country")}
+                onPress={() => router.push("/(tabs)/explore")}
               >
                 <Text style={styles.signInButtonText}>Sign In</Text>
                 <Feather name="arrow-right" size={20} color="white" />
