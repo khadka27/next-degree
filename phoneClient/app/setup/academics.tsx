@@ -1,0 +1,214 @@
+import React, { useState } from "react";
+import {
+  StyleSheet,
+  View,
+  Text,
+  TouchableOpacity,
+  Dimensions,
+  SafeAreaView,
+  Image,
+  ScrollView,
+  StatusBar,
+  ImageBackground,
+  TextInput,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
+import { Stack, router } from "expo-router";
+import { Feather } from "@expo/vector-icons";
+
+const { width, height } = Dimensions.get("window");
+
+const COLORS = {
+  primary: "#33BFFF", 
+  textDark: "#0F172A",
+  textGray: "#64748B",
+  white: "#FFFFFF",
+  glassBase: "rgba(255, 255, 255, 0.75)",
+  glassBorder: "rgba(255, 255, 255, 0.6)",
+  teal: "rgb(41, 142, 168)",
+};
+
+export default function AcademicsSetup() {
+  const [recentField, setRecentField] = useState("");
+  const [cgpa, setCgpa] = useState("");
+
+  return (
+    <View style={styles.container}>
+      <StatusBar barStyle="dark-content" />
+      <Stack.Screen options={{ headerShown: false }} />
+
+      <ImageBackground
+        source={require("../../assets/images/onboarding-bg-4k.png")}
+        style={styles.background}
+        imageStyle={{ top: -140, height: height + 140 }}
+        resizeMode="cover"
+      >
+        <KeyboardAvoidingView 
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={{ flex: 1 }}
+        >
+          <SafeAreaView style={styles.safeArea}>
+            <View style={styles.header}>
+              <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+                <Feather name="chevron-left" size={28} color={COLORS.textDark} />
+              </TouchableOpacity>
+              <Text style={styles.headerTitle}>Academics</Text>
+              <View style={{ width: 44 }} /> 
+            </View>
+
+            <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+              <Text style={styles.questionText}>Tell us about your education</Text>
+
+              {/* Input Group */}
+              <View style={styles.form}>
+                
+                {/* Field of Study Card */}
+                <View style={styles.inputCard}>
+                  <Text style={styles.inputLabel}>Recent Field of Study</Text>
+                  <View style={styles.textInputWrapper}>
+                    <Feather name="book-open" size={18} color={COLORS.textGray} style={styles.inputIcon} />
+                    <TextInput
+                      style={styles.textInput}
+                      placeholder=""
+                      placeholderTextColor={COLORS.textGray}
+                      value={recentField}
+                      onChangeText={setRecentField}
+                    />
+                  </View>
+                </View>
+
+                {/* CGPA Card */}
+                <View style={styles.inputCard}>
+                  <Text style={styles.inputLabel}>CGPA / Percentage</Text>
+                  <View style={styles.textInputWrapper}>
+                    <Feather name="trending-up" size={18} color={COLORS.textGray} style={styles.inputIcon} />
+                    <TextInput
+                      style={styles.textInput}
+                      placeholder=""
+                      placeholderTextColor={COLORS.textGray}
+                      value={cgpa}
+                      onChangeText={setCgpa}
+                      keyboardType="numeric"
+                    />
+                  </View>
+                </View>
+
+                {/* Continue Button inside Form Flow */}
+                <TouchableOpacity
+                  style={[styles.continueButton, { marginTop: 40 }]}
+                  onPress={() => router.push("/setup/english-test")}
+                >
+                  <Text style={styles.continueButtonText}>Continue</Text>
+                </TouchableOpacity>
+
+              </View>
+            </ScrollView>
+          </SafeAreaView>
+        </KeyboardAvoidingView>
+      </ImageBackground>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: COLORS.white,
+  },
+  background: {
+    flex: 1,
+    width: width,
+    height: height,
+  },
+  safeArea: {
+    flex: 1,
+    paddingTop: 80,
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  backButton: {
+    width: 44,
+    height: 44,
+    backgroundColor: "rgba(255, 255, 255, 0.5)",
+    borderRadius: 14,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  headerTitle: {
+    fontSize: 22,
+    fontWeight: "700",
+    color: COLORS.textDark,
+    letterSpacing: -0.4,
+  },
+  scrollContent: {
+    paddingHorizontal: 28,
+    paddingBottom: 40,
+  },
+  questionText: {
+    fontSize: 16,
+    color: COLORS.textGray,
+    textAlign: "center",
+    marginTop: 10,
+    marginBottom: 40,
+    fontWeight: "500",
+  },
+  form: {
+    gap: 16,
+  },
+  inputCard: {
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
+    borderRadius: 18,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.4)",
+  },
+  inputLabel: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: COLORS.textGray,
+    marginBottom: 8,
+    textTransform: "uppercase",
+    letterSpacing: 0.8,
+  },
+  textInputWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.4)",
+    borderRadius: 12,
+    height: 48,
+    paddingHorizontal: 15,
+  },
+  inputIcon: {
+    marginRight: 10,
+    opacity: 0.4,
+  },
+  textInput: {
+    flex: 1,
+    fontSize: 15,
+    color: COLORS.textDark,
+    fontWeight: "500",
+  },
+  continueButton: {
+    backgroundColor: COLORS.teal,
+    height: 60,
+    borderRadius: 30,
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: COLORS.teal,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+    elevation: 5,
+  },
+  continueButtonText: {
+    color: COLORS.white,
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+});
