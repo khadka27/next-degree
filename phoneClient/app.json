@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "phoneClient",
-    "slug": "phoneClient",
+    "name": "Abroadlift",
+    "slug": "Abroadlift",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "phoneclient",
+    "scheme": "abroadlift",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
