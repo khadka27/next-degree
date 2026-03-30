@@ -54,15 +54,18 @@ const CostItem = ({ label, value, subValue }: { label: string; value: string; su
 export default function CostBreakdownScreen() {
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" />
+      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" translucent />
       
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-          <Feather name="chevron-left" size={28} color={THEME.textDark} />
+          <Feather name="arrow-left" size={28} color={THEME.textDark} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Cost Breakdown</Text>
-        <TouchableOpacity style={styles.profileButton}>
+        <TouchableOpacity 
+          style={styles.profileButton}
+          onPress={() => router.push("/(tabs)/profile")}
+        >
           <Ionicons name="person-circle" size={44} color="#E2E8F0" />
         </TouchableOpacity>
       </View>
@@ -160,8 +163,6 @@ const styles = StyleSheet.create({
   backButton: {
     width: 44,
     height: 44,
-    borderRadius: 22,
-    backgroundColor: THEME.white,
     justifyContent: "center",
     alignItems: "flex-start",
   },

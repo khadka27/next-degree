@@ -102,14 +102,14 @@ export default function UniversitySelectionSetup() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" />
+      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" translucent />
       <Stack.Screen options={{ headerShown: false }} />
       
       {/* Header Section */}
       <View style={styles.header}>
         <View style={styles.topRow}>
             <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-                <Feather name="chevron-left" size={28} color={THEME.textDark} />
+                <Feather name="arrow-left" size={28} color={THEME.textDark} />
             </TouchableOpacity>
             <Text style={styles.headerTitle}>University Selection</Text>
             <View style={{ width: 44 }} />
@@ -246,10 +246,8 @@ const styles = StyleSheet.create({
   backButton: {
     width: 44,
     height: 44,
-    backgroundColor: "#F1F5F9",
-    borderRadius: 14,
     justifyContent: "center",
-    alignItems: "center",
+    alignItems: "flex-start", // Align to left side of its container
   },
   headerTitle: {
     fontSize: 22,

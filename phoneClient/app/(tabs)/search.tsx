@@ -98,10 +98,6 @@ export default function UniversitySelection() {
       
       {/* Search and Header Section */}
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-          <Feather name="arrow-left" size={24} color={THEME.textDark} />
-        </TouchableOpacity>
-        
         <Text style={styles.title}>Find Universities That Match Your Profile</Text>
         <Text style={styles.subtitle}>
           Compare costs, admission chances, and visa success — all in one place
@@ -241,6 +237,7 @@ const styles = StyleSheet.create({
     color: THEME.textDark,
     lineHeight: 32,
     marginBottom: 8,
+    marginTop: 30,
     letterSpacing: -0.5,
   },
   subtitle: {

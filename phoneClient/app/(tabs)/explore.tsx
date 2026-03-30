@@ -34,7 +34,7 @@ export default function DashboardScreen() {
   const { userData } = useUser();
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" />
+      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" translucent />
       
       {/* Top Bar */}
       <View style={styles.topBar}>
@@ -46,7 +46,10 @@ export default function DashboardScreen() {
           <TouchableOpacity style={styles.iconButton}>
             <Ionicons name="notifications-outline" size={24} color={THEME.textDark} />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.profileButton}>
+          <TouchableOpacity 
+            style={styles.profileButton}
+            onPress={() => router.push("/(tabs)/profile")}
+          >
             <Ionicons name="person-circle" size={44} color="#E2E8F0" />
           </TouchableOpacity>
         </View>
