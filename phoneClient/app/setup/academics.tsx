@@ -58,7 +58,7 @@ export default function AcademicsSetup() {
             </View>
 
             <View style={styles.trackerContainer}>
-              {[1, 2, 3, 4, 5, 6].map((i) => (
+              {[1, 2, 3, 4, 5].map((i) => (
                 <View 
                   key={i} 
                   style={[
@@ -109,7 +109,7 @@ export default function AcademicsSetup() {
                 {/* Continue Button inside Form Flow */}
                 <TouchableOpacity
                   style={[styles.continueButton, { marginTop: 40 }]}
-                  onPress={() => router.push("/setup/nationality")}
+                  onPress={() => router.push("/setup/english-test")}
                 >
                   <Text style={styles.continueButtonText}>Continue</Text>
                 </TouchableOpacity>

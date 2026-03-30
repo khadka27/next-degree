@@ -47,7 +47,10 @@ export default function ProfileTab() {
           <View style={styles.profileTextContainer}>
             <Text style={styles.profileName}>Something Surname</Text>
             <Text style={styles.profileUsername}>@something123</Text>
-            <TouchableOpacity style={styles.editButton}>
+            <TouchableOpacity 
+              style={styles.editButton} 
+              onPress={() => router.push("/profile/edit")}
+            >
               <Text style={styles.editButtonText}>Edit Profile</Text>
             </TouchableOpacity>
           </View>
@@ -95,7 +98,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 16,
-    paddingTop: Platform.OS === 'ios' ? 20 : 40,
+    paddingTop: Platform.OS === 'android' ? (StatusBar.currentHeight || 0) + 10 : 20,
     paddingBottom: 20,
   },
   backButton: {

@@ -18,6 +18,7 @@ import {
 } from "react-native";
 import { Stack, router } from "expo-router";
 import { Feather } from "@expo/vector-icons";
+import { useUser } from "../context/UserContext";
 
 // Enable LayoutAnimation for Android
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -40,6 +41,7 @@ const ENGLISH_LEVELS = ["Beginner", "Intermediate", "Advanced", "Fluent", "Nativ
 const TEST_TYPES = ["IELTS", "PTE", "TOEFL", "Duolingo"];
 
 export default function EnglishTestSelection() {
+  const { userData, setUserData } = useUser();
   const [hasTakenTest, setHasTakenTest] = useState<boolean | null>(null);
   const [testType, setTestType] = useState<string>("");
   const [score, setScore] = useState("");
@@ -48,6 +50,15 @@ export default function EnglishTestSelection() {
   const handleToggle = (taken: boolean) => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setHasTakenTest(taken);
+  };
+  
+  const handleComplete = () => {
+    setUserData(prev => ({
+        ...prev,
+        score: score || "Pending",
+        testType: testType || "Not Taken"
+    }));
+    router.push("/setup/university-select");
   };
 
   return (
@@ -71,12 +82,12 @@ export default function EnglishTestSelection() {
           </View>
 
           <View style={styles.trackerContainer}>
-            {[1, 2, 3, 4, 5, 6].map((i) => (
+            {[1, 2, 3, 4, 5].map((i) => (
               <View 
                 key={i} 
                 style={[
                   styles.trackerSegment, 
-                  i === 6 ? styles.trackerSegmentActive : styles.trackerSegmentInactive
+                  i === 5 ? styles.trackerSegmentActive : styles.trackerSegmentInactive
                 ]} 
               />
             ))}
@@ -196,7 +207,7 @@ export default function EnglishTestSelection() {
             {hasTakenTest !== null && (
               <TouchableOpacity
                 style={[styles.continueButton, { marginTop: 40 }]}
-                onPress={() => router.push("/explore")}
+                onPress={handleComplete}
               >
                 <Text style={styles.continueButtonText}>Continue</Text>
               </TouchableOpacity>

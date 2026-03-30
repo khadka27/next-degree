@@ -166,6 +166,8 @@ export default function UniversityDetails() {
           </View>
         </View>
 
+
+
         {/* Campus Facilities */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Campus Facilities</Text>
@@ -210,7 +212,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   headerTitle: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: "800",
     color: "#000",
   },
@@ -317,6 +319,89 @@ const styles = StyleSheet.create({
     color: "#475569",
     marginLeft: 8,
     fontWeight: "500",
+  },
+  eligibilityCard: {
+    backgroundColor: THEME.primary + "10",
+    borderRadius: 24,
+    padding: 24,
+    marginBottom: 32,
+    borderWidth: 1,
+    borderColor: THEME.primary + "30",
+  },
+  eligibilityContent: {
+    marginBottom: 20,
+  },
+  eligibilityTitle: {
+    fontSize: 18,
+    fontWeight: "800",
+    color: THEME.primary,
+    marginBottom: 8,
+  },
+  eligibilitySubtext: {
+    fontSize: 13,
+    color: "#475569",
+    lineHeight: 18,
+  },
+  checkButton: {
+    backgroundColor: THEME.primary,
+    paddingVertical: 14,
+    borderRadius: 16,
+    alignItems: "center",
+    shadowColor: THEME.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  checkButtonText: {
+    color: "white",
+    fontSize: 15,
+    fontWeight: "bold",
+  },
+  costContainer: {
+    backgroundColor: "#F8FAFC",
+    borderRadius: 24,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+  },
+  costItem: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E2E8F0",
+  },
+  costLabelRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  costLabel: {
+    fontSize: 14,
+    color: "#475569",
+    marginLeft: 10,
+    fontWeight: "500",
+  },
+  costValue: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#000",
+  },
+  totalCostItem: {
+    borderBottomWidth: 0,
+    marginTop: 8,
+    paddingTop: 16,
+  },
+  totalLabel: {
+    fontSize: 16,
+    fontWeight: "800",
+    color: "#000",
+  },
+  totalValue: {
+    fontSize: 18,
+    fontWeight: "900",
+    color: THEME.primary,
   },
   facilitiesRow: {
     flexDirection: "row",
