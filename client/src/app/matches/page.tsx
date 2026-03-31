@@ -533,7 +533,7 @@ const BUDGET_PRESETS = [
 const STEPS = [
   { label: "Welcome", question: "Your Journey Starts Here." },
   { label: "Country", question: "Where do you want to study?" },
-  { label: "Degree Level", question: "What is your target degree?" },
+  { label: "Study Level", question: "What is your target degree?" },
   { label: "Study Area", question: "What do you want to study?" },
   { label: "Target Intake", question: "When do you want to start?" },
   { label: "English Proficiency", question: "Do you have a test score?" },
@@ -1519,23 +1519,20 @@ export default function AbroadLiftMatchesPage() {
     // 1: Destination Countries
     if (step === 1) {
       return (
-        <div className="flex flex-col items-center animate-in fade-in zoom-in-95 duration-700 w-full max-w-2xl mx-auto pb-8 ">
-          <div className="mb-4 text-center flex flex-col items-center">
-            <h2 className="text-[20px] sm:text-[16px] font-medium text-[#111827] mb-3 tracking-tight">
+        <div className="flex flex-col items-center animate-in fade-in zoom-in-95 duration-700 w-full max-w-2xl mx-auto pb-2 ">
+          <div className="mb-2 text-center flex flex-col items-center">
+            <h2 className="text-[18px] font-semibold text-[#111827] mb-0 tracking-tight">
               Where do you want to study?
             </h2>
-            <p className="text-[#64748b] font-regular text-[14px] sm:text-[15px] leading-snug w-full">
-              We'll match universities and estimate your cost & visa chances
-            </p>
           </div>
 
-          <div className="w-full mb-10 overflow-hidden rounded-[20px] shadow-xl shadow-slate-100 border border-slate-100 lg:hidden">
+          <div className="w-full mb-3 overflow-hidden rounded-[20px] shadow-xl shadow-slate-100 border border-slate-50 lg:hidden">
             <Image
               src="https://images.unsplash.com/photo-1499856871958-5b9627545d1a?q=80&w=2070&auto=format&fit=crop"
               alt="Destinations"
               width={800}
               height={400}
-              className="w-full h-[180px] object-cover"
+              className="w-full h-[110px] object-cover"
               priority
             />
           </div>
@@ -1578,66 +1575,73 @@ export default function AbroadLiftMatchesPage() {
       );
     }
 
-    // 2: Degree Level (Structured Full List)
+    // 2: Study Level
     if (step === 2) {
-      const categories = Array.from(new Set(DEGREES.map((d) => d.cat)));
+      // Simplified list based on the user's screenshot
+      const DISPLAY_DEGREES = [
+        { v: "bachelor-4", l: "Bachelor's Degree", icon: GraduationCap },
+        { v: "masters", l: "Master's Degree", icon: BookOpen },
+        { v: "doctorate", l: "PHD Degree", icon: BookOpen },
+        { v: "undergrad-dip-2", l: "Diploma", icon: Award },
+      ];
+
       return (
-        <div className="animate-in fade-in zoom-in-95 duration-700 w-full max-w-2xl mx-auto pb-12 mt-2">
-          <div className="mb-5 text-center flex flex-col items-center">
-            <h2 className="text-[20px] sm:text-[28px] font-[700] text-[#111827] mb-3 tracking-tight">
-              {STEPS[step]?.question}
+        <div className="animate-in fade-in zoom-in-95 duration-700 w-full max-w-2xl mx-auto pb-2">
+          <div className="mb-6 text-center">
+            <h2 className="text-[17px] font-semibold text-[#111827] tracking-tight">
+              What level of study are you planning?
             </h2>
-            <p className="text-[#64748b] font-[400] text-[14px] sm:text-[15px] leading-snug w-full">
-              Precisely define your intended level of education.
-            </p>
           </div>
 
-          <div className="space-y-12">
-            {categories.map((cat) => (
-              <div key={cat} className="space-y-6">
-                <div className="flex items-center gap-4">
-                  <h3 className="text-[11px] font-[700] text-blue-600 uppercase tracking-[0.2em] whitespace-nowrap bg-blue-50 px-3 py-1 rounded-full">
-                    {cat}
-                  </h3>
-                  <div className="h-px bg-slate-100 w-full" />
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {DEGREES.filter((d) => d.cat === cat).map((d) => {
-                    const isSel = form.degree === d.v;
-                    const Icon = d.icon;
-                    return (
-                      <button
-                        key={d.v}
-                        onClick={() => updateForm("degree", d.v)}
-                        className={`group relative flex items-center gap-5 p-5 rounded-[24px] border-2 text-left transition-all duration-300 ${isSel
-                          ? "border-blue-500 bg-blue-50/20 shadow-md transform scale-[1.02]"
-                          : "border-slate-50 bg-white hover:border-blue-100 hover:shadow-sm"
-                          }`}
-                      >
-                        <div
-                          className={`shrink-0 w-12 h-12 rounded-[16px] flex items-center justify-center transition-all ${isSel
-                            ? "bg-blue-600 text-white shadow-lg shadow-blue-500/30"
-                            : "bg-slate-50 text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-500"
-                            }`}
-                        >
-                          <Icon className="w-6 h-6" strokeWidth={2} />
-                        </div>
-                        <span
-                          className={`text-[17px] font-[600] leading-tight ${isSel ? "text-slate-900" : "text-slate-600"}`}
-                        >
-                          {d.l}
-                        </span>
-                        {isSel && (
-                          <div className="ml-auto">
-                            <CheckCircle2 className="w-5 h-5 text-blue-500" />
-                          </div>
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
+          <div className="w-full mb-8 overflow-hidden rounded-[24px] shadow-sm border border-slate-100">
+            <Image
+              src="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=2070&auto=format&fit=crop"
+              alt="Study Level"
+              width={800}
+              height={400}
+              className="w-full h-[180px] object-cover"
+              priority
+            />
+          </div>
+
+          <div className="flex flex-col gap-4 w-full max-w-md mx-auto">
+            {DISPLAY_DEGREES.map((d) => {
+              const isSel = form.degree === d.v;
+              const Icon = d.icon;
+              return (
+                <button
+                  key={d.v}
+                  onClick={() => updateForm("degree", d.v)}
+                  className={`group relative flex items-center gap-6 p-4 rounded-[20px] border transition-all duration-300 ${
+                    isSel
+                      ? "border-blue-500 bg-white shadow-lg shadow-blue-500/5 -translate-y-0.5"
+                      : "border-slate-200 bg-white hover:border-blue-200"
+                  }`}
+                >
+                  <div
+                    className={`shrink-0 w-12 h-12 rounded-xl flex items-center justify-center transition-all border ${
+                      isSel
+                        ? "bg-white text-slate-900 border-blue-500 shadow-sm"
+                        : "bg-slate-50 text-slate-400 border-slate-100"
+                    }`}
+                  >
+                    <Icon className="w-6 h-6" strokeWidth={1.5} />
+                  </div>
+                  <span
+                    className={`text-[16px] font-[500] ${
+                      isSel ? "text-slate-900" : "text-slate-600"
+                    }`}
+                  >
+                    {d.l}
+                  </span>
+                  {isSel && (
+                    <div className="ml-auto w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center shadow-sm">
+                      <CheckCircle2 className="w-4 h-4 text-white" />
+                    </div>
+                  )}
+                </button>
+              );
+            })}
           </div>
         </div>
       );
@@ -1647,14 +1651,22 @@ export default function AbroadLiftMatchesPage() {
     if (step === 3) {
       const programsList = form.field ? PROGRAMS[form.field] || [] : [];
       return (
-        <div className="flex flex-col items-center animate-in fade-in zoom-in-95 duration-700 w-full max-w-2xl mx-auto pb-12 mt-2">
-          <div className="mb-5 text-center flex flex-col items-center">
-            <h2 className="text-[20px] sm:text-[28px] font-[700] text-[#111827] mb-3 tracking-tight">
+        <div className="flex flex-col items-center animate-in fade-in zoom-in-95 duration-700 w-full max-w-2xl mx-auto pb-2 mt-2">
+          <div className="mb-4 text-center flex flex-col items-center">
+            <h2 className="text-[20px] sm:text-[18px] font-semibold text-[#111827] mb-2 tracking-tight">
               {STEPS[step]?.question}
             </h2>
-            <p className="text-[#64748b] font-[400] text-[14px] sm:text-[15px] leading-snug w-full">
-              Tell us what you want to study so we can match you perfectly.
-            </p>
+          </div>
+
+          <div className="w-full mb-4 overflow-hidden rounded-[20px] shadow-xl shadow-slate-100 border border-slate-50 lg:hidden">
+            <Image
+              src="https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?q=80&w=2070&auto=format&fit=crop"
+              alt="Field of Study"
+              width={800}
+              height={400}
+              className="w-full h-[120px] object-cover"
+              priority
+            />
           </div>
 
           <div className="flex flex-col gap-8 w-full max-w-md">
@@ -1693,17 +1705,25 @@ export default function AbroadLiftMatchesPage() {
     // 4: Intake Selection
     if (step === 4) {
       return (
-        <div className="flex flex-col items-center animate-in fade-in zoom-in-95 duration-700 w-full max-w-2xl mx-auto pb-12 mt-2">
-          <div className="mb-5 text-center flex flex-col items-center">
-            <h2 className="text-[20px] sm:text-[28px] font-[700] text-[#111827] mb-3 tracking-tight">
+        <div className="flex flex-col items-center animate-in fade-in zoom-in-95 duration-700 w-full max-w-2xl mx-auto pb-2 mt-2">
+          <div className="mb-4 text-center flex flex-col items-center">
+            <h2 className="text-[20px] sm:text-[18px] font-semibold text-[#111827] mb-2 tracking-tight">
               {STEPS[step]?.question}
             </h2>
-            <p className="text-[#64748b] font-[400] text-[14px] sm:text-[15px] leading-snug w-full">
-              When do you plan to start your studies?
-            </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
+          <div className="w-full mb-4 overflow-hidden rounded-[20px] shadow-xl shadow-slate-100 border border-slate-50 lg:hidden">
+            <Image
+              src="https://images.unsplash.com/photo-1506784983877-45594efa4cbe?q=80&w=2068&auto=format&fit=crop"
+              alt="Intake"
+              width={800}
+              height={400}
+              className="w-full h-[120px] object-cover"
+              priority
+            />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
             {INTAKES.map((i) => {
               const isSel = form.intake === i;
               return (
@@ -3853,12 +3873,12 @@ export default function AbroadLiftMatchesPage() {
           </div>
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             {step > 0 && step < 8 && (
-              <span className="text-[25px] font-semibold text-slate-900 tracking-tight">
+              <span className="text-[19px] font-bold text-[#111827] tracking-tight">
                 {STEPS[step]?.label}
               </span>
             )}
             {step >= 8 && (
-              <span className="text-[24px] font-[800] text-slate-900 tracking-tight">
+              <span className="text-[20px] font-bold text-[#111827] tracking-tight">
                 Results
               </span>
             )}
@@ -3867,16 +3887,17 @@ export default function AbroadLiftMatchesPage() {
         </div>
 
         {/* Progress Header - Now below the title */}
-        {step > 0 && (
-          <div className="w-full flex justify-center pt-1 pb-3 bg-white shrink-0 print:hidden z-[60] relative">
+        {step > 0 && step < 8 && (
+          <div className="w-full flex justify-center pt-1 pb-6 bg-white shrink-0 print:hidden z-[60] relative">
             <div className="flex items-center gap-1.5">
-              {Array.from({ length: STEPS.length - 1 }).map((_, i) => (
+              {Array.from({ length: 8 }).map((_, i) => (
                 <div
                   key={i}
-                  className={`h-[4.5px] rounded-full transition-all duration-500 ease-out ${i + 1 <= step
-                    ? "w-8 bg-blue-500"
-                    : "w-8 bg-slate-100"
-                    }`}
+                  className={`h-[4px] rounded-full transition-all duration-500 ease-out ${
+                    i + 1 === step
+                      ? "w-8 bg-blue-500"
+                      : "w-8 bg-slate-100"
+                  }`}
                 />
               ))}
             </div>
@@ -3884,22 +3905,23 @@ export default function AbroadLiftMatchesPage() {
         )}
 
         {/* Step Content Area */}
-        <div className="flex-1 overflow-y-auto px-8 lg:px-12 pt-3 pb-8 lg:py-12 override-scroll">
+        <div className="flex-1 overflow-y-auto px-6 lg:px-12 pt-3 pb-8 lg:py-12 override-scroll">
           <div
             className={`${step >= 9 ? "max-w-full" : "max-w-4xl"} mx-auto min-h-full flex flex-col`}
           >
             <div className="flex-1">{renderStep()}</div>
 
             {/* Step Navigation Footer */}
-            {step > 0 && step !== 8 && (
-              <div className="mt-4 flex justify-center pb-12 print:hidden w-full max-w-[320px] mx-auto pt-0 z-40">
+            {step > 0 && step !== 8 && step < 9 && (
+              <div className="mt-8 flex justify-center pb-8 print:hidden w-full max-w-[340px] mx-auto pt-0 z-40">
                 <button
                   onClick={handleNext}
                   disabled={!canContinue()}
-                  className={`w-full h-[52px] rounded-full font-[600] text-[15px] transition-all flex items-center justify-center tracking-wide ${canContinue()
-                    ? "bg-blue-500 hover:bg-blue-600 text-white shadow-lg shadow-blue-500/10"
-                    : "bg-[#eff5fd] text-[#9ca3af] cursor-not-allowed"
-                    }`}
+                  className={`w-full h-[58px] rounded-[20px] font-[600] text-[16px] transition-all flex items-center justify-center tracking-wide ${
+                    canContinue()
+                      ? "bg-blue-500 hover:bg-blue-600 text-white shadow-[0_8px_20px_-6px_rgba(59,130,246,0.35)]"
+                      : "bg-[#eff5fd] text-[#9ca3af] cursor-not-allowed"
+                  }`}
                 >
                   {step === 7 ? "Analyze & Match" : "Continue"}
                 </button>
