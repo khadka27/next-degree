@@ -1285,8 +1285,8 @@ export default function AbroadLiftMatchesPage() {
     setForm((prev) => ({
       ...prev,
       countries: prev.countries.includes(code)
-        ? prev.countries.filter((c) => c !== code)
-        : [...prev.countries, code],
+        ? []
+        : [code],
     }));
   };
 
@@ -1880,7 +1880,7 @@ export default function AbroadLiftMatchesPage() {
                     : "bg-white text-slate-600 border-slate-100 shadow-sm hover:border-blue-200"
                 }`}
               >
-                No, I haven't
+                No, I haven&apos;t
               </button>
             </div>
 
@@ -2017,17 +2017,9 @@ export default function AbroadLiftMatchesPage() {
       );
     }
     // 7: Budget
-    if (step === 7) {
+    if (step === -1) {
       return (
         <div className="flex flex-col items-center animate-in fade-in zoom-in-95 duration-700 w-full max-w-2xl mx-auto pb-12 mt-2">
-          <div className="mb-5 text-center flex flex-col items-center">
-            <h2 className="text-[20px] sm:text-[28px] font-[700] text-[#111827] mb-3 tracking-tight">
-              {STEPS[step]?.question}
-            </h2>
-            <p className="text-[#64748b] font-[400] text-[14px] sm:text-[15px] leading-snug w-full">
-              Configure your investment parameters for total course estimation.
-            </p>
-          </div>
 
           <div className="space-y-10">
             {/* 1. Univ & City Type */}
@@ -2143,7 +2135,7 @@ export default function AbroadLiftMatchesPage() {
     }
 
     // 7: Enhanced Profile
-    if (step === 7) {
+    if (step === -1) {
       const isGraduate =
         form.degree.includes("Master") ||
         form.degree.includes("Doctoral") ||
@@ -2388,7 +2380,7 @@ export default function AbroadLiftMatchesPage() {
       );
     }
     // 8: Results
-    if (step === 8) {
+    if (step === 7) {
       return (
         <div className="animate-in fade-in duration-700 max-w-full mx-auto px-8 lg:px-16">
           {/* Dashboard Header */}
@@ -2545,10 +2537,10 @@ export default function AbroadLiftMatchesPage() {
               </p>
               <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
                 <button
-                  onClick={() => setStep(7)}
+                  onClick={() => setStep(6)}
                   className="w-full sm:w-auto px-8 h-14 bg-slate-900 text-white rounded-2xl font-black text-sm hover:shadow-xl transition-all"
                 >
-                  Adjust Budget
+                  Adjust Preferences
                 </button>
                 <button
                   onClick={() => {
@@ -3924,7 +3916,7 @@ export default function AbroadLiftMatchesPage() {
             <div className="flex-1">{renderStep()}</div>
 
             {/* Step Navigation Footer */}
-            {step > 0 && step !== 8 && step < 9 && (
+            {step > 0 && step < 7 && (
               <div className="mt-8 flex justify-center pb-8 print:hidden w-full max-w-[340px] mx-auto pt-0 z-40">
                 <button
                   onClick={handleNext}
