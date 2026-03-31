@@ -13,7 +13,7 @@ import {
   Platform,
   Modal,
 } from "react-native";
-import { router, Stack } from "expo-router";
+import { router, Stack, useLocalSearchParams } from "expo-router";
 import { Feather, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import { useUser } from "../context/UserContext";
@@ -144,6 +144,8 @@ const ProgressTracker = ({ percentage }: { percentage: number }) => {
 };
 
 export default function UniversitySelection() {
+  const { userData, setUserData, selectUniversity } = useUser();
+  const { pendingCountry, pendingFlag } = useLocalSearchParams();
   const [filterVisible, setFilterVisible] = useState(false);
   
   // Search state
@@ -153,7 +155,7 @@ export default function UniversitySelection() {
   const [admissionChance, setAdmissionChance] = useState("All");
   const [matchRating, setMatchRating] = useState("All");
   const [feeRange, setFeeRange] = useState(100000); // Max fee slider
-  const [selectedCountry, setSelectedCountry] = useState("All");
+  const [selectedCountry, setSelectedCountry] = useState((pendingCountry as string) || "All");
 
   const filteredUniversities = useMemo(() => {
     return MATCHED_UNIVERSITIES.filter(uni => {
@@ -308,7 +310,19 @@ export default function UniversitySelection() {
                 <View style={styles.actionButtons}>
                   <TouchableOpacity 
                     style={styles.selectButton}
-                    onPress={() => router.push("/(tabs)/explore")}
+                    onPress={() => {
+                      if (pendingCountry) {
+                        setUserData({ 
+                          ...userData, 
+                          country: pendingCountry as string, 
+                          flag: pendingFlag as string,
+                          selectedUniversities: [uni, ...userData.selectedUniversities.filter(u => u.id !== uni.id)]
+                        });
+                      } else {
+                        selectUniversity(uni);
+                      }
+                      router.replace("/(tabs)/explore");
+                    }}
                   >
                     <Text style={styles.selectButtonText}>Select University</Text>
                     <Feather name="arrow-right" size={18} color="white" />

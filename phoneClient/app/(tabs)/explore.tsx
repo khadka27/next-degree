@@ -419,7 +419,7 @@ export default function DashboardScreen() {
                            userData.country === c.name && styles.modalCountrySelected
                          ]}
                          onPress={() => {
-                           setUserData({ ...userData, country: c.name, flag: c.flag });
+                           setShowPlanModal(false); setModalStep('options'); router.push({ pathname: "/search", params: { pendingCountry: c.name, pendingFlag: c.flag } });
                            setModalStep('options');
                          }}
                        >
