@@ -16,6 +16,8 @@ import {
 import { router, Stack } from "expo-router";
 import { Feather, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
+import { useUser } from "../context/UserContext";
+import { ProfileAvatar } from "../../components/ProfileAvatar";
 
 const { width, height } = Dimensions.get("window");
 
@@ -196,7 +198,7 @@ export default function UniversitySelection() {
             style={styles.profileBtn}
             onPress={() => router.push("/(tabs)/profile")}
           >
-            <Ionicons name="person-circle" size={48} color="#CBD5E1" />
+            <ProfileAvatar size={48} color="#CBD5E1" />
           </TouchableOpacity>
         </View>
 
