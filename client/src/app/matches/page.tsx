@@ -886,7 +886,7 @@ function MatchCard({
               <Wallet className="w-5 h-5" />
               <span className="text-[13px] font-semibold text-black">Tuition</span>
             </div>
-            <span className="text-[13px] font-semibold text-[#111827]">$32,100 / yr</span>
+            <span className="text-[13px] font-semibold text-[#111827]">{m.tuitionFee ? `${fmt(m.tuitionFee)} / yr` : "TBD"}</span>
           </div>
           <div className="space-y-3">
             <div className="flex items-center justify-between">
@@ -923,12 +923,96 @@ function MatchCard({
         </div>
       </div>
 
-      {/* Expanded Details - optional animation */}
+      {/* Expanded Details - Rich Data Feed */}
       {showDetails && (
-        <div className="px-6 pb-6 animate-in slide-in-from-top-4 duration-300">
-          <p className="text-xs font-medium text-slate-500 leading-relaxed border-t border-slate-50 pt-4">
-            {m.description || "World-class research facilities and a diverse student community focused on academic excellence."}
-          </p>
+        <div className="px-6 pb-6 animate-in slide-in-from-top-4 duration-500">
+          <div className="border-t border-slate-50 pt-5 space-y-6">
+            <p className="text-[13px] font-medium text-slate-600 leading-relaxed italic">
+              {m.description || "World-class research facilities and a diverse student community focused on academic excellence."}
+            </p>
+            
+            <div className="grid grid-cols-2 gap-x-4 gap-y-5">
+              {/* Ranking & Type */}
+              <div className="space-y-1.5">
+                <div className="flex items-center gap-1.5 text-slate-400">
+                  <Award className="w-3.5 h-3.5" />
+                  <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">National Rank</span>
+                </div>
+                <p className="text-[14px] font-bold text-slate-900">
+                  {m.rankingNational ? `#${m.rankingNational}` : "N/A"}
+                </p>
+              </div>
+              
+              <div className="space-y-1.5">
+                <div className="flex items-center gap-1.5 text-slate-400">
+                  <Building2 className="w-3.5 h-3.5" />
+                  <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Type & Founded</span>
+                </div>
+                <p className="text-[14px] font-bold text-slate-900 capitalize">
+                  {m.type || "Public"} <span className="text-slate-500 font-medium">{m.founded ? `(${m.founded})` : ""}</span>
+                </p>
+              </div>
+
+              {/* Requirements */}
+              <div className="space-y-1.5">
+                <div className="flex items-center gap-1.5 text-slate-400">
+                  <FileCheck className="w-3.5 h-3.5" />
+                  <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Min. GPA</span>
+                </div>
+                <p className="text-[14px] font-bold text-slate-900">
+                  {m.gpaRequirement || "3.0"}<span className="text-slate-400 text-[11px] font-bold">/4.0</span>
+                </p>
+              </div>
+
+              <div className="space-y-1.5">
+                <div className="flex items-center gap-1.5 text-slate-400">
+                  <Globe className="w-3.5 h-3.5" />
+                  <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">English Req.</span>
+                </div>
+                <p className="text-[14px] font-bold text-slate-900">
+                  IELTS {m.englishReq || "6.5"}
+                </p>
+              </div>
+
+              {/* Demographics & Salary */}
+              <div className="space-y-1.5">
+                <div className="flex items-center gap-1.5 text-slate-400">
+                  <GraduationCap className="w-3.5 h-3.5" />
+                  <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Intl. Students</span>
+                </div>
+                <p className="text-[14px] font-bold text-slate-900">
+                  {m.internationalPercentage || "15"}%
+                </p>
+              </div>
+
+              <div className="space-y-1.5">
+                <div className="flex items-center gap-1.5 text-slate-400">
+                  <Briefcase className="w-3.5 h-3.5" />
+                  <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Grad Salary</span>
+                </div>
+                <p className="text-[14px] font-bold text-emerald-600">
+                  {m.salaryMedian ? fmt(m.salaryMedian) : "N/A"}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between pt-3 border-t border-slate-50">
+               <div className="flex flex-col gap-1">
+                 <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Deadline</span>
+                 <span className="text-[13px] font-bold text-rose-500 flex items-center gap-1.5">
+                   <Clock className="w-3.5 h-3.5" />
+                   {m.applicationDeadline || "Rolling Admission"}
+                 </span>
+               </div>
+               
+               {m.website && (
+                  <a href={m.website} onClick={(e) => e.stopPropagation()} target="_blank" rel="noreferrer" className="flex items-center gap-2 group/link px-5 py-2.5 bg-[#f8fafc] hover:bg-blue-50 transition-all rounded-[14px] text-blue-600 text-[12px] font-bold shadow-sm ring-1 ring-slate-100 hover:ring-blue-100">
+                    Website 
+                    <ExternalLink className="w-3.5 h-3.5 group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5 transition-transform" />
+                  </a>
+               )}
+            </div>
+          </div>
         </div>
       )}
     </div>
