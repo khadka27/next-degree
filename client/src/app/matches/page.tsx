@@ -1259,7 +1259,7 @@ function MatchCostEstimator({ match: m }: { match: Match }) {
 
 /* ─────────────── Main Component ─────────────── */
 export default function AbroadLiftMatchesPage() {
-  const { status } = useSession();
+  const { data: session, status } = useSession();
   const USD_TO_NPR = 138;
   const [step, setStep] = useState(1);
   const [costPeriod, setCostPeriod] = useState<string>("First year");
@@ -1278,6 +1278,32 @@ export default function AbroadLiftMatchesPage() {
   const [searchQuery, setSearchQuery] = useState(""); // For Step 3 (Field of Study)
   const [dynamicLivingCost, setDynamicLivingCost] = useState<any>(null);
   const [relocationStats, setRelocationStats] = useState<any>(null);
+
+  // Persistence logic
+  useEffect(() => {
+    const saved = localStorage.getItem("abroadlift_match_data");
+    if (saved) {
+      try {
+        const data = JSON.parse(saved);
+        if (data.form) setForm(data.form);
+        if (data.step) setStep(data.step);
+        if (data.selectedMatch) setSelectedMatch(data.selectedMatch);
+      } catch (e) {
+        console.error("Failed to load match data", e);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    const data = { form, step, selectedMatch };
+    localStorage.setItem("abroadlift_match_data", JSON.stringify(data));
+  }, [form, step, selectedMatch]);
+
+  useEffect(() => {
+    if (step >= 8 && !session && status !== "loading") {
+      setStep(7);
+    }
+  }, [step, session, status]);
 
   useEffect(() => {
     if (step === 8 && selectedMatch) {
@@ -2424,6 +2450,10 @@ export default function AbroadLiftMatchesPage() {
                     currency={form.currency}
                     selected={selectedMatch?.id === m.id}
                     onSelect={() => {
+                      if (!session) {
+                        window.location.href = `/register?callbackUrl=${encodeURIComponent('/matches')}`;
+                        return;
+                      }
                       setSelectedMatch(m);
                       setStep(8);
                     }}

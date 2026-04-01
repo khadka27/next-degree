@@ -51,7 +51,8 @@ function LoginForm() {
       if (result?.error) {
         setError(result.error);
       } else {
-        router.push("/");
+        const callbackUrl = searchParams.get("callbackUrl");
+        router.push(callbackUrl || "/");
         router.refresh();
       }
     } catch {

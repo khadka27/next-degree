@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { AlertCircle, Eye, EyeOff } from "lucide-react";
@@ -67,6 +67,8 @@ function buildCountryCodeOptions(data: unknown): CountryCodeOption[] {
 
 export default function RegisterPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl");
   const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [serverError, setServerError] = useState("");
@@ -182,7 +184,10 @@ export default function RegisterPage() {
       const channelParam = otpChannel
         ? `&otpChannel=${otpChannel.toLowerCase()}`
         : "";
-      router.push(`/login?registered=1&otp=1${channelParam}`);
+      
+      const callbackParam = callbackUrl ? `&callbackUrl=${encodeURIComponent(callbackUrl)}` : "";
+      
+      router.push(`/login?registered=1&otp=1${channelParam}${callbackParam}`);
     } catch {
       setServerError("Something went wrong.");
     } finally {

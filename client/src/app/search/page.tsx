@@ -4,6 +4,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 import { 
   Search, 
   BookOpen, 
@@ -40,6 +41,7 @@ const COUNTRY_CODES: { [key: string]: string } = {
 
 
 export default function SearchPage() {
+  const { data: session } = useSession();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedMajor, setSelectedMajor] = useState("Computer Science");
   const [selectedCountry, setSelectedCountry] = useState("All Countries");
@@ -364,7 +366,10 @@ export default function SearchPage() {
                         <Users className="w-4 h-4" />
                         <span className="text-[13px] font-black">Diverse Community</span>
                       </div>
-                      <Link href={`/universities/${uni.id}`} className="bg-[#3366FF] text-white px-6 py-3 rounded-[16px] font-black text-[13px] flex items-center gap-2 hover:bg-[#2952cc] transition-all group active:scale-95 shadow-lg shadow-blue-500/20">
+                      <Link 
+                        href={session ? `/universities/${uni.id}` : `/register?callbackUrl=${encodeURIComponent(`/universities/${uni.id}`)}`} 
+                        className="bg-[#3366FF] text-white px-6 py-3 rounded-[16px] font-black text-[13px] flex items-center gap-2 hover:bg-[#2952cc] transition-all group active:scale-95 shadow-lg shadow-blue-500/20"
+                      >
                         View Details
                         <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                       </Link>
