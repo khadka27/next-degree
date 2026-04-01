@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import {
   Menu,
   X,
@@ -10,6 +11,10 @@ import {
   ArrowRight,
   ChevronDown,
   LayoutDashboard,
+  Home,
+  Search,
+  Sparkles,
+  LayoutGrid,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 
@@ -74,8 +79,17 @@ const NAV_LINKS: NavLink[] = [
   { href: "/scholarships", label: "Scholarships" },
 ];
 
+const MOBILE_TABS = [
+  { href: "/", label: "Home", icon: Home },
+  { href: "/search", label: "Search", icon: Search },
+  { href: "/matches", label: "Matches", icon: Sparkles },
+  { href: "/dashboard", label: "Stats", icon: LayoutGrid },
+  { href: "/profile", label: "Profile", icon: User },
+];
+
 export default function Navbar() {
   const { data: session } = useSession();
+  const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const isAdmin = session?.user?.role === "ADMIN";
@@ -88,8 +102,9 @@ export default function Navbar() {
 
   return (
     <>
+      {/* Desktop & Mobile Top Bar (Logo Only on Mobile) */}
       <nav
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'translate-y-0' : 'translate-y-0'} ${
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
           scrolled
             ? "bg-white/80 backdrop-blur-xl border-b border-gray-100 py-3 shadow-sm"
             : "bg-transparent py-5"
@@ -101,7 +116,7 @@ export default function Navbar() {
             href="/"
             className="flex items-center gap-2.5 group no-underline"
           >
-            <div className="relative w-[160px] h-[45px] group-hover:scale-105 transition-transform duration-300">
+            <div className="relative w-[140px] md:w-[160px] h-[40px] md:h-[45px] group-hover:scale-105 transition-transform duration-300">
               <Image
                 src="/logo.png"
                 alt="AbroadLift Logo"
@@ -111,7 +126,7 @@ export default function Navbar() {
             </div>
           </Link>
 
-          {/* Desktop Links */}
+          {/* Desktop Links (Hidden on Mobile) */}
           <ul className="hidden lg:flex items-center gap-8 list-none m-0 p-0">
             {NAV_LINKS.map((l) => (
               <li key={l.label} className="relative group py-4">
@@ -124,7 +139,9 @@ export default function Navbar() {
                   {l.label}
                   {l.hasDropdown && (
                     <ChevronDown
-                      className={`w-4 h-4 transition-transform group-hover:rotate-180 ${scrolled ? "text-blue-400!" : "text-blue-500!"}`}
+                      className={`w-4 h-4 transition-transform group-hover:rotate-180 ${
+                        scrolled ? "text-blue-400!" : "text-blue-500!"
+                      }`}
                     />
                   )}
                 </Link>
@@ -167,38 +184,38 @@ export default function Navbar() {
             )}
           </ul>
 
-          {/* Right actions */}
-          <div className="flex items-center gap-4 sm:gap-6">
+          {/* Right actions (Desktop Only) */}
+          <div className="hidden lg:flex items-center gap-4 sm:gap-6">
             <Link
               href="/profile"
-              className={`p-2 transition-colors ${scrolled ? "text-blue-600! hover:text-blue-700!" : "text-blue-700! hover:text-blue-600!"}`}
+              className={`p-2 transition-colors ${
+                scrolled
+                  ? "text-blue-600! hover:text-blue-700!"
+                  : "text-blue-700! hover:text-blue-600!"
+              }`}
             >
               <User className="w-6 h-6" strokeWidth={2} />
             </Link>
 
             <Link
               href="/register"
-              className="hidden md:flex items-center gap-2 bg-[#3366FF] text-white font-bold px-7 py-3 rounded-2xl text-[15px] shadow-xl shadow-blue-500/25 hover:bg-[#2952CC] hover:-translate-y-0.5 transition-all duration-300 active:scale-95"
+              className="flex items-center gap-2 bg-[#3366FF] text-white font-bold px-7 py-3 rounded-2xl text-[15px] shadow-xl shadow-blue-500/25 hover:bg-[#2952CC] hover:-translate-y-0.5 transition-all duration-300 active:scale-95"
             >
               Get Started
               <ArrowRight className="w-4 h-4" />
             </Link>
-
-            {/* Mobile burger */}
-            <button
-              className={`lg:hidden w-11 h-11 flex justify-center items-center rounded-2xl border transition-all shadow-sm bg-white border-gray-100 text-gray-900`}
-              onClick={() => setMobileOpen(!mobileOpen)}
-            >
-              {mobileOpen ? (
-                <X className="w-6 h-6" />
-              ) : (
-                <Menu className="w-6 h-6" />
-              )}
-            </button>
           </div>
+
+          {/* Mobileburger (Hidden by default, used for secondary menu if needed, but we'll focus on the bottom nav) */}
+          <button
+            className={`lg:hidden w-11 h-11 flex justify-center items-center rounded-2xl border transition-all shadow-sm bg-white border-gray-100 text-gray-900`}
+            onClick={() => setMobileOpen(!mobileOpen)}
+          >
+            {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
         </div>
 
-        {/* Mobile drawer */}
+        {/* Mobile drawer (Backup for deep links) */}
         {mobileOpen && (
           <div className="lg:hidden absolute top-full left-0 w-full border-b border-gray-100 bg-white px-6 py-10 flex flex-col gap-6 shadow-2xl animate-fade-in">
             {NAV_LINKS.map((l) => (
@@ -226,16 +243,6 @@ export default function Navbar() {
                 )}
               </div>
             ))}
-            {isAdmin && (
-              <Link
-                href="/admin"
-                onClick={() => setMobileOpen(false)}
-                className="text-xl font-extrabold text-blue-700! hover:text-blue-600! transition-colors flex items-center gap-2"
-              >
-                <LayoutDashboard className="w-5 h-5 text-blue-600" />
-                Admin Panel
-              </Link>
-            )}
             <div className="h-px bg-gray-100 my-2" />
             <Link
               href="/register"
@@ -247,6 +254,80 @@ export default function Navbar() {
           </div>
         )}
       </nav>
+
+      {/* Mobile Floating Bottom Nav */}
+      <div className="lg:hidden fixed bottom-6 left-1/2 -translate-x-1/2 w-[95%] max-w-[440px] z-50 h-20 bg-white rounded-[32px] shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-gray-100 flex items-center justify-around px-2">
+        {/* Animated Notch/Cutout (SVG for the smooth curve) */}
+        <div 
+          className="absolute top-0 h-full transition-all duration-500 ease-out pointer-events-none"
+          style={{ 
+            left: `${(MOBILE_TABS.findIndex(t => t.href === pathname) * 20) + 10}%`,
+            width: '20%',
+            transform: 'translateX(-50%)'
+          }}
+        >
+          {/* The Notch SVG */}
+          <div className="absolute -top-[18px] left-1/2 -translate-x-1/2 w-[70px] h-[30px]">
+             <svg viewBox="0 0 70 30" className="w-full h-full fill-white drop-shadow-[0_-5px_5px_rgba(0,0,0,0.02)]">
+                <path d="M0 30 C15 30 15 0 35 0 C55 0 55 30 70 30 L0 30 Z" />
+             </svg>
+             {/* The Indicator Dot */}
+             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2 h-2 bg-blue-600 rounded-full shadow-[0_0_10px_rgba(51,102,255,0.8)]" />
+          </div>
+        </div>
+
+        {MOBILE_TABS.map((tab) => {
+          const isActive = pathname === tab.href;
+          const Icon = tab.icon;
+          
+          return (
+            <Link
+              key={tab.label}
+              href={tab.href}
+              className="relative flex flex-col items-center justify-center w-1/5 h-full z-10"
+            >
+              <div
+                className={`transition-all duration-500 ${
+                  isActive
+                    ? "text-[#3366FF] -translate-y-4 scale-110"
+                    : "text-gray-400"
+                }`}
+              >
+                <Icon
+                  size={isActive ? 28 : 24}
+                  strokeWidth={isActive ? 2.5 : 2}
+                />
+              </div>
+
+              <span
+                className={`text-[9px] font-bold absolute bottom-3 transition-all duration-300 ${
+                  isActive
+                    ? "text-[#3366FF] opacity-100 scale-100"
+                    : "text-gray-400 opacity-0 scale-50"
+                }`}
+              >
+                {tab.label}
+              </span>
+            </Link>
+          );
+        })}
+      </div>
+
+      <style jsx global>{`
+        @keyframes fade-in {
+          from {
+            opacity: 0;
+            transform: translateY(-10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        .animate-fade-in {
+          animation: fade-in 0.3s ease-out forwards;
+        }
+      `}</style>
     </>
   );
 }
