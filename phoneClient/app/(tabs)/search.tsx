@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import {
   StyleSheet,
   View,
@@ -14,6 +14,7 @@ import {
   Modal,
   ActivityIndicator,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import { Feather, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
@@ -146,6 +147,7 @@ const ProgressTracker = ({ percentage }: { percentage: number }) => {
 };
 
 export default function UniversitySelection() {
+  const insets = useSafeAreaInsets();
   const { userData, setUserData, selectUniversity } = useUser();
   const { pendingCountry, pendingFlag } = useLocalSearchParams();
   const [filterVisible, setFilterVisible] = useState(false);
@@ -153,29 +155,49 @@ export default function UniversitySelection() {
   // Search state
   const [searchQuery, setSearchQuery] = useState("");
   
+  // UI Refs
+  const scrollRef = useRef<ScrollView>(null);
+  
   // Filter states
   const [admissionChance, setAdmissionChance] = useState("All");
   const [matchRating, setMatchRating] = useState("All");
   const [feeRange, setFeeRange] = useState(100000); // Max fee slider
-  const [selectedCountry, setSelectedCountry] = useState((pendingCountry as string) || "All");
+  const [selectedCountry, setSelectedCountry] = useState((pendingCountry as string) || userData.country || "All");
 
   // Dynamic API state
   const [universities, setUniversities] = useState<UniversityResult[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Sync with Study Plan changes
+  useEffect(() => {
+    if (userData.country) {
+      console.log(`[Search Sync] Destination changed in Study Plan to: ${userData.country}`);
+      setSelectedCountry(userData.country);
+    }
+  }, [userData.country]);
+
   useEffect(() => {
     let mounted = true;
     const fetchIt = async () => {
-      setIsLoading(true);
-      const data = await searchUniversities(searchQuery, selectedCountry);
+      // Clear current view and scroll to top for fresh start
+      if (mounted) {
+        setIsLoading(true);
+        setUniversities([]); // Immediate feedback
+        scrollRef.current?.scrollTo({ y: 0, animated: false });
+      }
+      
+      console.log(`[Search Effect] Fetching for: ${selectedCountry || userData.country || 'All'}`);
+      const data = await searchUniversities(searchQuery, selectedCountry || userData.country || "All");
+      
       if (mounted) {
         setUniversities(data);
         setIsLoading(false);
       }
     };
+    // Debounce to prevent rapid multiple calls if state updates sequentially
     const t = setTimeout(fetchIt, 400);
     return () => { mounted = false; clearTimeout(t); };
-  }, [searchQuery, selectedCountry]);
+  }, [searchQuery, selectedCountry, userData.country]);
 
   const filteredUniversities = useMemo(() => {
     return universities.filter(uni => {
@@ -199,53 +221,54 @@ export default function UniversitySelection() {
       <StatusBar barStyle="dark-content" />
       <Stack.Screen options={{ headerShown: false }} />
       
-      {/* Search and Header Section */}
-      <View style={styles.header}>
-        <View style={styles.headerTopRow}>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.title}>Find Universities That Match Your Profile</Text>
-            <Text style={styles.subtitle}>
-              Compare costs, admission chances, and visa success — all in one place
-            </Text>
-          </View>
-          <TouchableOpacity 
-            style={styles.profileBtn}
-            onPress={() => router.push("/(tabs)/profile")}
-          >
-            <ProfileAvatar size={48} color="#CBD5E1" />
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.searchBar}>
-          <Feather name="search" size={20} color="#94A3B8" />
-          <TextInput 
-            placeholder="Search universities, courses..." 
-            style={styles.searchInput}
-            placeholderTextColor="#94A3B8"
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-          />
-        </View>
-
-        <View style={styles.actionsRow}>
-          <TouchableOpacity style={styles.actionButton}>
-            <MaterialIcons name="swap-vert" size={20} color={THEME.textDark} />
-            <Text style={styles.actionButtonText}>Sort</Text>
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={[styles.actionButton, (admissionChance !== "All" || matchRating !== "All" || feeRange < 100000 || selectedCountry !== "All") && { borderColor: THEME.primary, backgroundColor: "#F0F9FF" }]} 
-            onPress={() => setFilterVisible(true)}
-          >
-            <Ionicons name="options-outline" size={20} color={THEME.textDark} />
-            <Text style={styles.actionButtonText}>Filters</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-
       <ScrollView 
+        ref={scrollRef}
         showsVerticalScrollIndicator={false} 
         contentContainerStyle={styles.scrollContent}
       >
+        {/* Search and Header Section Moved Inside ScrollView */}
+        <View style={[styles.header, { paddingHorizontal: 0, paddingTop: insets.top + 20 }]}>
+          <View style={styles.headerTopRow}>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.title}>Find Universities That Match Your Profile</Text>
+              <Text style={styles.subtitle}>
+                Compare costs, admission chances, and visa success — all in one place
+              </Text>
+            </View>
+            <TouchableOpacity 
+              style={styles.profileBtn}
+              onPress={() => router.push("/(tabs)/profile")}
+            >
+              <ProfileAvatar size={48} color="#CBD5E1" />
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.searchBar}>
+            <Feather name="search" size={20} color="#94A3B8" />
+            <TextInput 
+              placeholder="Search universities, courses..." 
+              style={styles.searchInput}
+              placeholderTextColor="#94A3B8"
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+            />
+          </View>
+
+          <View style={styles.actionsRow}>
+            <TouchableOpacity style={styles.actionButton}>
+              <MaterialIcons name="swap-vert" size={20} color={THEME.textDark} />
+              <Text style={styles.actionButtonText}>Sort</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={[styles.actionButton, (admissionChance !== "All" || matchRating !== "All" || feeRange < 100000 || selectedCountry !== "All") && { borderColor: THEME.primary, backgroundColor: "#F0F9FF" }]} 
+              onPress={() => setFilterVisible(true)}
+            >
+              <Ionicons name="options-outline" size={20} color={THEME.textDark} />
+              <Text style={styles.actionButtonText}>Filters</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
         {isLoading ? (
           <View style={{ flex: 1, justifyContent: "center", alignItems: "center", paddingVertical: 40 }}>
             <ActivityIndicator size="large" color={THEME.primary} />

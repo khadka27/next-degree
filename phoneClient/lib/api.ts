@@ -24,27 +24,27 @@ export interface UniversityResult {
   recommended?: boolean;
 }
 
+import { fetchWorqnowUniversities, WorqnowUniversity } from './worqnow';
+
 export const searchUniversities = async (query: string, countries: string = "All"): Promise<UniversityResult[]> => {
   try {
-    const queryParams = new URLSearchParams();
-    if (query) queryParams.append('q', query);
-    if (countries && countries !== "All") queryParams.append('countries', countries);
+    // If "All" countries, we'll default to a popular one or a list for demo
+    // The web client usually specifies a country.
+    const countryToFetch = countries === "All" ? "uk" : countries.toLowerCase();
     
-    // Default URL to fetch
-    const url = `${API_BASE_URL}/universities/search?${queryParams.toString()}`;
-    const response = await fetch(url);
-    if (!response.ok) {
-        // Log errors to retry with physical IP
-        console.warn(`API Failed on ${API_BASE_URL}, retrying with physical network IP...`);
-        const fallbackUrl = `http://192.168.1.68:3000/api/universities/search?${queryParams.toString()}`;
-        const fbResponse = await fetch(fallbackUrl);
-        if(!fbResponse.ok) throw new Error("Failed to fetch from fallback URL");
-        
-        const data = await fbResponse.json();
-        return processResults(data.results);
+    console.log(`[API Search] Redirecting search to direct WorqNow client for ${countryToFetch}...`);
+    const results: WorqnowUniversity[] = await fetchWorqnowUniversities(countryToFetch);
+    
+    let filtered = results;
+    if (query) {
+      const q = query.toLowerCase();
+      filtered = results.filter(u => 
+        u.name.toLowerCase().includes(q) || 
+        u.city?.toLowerCase().includes(q)
+      );
     }
-    const data = await response.json();
-    return processResults(data.results);
+
+    return processResults(filtered);
   } catch (error) {
     console.error("Error fetching universities:", error);
     return [];
@@ -54,6 +54,9 @@ export const searchUniversities = async (query: string, countries: string = "All
 const processResults = (results: any[]): UniversityResult[] => {
   if (!results) return [];
   return results.map((res: any) => {
+    // WorqNow uses 'code' as the unique ID
+    const uniqueId = res.code || res.id || `temp-${Math.random().toString(36).substr(2, 9)}`;
+    
     // Attempt to extract numerical tuition
     let tuitionValue = 35000;
     if (typeof res.tuition === 'number') {
@@ -70,12 +73,12 @@ const processResults = (results: any[]): UniversityResult[] => {
     else if (rate <= 30) chance = "Low";
 
     return {
-      id: String(res.id),
+      id: String(uniqueId),
       name: res.name || "Unknown University",
-      course: "Various Courses", // API returns institutions, not specific courses
-      location: res.location || "Unknown Location",
+      course: res.course || "Various Courses", // API returns institutions, not specific courses
+      location: res.location || (res.city ? `${res.city}, ${res.country}` : "Unknown Location"),
       image: "https://images.unsplash.com/photo-1541339907198-e08756ebafe3?auto=format&fit=crop&q=80&w=800", // Default image
-      rank: "Global Rank N/A",
+      rank: res.ranking_world ? `#${res.ranking_world} Global` : (res.rank || "N/A"),
       duration: "Check Website",
       tuition: typeof res.tuition === 'number' ? `$${res.tuition.toLocaleString()} / yr` : (res.tuition || "Check Website"),
       tuitionValue,
@@ -83,7 +86,7 @@ const processResults = (results: any[]): UniversityResult[] => {
       admissionChance: chance,
       matchRating: "4.0",
       country: res.country || "Unknown",
-      city: res.location?.split(',')[0] || "",
+      city: res.city || res.location?.split(',')[0] || "",
       recommended: false, 
       website: res.website || "",
       ...res // Allow overrides if API changes

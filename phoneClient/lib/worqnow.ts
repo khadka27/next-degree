@@ -31,35 +31,63 @@ export interface WorqnowUniversity {
 
 const universityCache: Record<string, WorqnowUniversity[]> = {};
 
+const COUNTRY_MAP: Record<string, string> = {
+  "australia": "au",
+  "canada": "ca",
+  "germany": "de",
+  "ireland": "ie",
+  "netherlands": "nl",
+  "uk": "gb",
+  "gb": "gb",
+  "united kingdom": "gb",
+  "united states": "us",
+  "usa": "us",
+  "us": "us"
+};
+
 export async function fetchWorqnowUniversities(
-  countryCode: string
+  countryCode: string,
 ): Promise<WorqnowUniversity[]> {
-  const code = countryCode.toLowerCase();
-  if (universityCache[code]) {
-    return universityCache[code];
+  const normalizedCountry = countryCode.toLowerCase();
+  const mappedCode = COUNTRY_MAP[normalizedCountry] || normalizedCountry;
+  
+  // Return from memory if already loaded
+  if (universityCache[mappedCode]) {
+    console.log(`[WorqNow API] Cache HIT for ${mappedCode.toUpperCase()} (${universityCache[mappedCode].length} items)`);
+    return universityCache[mappedCode];
   }
 
-  const apiKey = process.env.EXPO_PUBLIC_WORQNOW_API_KEY || "https://api.worqnow.ai";
-  const url = `${BASE_URL}/${code}/universities`;
+  const apiKey = process.env.EXPO_PUBLIC_WORQNOW_API_KEY;
+  const url = `${BASE_URL}/${mappedCode}/universities`;
+
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
   };
 
-  // Attach auth header if present
-  if (apiKey) {
+  // Only attach auth header if a key is configured and not just a placeholder
+  if (apiKey && apiKey !== "your_worqnow_api_key_here") {
     headers["Authorization"] = `Bearer ${apiKey}`;
     headers["x-api-key"] = apiKey;
   }
 
+  console.log(`[WorqNow API] Requesting ${mappedCode.toUpperCase()}...`);
+  console.log(`[WorqNow API] URL: ${url}`);
+  console.log(`[WorqNow API] Headers:`, JSON.stringify({ ...headers, Authorization: headers.Authorization ? "Bearer [REDACTED]" : undefined }, null, 2));
+
   try {
     const response = await fetch(url, { method: "GET", headers });
 
+    console.log(`[WorqNow API] Status: ${response.status} ${response.statusText}`);
+
     if (!response.ok) {
-      console.warn(`WorqNow API Error: ${response.status} for ${countryCode}`);
+      console.warn(`[WorqNow API] Request failed for ${countryCode}`);
       return [];
     }
 
     const data = await response.json();
+    
+    // Log a small sample of the raw result
+    console.log(`[WorqNow API] Raw Data Received:`, JSON.stringify(data).substring(0, 300) + "...");
 
     const list: any[] = Array.isArray(data?.data)
       ? data.data
@@ -67,61 +95,68 @@ export async function fetchWorqnowUniversities(
         ? data
         : [];
 
+    console.log(`[WorqNow API] Found ${list.length} universities.`);
+    if (list.length > 0) {
+      console.log(`[WorqNow API] Sample Result (First Item):`, JSON.stringify(list[0], null, 2));
+    }
+
     const transformed = list.map((u: any) => ({
       ...u,
       estimatedFeeUSD: FEE_BAND_USD[u.international_fee_band] ?? 0,
     }));
-    universityCache[code] = transformed;
+
+    universityCache[mappedCode] = transformed;
     return transformed;
-  } catch (error) {
-    console.warn(`WorqNow API Fetch Error for ${countryCode}:`, error);
+  } catch (error: any) {
+    console.error(`[WorqNow API] ERROR for ${countryCode}:`, error?.message || error);
     return [];
   }
 }
 
-const COUNTRY_MAP: Record<string, string> = {
-  "uk": "uk",
-  "united kingdom": "uk",
-  "usa": "us",
-  "united states": "us",
-  "canada": "ca",
-  "australia": "au",
-  "new zealand": "nz",
-  "china": "cn"
-};
 
 export async function getWorqnowUniversityDetail(
   id: string,
   countryString?: string
 ): Promise<WorqnowUniversity | null> {
-  const apiKey = process.env.EXPO_PUBLIC_WORQNOW_API_KEY || "https://api.worqnow.ai";
+  const apiKey = process.env.EXPO_PUBLIC_WORQNOW_API_KEY;
   const headers: Record<string, string> = { "Content-Type": "application/json" };
-  if (apiKey) {
+  
+  if (apiKey && apiKey !== "your_worqnow_api_key_here") {
     headers["Authorization"] = `Bearer ${apiKey}`;
     headers["x-api-key"] = apiKey;
   }
 
-  // If we know the country, direct fetch
   if (countryString) {
-    const code = COUNTRY_MAP[countryString.toLowerCase()] || countryString.toLowerCase();
+    const normalizedCountry = countryString.toLowerCase();
+    const code = COUNTRY_MAP[normalizedCountry] || normalizedCountry;
     const url = `${BASE_URL}/${code}/universities/${id}`;
+    
+    console.log(`[WorqNow API] Requesting Detail for ID: ${id}`);
+    console.log(`[WorqNow API] URL: ${url}`);
+
     try {
       const res = await fetch(url, { method: "GET", headers });
+      
+      console.log(`[WorqNow API] Detail Status: ${res.status}`);
+
       if (res.ok) {
         const data = await res.json();
+        console.log(`[WorqNow API] Detail Data Received:`, JSON.stringify(data, null, 2));
         const uni = data.data || data;
         return {
           ...uni,
           estimatedFeeUSD: FEE_BAND_USD[uni.international_fee_band] ?? 0,
         };
       }
-    } catch (e) {
-      console.warn("Direct fetch error:", e);
+    } catch (e: any) {
+      console.warn(`[WorqNow API] Detail Fetch Error for ${id}:`, e?.message || e);
     }
   }
 
   // Fallback to searching lists if direct fetch fails or country is unknown
-  const fallbackCountries = ["uk", "ca", "au", "us", "nz", "cn"];
+  console.log(`[WorqNow API] Triggering fallback list search for ID: ${id}`);
+  // Use unique codes for fallback from the official provided list
+  const fallbackCountries = ["au", "ca", "de", "ie", "nl", "gb", "us"];
   const allResults = await Promise.all(
     fallbackCountries.map(c => fetchWorqnowUniversities(c))
   );
@@ -132,9 +167,13 @@ export async function getWorqnowUniversityDetail(
       u.name === id || 
       String((u as any).id) === id
     );
-    if (found) return found;
+    if (found) {
+      console.log(`[WorqNow API] Found match in list search: ${found.name}`);
+      return found;
+    }
   }
   
+  console.log(`[WorqNow API] No university found for ID: ${id}`);
   return null;
 }
 
