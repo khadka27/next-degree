@@ -37,12 +37,12 @@ const COUNTRY_MAP: Record<string, string> = {
   "germany": "de",
   "ireland": "ie",
   "netherlands": "nl",
-  "uk": "gb",
-  "gb": "gb",
-  "united kingdom": "gb",
-  "united states": "us",
-  "usa": "us",
-  "us": "us"
+  "uk": "uk",
+  "gb": "uk",
+  "united kingdom": "uk",
+  "united states": "usa",
+  "usa": "usa",
+  "us": "usa"
 };
 
 export async function fetchWorqnowUniversities(
@@ -156,7 +156,7 @@ export async function getWorqnowUniversityDetail(
   // Fallback to searching lists if direct fetch fails or country is unknown
   console.log(`[WorqNow API] Triggering fallback list search for ID: ${id}`);
   // Use unique codes for fallback from the official provided list
-  const fallbackCountries = ["au", "ca", "de", "ie", "nl", "gb", "us"];
+  const fallbackCountries = ["au", "ca", "de", "ie", "nl", "uk", "usa"];
   const allResults = await Promise.all(
     fallbackCountries.map(c => fetchWorqnowUniversities(c))
   );

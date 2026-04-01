@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from "react";
+import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import {
   StyleSheet,
   View,
@@ -15,6 +15,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useFocusEffect } from "@react-navigation/native";
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import { Feather, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
@@ -167,6 +168,22 @@ export default function UniversitySelection() {
   // Dynamic API state
   const [universities, setUniversities] = useState<UniversityResult[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [focusCount, setFocusCount] = useState(0);
+
+  // Trigger search on focus
+  useFocusEffect(
+    useCallback(() => {
+      setFocusCount(prev => prev + 1);
+      console.log("[Search] Page focused, refreshing...");
+    }, [])
+  );
+
+  // Sync with params
+  useEffect(() => {
+    if (pendingCountry) {
+      setSelectedCountry(pendingCountry as string);
+    }
+  }, [pendingCountry]);
 
   // Sync with Study Plan changes
   useEffect(() => {
@@ -178,11 +195,14 @@ export default function UniversitySelection() {
 
   useEffect(() => {
     let mounted = true;
+    
+    // Immediate feedback
+    setIsLoading(true);
+    
     const fetchIt = async () => {
       // Clear current view and scroll to top for fresh start
       if (mounted) {
-        setIsLoading(true);
-        setUniversities([]); // Immediate feedback
+        setUniversities([]); 
         scrollRef.current?.scrollTo({ y: 0, animated: false });
       }
       
@@ -197,7 +217,7 @@ export default function UniversitySelection() {
     // Debounce to prevent rapid multiple calls if state updates sequentially
     const t = setTimeout(fetchIt, 400);
     return () => { mounted = false; clearTimeout(t); };
-  }, [searchQuery, selectedCountry, userData.country]);
+  }, [searchQuery, selectedCountry, userData.country, focusCount]);
 
   const filteredUniversities = useMemo(() => {
     return universities.filter(uni => {
@@ -504,7 +524,7 @@ export default function UniversitySelection() {
               <View style={styles.filterSection}>
                 <Text style={styles.filterLabel}>Country</Text>
                 <View style={styles.chipRow}>
-                    {["All", "UK", "USA", "Canada"].map((c) => (
+                    {["All", "UK", "USA", "Canada", "Australia", "Germany", "Ireland", "Netherlands"].map((c) => (
                         <TouchableOpacity 
                             key={c}
                             style={[styles.filterChip, selectedCountry === c && styles.activeChip]}

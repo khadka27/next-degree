@@ -44,14 +44,14 @@ export const searchUniversities = async (query: string, countries: string = "All
       );
     }
 
-    return processResults(filtered);
+    return processResults(filtered, countries);
   } catch (error) {
     console.error("Error fetching universities:", error);
     return [];
   }
 };
 
-const processResults = (results: any[]): UniversityResult[] => {
+const processResults = (results: any[], searchCountry: string): UniversityResult[] => {
   if (!results) return [];
   return results.map((res: any) => {
     // WorqNow uses 'code' as the unique ID
@@ -72,11 +72,14 @@ const processResults = (results: any[]): UniversityResult[] => {
     if (rate >= 60) chance = "High";
     else if (rate <= 30) chance = "Low";
 
+    // Fallback country name if API doesn't provide it
+    const displayCountry = res.country || (searchCountry !== "All" ? searchCountry : "Global");
+
     return {
       id: String(uniqueId),
       name: res.name || "Unknown University",
       course: res.course || "Various Courses", // API returns institutions, not specific courses
-      location: res.location || (res.city ? `${res.city}, ${res.country}` : "Unknown Location"),
+      location: res.location || (res.city ? `${res.city}, ${displayCountry}` : `Various Locations, ${displayCountry}`),
       image: "https://images.unsplash.com/photo-1541339907198-e08756ebafe3?auto=format&fit=crop&q=80&w=800", // Default image
       rank: res.ranking_world ? `#${res.ranking_world} Global` : (res.rank || "N/A"),
       duration: "Check Website",
@@ -85,7 +88,7 @@ const processResults = (results: any[]): UniversityResult[] => {
       acceptanceRate: rate,
       admissionChance: chance,
       matchRating: "4.0",
-      country: res.country || "Unknown",
+      country: displayCountry,
       city: res.city || res.location?.split(',')[0] || "",
       recommended: false, 
       website: res.website || "",
