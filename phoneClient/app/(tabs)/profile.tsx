@@ -25,7 +25,7 @@ const COLORS = {
 };
 
 export default function ProfileTab() {
-  const { userData } = useUser();
+  const { userData, logout } = useUser();
 
   return (
     <SafeAreaView style={styles.container}>
@@ -146,7 +146,7 @@ export default function ProfileTab() {
             <Feather name="chevron-right" size={20} color={COLORS.textDark} />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.menuItem} onPress={() => router.push("/")}>
+          <TouchableOpacity style={styles.menuItem} onPress={logout}>
             <Text style={[styles.menuItemText, { color: COLORS.red }]}>Log Out</Text>
           </TouchableOpacity>
         </View>

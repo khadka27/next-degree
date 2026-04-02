@@ -26,7 +26,40 @@ export interface UniversityResult {
 
 import { fetchWorqnowUniversities, WorqnowUniversity } from './worqnow';
 
+export const login = async (identifier: string, password: string): Promise<any> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/auth/mobile/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ identifier, password }),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || 'Login failed');
+    return data;
+  } catch (error) {
+    console.error("Login Error:", error);
+    throw error;
+  }
+};
+
+export const register = async (userData: any): Promise<any> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(userData),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || 'Registration failed');
+    return data;
+  } catch (error) {
+    console.error("Registration Error:", error);
+    throw error;
+  }
+};
+
 export const searchUniversities = async (query: string, countries: string = "All"): Promise<UniversityResult[]> => {
+
   try {
     // If "All" countries, we'll default to a popular one or a list for demo
     // The web client usually specifies a country.
