@@ -2836,20 +2836,22 @@ export default function AbroadLiftMatchesPage() {
 
       const yearlyLivingUsd = Object.values(livingBreakdownUsd as Record<string, number>).reduce((s, v) => s + v, 0);
       const setupCostsUsd = 1500;
+      const graduationDuration = parseInt(form.duration) || (form.degree === "Postgraduate" ? 2 : 4);
+      
       const totalYear1Usd = tuitionUsd + yearlyLivingUsd + setupCostsUsd;
       const totalYear1Npr = apiCostEstimate?.total_npr || Math.round(totalYear1Usd * usdToNpr);
 
       const fmtNpr = (v: number) => new Intl.NumberFormat('en-NP', { style: 'currency', currency: 'NPR', maximumFractionDigits: 0 }).format(v);
       const fmtLakhs = (v: number) => `NPR ${(v / 100000).toFixed(1)} Lakhs`;
 
-      const monthlyLivingNpr = apiCostEstimate?.monthly_npr || Math.round((yearlyLivingUsd * usdToNpr) / 12);
-      
       const itemizedMonthly = apiCostEstimate ? {
+        Education: Math.round(apiCostEstimate.education_npr),
         Rent: Math.round(apiCostEstimate.housing_npr / 12),
         Food: Math.round(apiCostEstimate.food_npr / 12),
         Transport: Math.round(apiCostEstimate.transport_npr / 12),
         Healthcare: Math.round(apiCostEstimate.healthcare_npr / 12),
       } : {
+        Education: Math.round(tuitionUsd * usdToNpr),
         Rent: Math.round(((livingBreakdownUsd as any).rent * usdToNpr) / 12),
         Food: Math.round(((livingBreakdownUsd as any).food * usdToNpr) / 12),
         Transport: Math.round(((livingBreakdownUsd as any).transport * usdToNpr) / 12),
@@ -2858,6 +2860,19 @@ export default function AbroadLiftMatchesPage() {
 
       const tuitionPct = apiCostEstimate ? Math.round((apiCostEstimate.education_npr / totalYear1Npr) * 100) : Math.round((tuitionUsd / totalYear1Usd) * 100);
       const livingPct = 100 - tuitionPct;
+
+      const totalDegreeCostNpr = totalYear1Npr + (tuitionUsd + yearlyLivingUsd) * usdToNpr * (graduationDuration - 1);
+      const monthlyTotalNpr = Math.round((tuitionUsd + yearlyLivingUsd) * usdToNpr / 12);
+
+      const displayAmountNpr = 
+        costPeriod === "Month on month" ? monthlyTotalNpr :
+        costPeriod === "Year on year" ? totalDegreeCostNpr :
+        totalYear1Npr;
+
+      const displayLabel = 
+        costPeriod === "Month on month" ? "Average Monthly Cost" :
+        costPeriod === "Year on year" ? `Total ${graduationDuration}-Year Estimate` :
+        "First Year Total Investment";
 
       return (
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 max-w-full px-4 pb-12 space-y-5 bg-white min-h-screen">
@@ -2881,9 +2896,9 @@ export default function AbroadLiftMatchesPage() {
           >
             <div className="relative z-10 flex items-center justify-between">
               <div className="space-y-4">
-                <p className="text-[13px] font-bold text-slate-600 leading-none">Total Estimated Cost</p>
+                <p className="text-[13px] font-bold text-slate-600 leading-none">{displayLabel}</p>
                 <h2 className="text-2xl font-black text-slate-900 leading-tight">
-                  {fmtLakhs(totalYear1Npr)}
+                  {costPeriod === "Month on month" ? fmtNpr(displayAmountNpr) : fmtLakhs(displayAmountNpr)}
                 </h2>
                 <div className="inline-flex px-4 py-2 bg-blue-600 text-white text-[11px] font-black rounded-full uppercase tracking-widest shadow-sm">
                   ● {selectedMatch.countryCode} Engine
@@ -2927,24 +2942,48 @@ export default function AbroadLiftMatchesPage() {
                   <div className="w-10 h-10 rounded-full bg-emerald-400/20 flex items-center justify-center text-emerald-600">
                     <Calculator className="w-5 h-5 text-emerald-500" fill="currentColor" fillOpacity="0.2" />
                   </div>
-                  <span className="font-bold text-slate-800">Year Breakdown</span>
+                  <span className="font-bold text-slate-800">
+                    {costPeriod === "Month on month" ? "Monthly Breakdown" : 
+                     costPeriod === "Year on year" ? "Multi-Year Projection" : "Year 1 Breakdown"}
+                  </span>
                 </div>
                 <ChevronDown className="w-5 h-5 text-slate-300" />
               </div>
               <div className="divide-y divide-slate-50">
-                {[
-                  { l: "Year 1 (Total)", v: fmtLakhs(totalYear1Npr) },
-                  { l: "Year 2 (Tuition+Living)", v: fmtLakhs((tuitionUsd + (Object.values(livingBreakdownUsd as Record<string, number>).reduce((s, v) => s + v, 0) * 12)) * usdToNpr) },
-                  { l: "Year 3 (Tuition+Living)", v: fmtLakhs((tuitionUsd + (Object.values(livingBreakdownUsd as Record<string, number>).reduce((s, v) => s + v, 0) * 12)) * usdToNpr) },
-                ].map((it, i) => (
-                  <div key={i} className="px-6 py-4 flex items-center justify-between font-black text-slate-900 text-[14px]">
-                    <span className="text-slate-400 font-medium">{it.l}</span>
-                    <span>{it.v}</span>
-                  </div>
-                ))}
+                {costPeriod === "Month on month" ? (
+                  Object.entries(itemizedMonthly).map(([l, v], i) => (
+                    <div key={i} className="px-6 py-4 flex items-center justify-between font-black text-slate-900 text-[14px]">
+                       <span className="text-slate-400 font-medium">{l}</span>
+                       <span>{fmtNpr(v / (l === "Tuition" || l === "Education" ? 12 : 1))}</span>
+                    </div>
+                  ))
+                ) : costPeriod === "Year on year" ? (
+                  Array.from({ length: graduationDuration }).map((_, i) => {
+                    const amount = i === 0 ? totalYear1Npr : (tuitionUsd + yearlyLivingUsd) * usdToNpr;
+                    return (
+                      <div key={i} className="px-6 py-4 flex items-center justify-between font-black text-slate-900 text-[14px]">
+                        <span className="text-slate-400 font-medium">Year {i + 1}</span>
+                        <span>{fmtLakhs(amount)}</span>
+                      </div>
+                    );
+                  })
+                ) : (
+                  [
+                    { l: "Tuition Fees", v: fmtLakhs(tuitionUsd * usdToNpr) },
+                    { l: "Living Expenses", v: fmtLakhs(yearlyLivingUsd * usdToNpr) },
+                    { l: "Initial Setup Cost", v: fmtLakhs(setupCostsUsd * usdToNpr) },
+                  ].map((it, i) => (
+                    <div key={i} className="px-6 py-4 flex items-center justify-between font-black text-slate-900 text-[14px]">
+                      <span className="text-slate-400 font-medium">{it.l}</span>
+                      <span>{it.v}</span>
+                    </div>
+                  ))
+                )}
               </div>
               <div className="p-4 bg-slate-50/50 text-center text-[12px] font-bold text-slate-500 border-t border-slate-50">
-                Setup and visa costs occur primarily in Year 1
+                {costPeriod === "Year on year" ? `Projected over ${graduationDuration} years` : 
+                 costPeriod === "Month on month" ? "Average monthly allocation" :
+                 "One-time setup costs included in Year 1"}
               </div>
             </div>
 
@@ -2955,72 +2994,46 @@ export default function AbroadLiftMatchesPage() {
               Next: Admission Chance
             </button>
 
-            {/* 2. Monthly Expenses Breakdown (Labeled Year Breakdown per Design) */}
+            {/* 2. Monthly Expenses Breakdown - Always relevant */}
             <div className="bg-white rounded-[24px] border border-slate-100 overflow-hidden shadow-sm">
               <div className="p-5 flex items-center justify-between border-b border-slate-50">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-blue-400/20 flex items-center justify-center text-blue-600">
                     <Calculator className="w-5 h-5 text-blue-500" fill="currentColor" fillOpacity="0.2" />
                   </div>
-                  <span className="font-bold text-slate-800">Monthly Expenses</span>
+                  <span className="font-bold text-slate-800">Living Components</span>
                 </div>
                 <ChevronDown className="w-5 h-5 text-slate-300" />
               </div>
               <div className="divide-y divide-slate-50">
-                {Object.entries(itemizedMonthly).map(([l, v], i) => (
-                  <div key={i} className="px-6 py-4 flex items-center justify-between font-black text-slate-900 text-[14px]">
-                    <span className="text-slate-400 font-medium">{l}</span>
-                    <span>{fmtNpr(v / 12)}</span>
-                  </div>
-                ))}
-              </div>
-              <div className="p-4 bg-slate-50/50 text-center text-[12px] font-bold text-slate-500 border-t border-slate-50">
-                Calculated based on {selectedMatch.location}
+                {Object.entries(itemizedMonthly)
+                  .filter(([l]) => l !== "Tuition" && l !== "Education")
+                  .map(([l, v], i) => (
+                    <div key={i} className="px-6 py-4 flex items-center justify-between font-black text-slate-900 text-[14px]">
+                      <span className="text-slate-400 font-medium">{l}</span>
+                      <span>{fmtNpr(v / 12)} /mo</span>
+                    </div>
+                  ))}
               </div>
             </div>
 
-            {/* 3. Total Monthly Cost Card */}
+            {/* 3. Pre-application Cost - Global context */}
             <div className="bg-white rounded-[24px] border border-slate-100 overflow-hidden shadow-sm">
               <div className="p-5 flex items-center justify-between border-b border-slate-50">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-emerald-400/20 flex items-center justify-center text-emerald-600">
                     <Calculator className="w-5 h-5 text-emerald-500" fill="currentColor" fillOpacity="0.2" />
                   </div>
-                  <span className="font-bold text-slate-800">Total Monthly Expenditure</span>
-                </div>
-                <ChevronDown className="w-5 h-5 text-slate-300" />
-              </div>
-              <div className="px-6 py-6 text-center font-black text-slate-800 text-[14px]">
-                {fmtNpr(monthlyLivingNpr)} / month — {fmtLakhs(monthlyLivingNpr * 12)} / year
-              </div>
-            </div>
-
-            <button
-              onClick={handleSavePlan}
-              disabled={saving}
-              className={`w-full h-14 bg-blue-600 hover:bg-blue-700 text-white rounded-[20px] font-black text-[15px] shadow-xl shadow-blue-500/20 active:scale-95 transition-all flex items-center justify-center ${saving ? "opacity-70 cursor-not-allowed" : ""}`}
-            >
-              {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : "Save Plan"}
-            </button>
-
-            {/* 4. Pre-application Cost */}
-            <div className="bg-white rounded-[24px] border border-slate-100 overflow-hidden shadow-sm">
-              <div className="p-5 flex items-center justify-between border-b border-slate-50">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-emerald-400/20 flex items-center justify-center text-emerald-600">
-                    <Calculator className="w-5 h-5 text-emerald-500" fill="currentColor" fillOpacity="0.2" />
-                  </div>
-                  <span className="font-bold text-slate-800">Pre-application Cost</span>
+                  <span className="font-bold text-slate-800">Initial Milestone Costs</span>
                 </div>
                 <ChevronDown className="w-5 h-5 text-slate-300" />
               </div>
               <div className="divide-y divide-slate-50">
                 {[
-                  { l: "Consultancy Fee", v: "NPR 0 - 25,000" },
-                  { l: "IELTS/PTE Test", v: "NPR 29,500" },
-                  { l: "Documents & NOC", v: "NPR 15,000 - 35,000" },
-                  { l: "Medical & Biometrics", v: "NPR 12,000 - 22,000" },
-                  { l: "Visa Application", v: (selectedMatch.countryCode === "AU" ? "NPR 1,600 (AUD)" : selectedMatch.countryCode === "USA" ? "NPR 185 (USD)" : "NPR 85,000 - 150,000") },
+                  { l: "IELTS/PTE Exam", v: "NPR 29,500" },
+                  { l: "NOC & Docs", v: "NPR 15,000" },
+                  { l: "Health & Bio", v: "NPR 22,000" },
+                  { l: "Application Fees", v: "NPR 15,000 - 30,000" },
                 ].map((it, i) => (
                   <div key={i} className="px-6 py-4 flex items-center justify-between font-black text-slate-900 text-[13px]">
                     <span className="text-slate-400 font-medium">{it.l}</span>
@@ -3030,6 +3043,14 @@ export default function AbroadLiftMatchesPage() {
               </div>
             </div>
 
+            <button
+              onClick={handleSavePlan}
+              disabled={saving}
+              className={`w-full h-14 bg-blue-600 hover:bg-blue-700 text-white rounded-[20px] font-black text-[15px] shadow-xl shadow-blue-500/20 active:scale-95 transition-all flex items-center justify-center ${saving ? "opacity-70 cursor-not-allowed" : ""}`}
+            >
+              {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : "Save Success Plan"}
+            </button>
+
             {/* 5. Tuition Fees Comparison */}
             <div className="bg-white rounded-[24px] border border-slate-100 overflow-hidden shadow-sm">
               <div className="p-5 flex items-center justify-between border-b border-slate-50">
@@ -3037,15 +3058,15 @@ export default function AbroadLiftMatchesPage() {
                   <div className="w-10 h-10 rounded-full bg-orange-400/20 flex items-center justify-center text-orange-600">
                     <GraduationCap className="w-5 h-5 text-orange-500" fill="currentColor" fillOpacity="0.2" />
                   </div>
-                  <span className="font-bold text-slate-800">Tuition Fees</span>
+                  <span className="font-bold text-slate-800">Regional Comparison</span>
                 </div>
                 <ChevronDown className="w-5 h-5 text-slate-300" />
               </div>
               <div className="divide-y divide-slate-50">
                 {[
-                  { l: "USA/UK", v: "NPR 17-44 Lakhs", s: "per year" },
-                  { l: "Canada/Australia", v: "NPR 17-44 Lakhs", s: "per year" },
-                  { l: "Germany/Europe", v: "NPR 17-44 Lakhs", s: "per year" },
+                  { l: "USA/UK", v: "NPR 25-45 Lakhs", s: "Avg/yr" },
+                  { l: "Canada/Australia", v: "NPR 18-35 Lakhs", s: "Avg/yr" },
+                  { l: "Germany/Europe", v: "NPR 12-18 Lakhs", s: "Avg/yr" },
                 ].map((it, i) => (
                   <div key={i} className="px-6 py-4 flex items-center justify-between font-black text-slate-900 text-[13px]">
                     <span className="text-slate-400 font-medium">{it.l}</span>
