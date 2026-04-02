@@ -12,6 +12,7 @@ function LoginForm() {
   const searchParams = useSearchParams();
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
+  const [otp, setOtp] = useState("123456"); // Pre-filled with static code for testing
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -43,13 +44,15 @@ function LoginForm() {
       const result = await signIn("credentials", {
         identifier,
         password,
+        otp,
         redirect: false,
       });
 
       if (result?.error) {
         setError(result.error);
       } else {
-        router.push("/");
+        const callbackUrl = searchParams.get("callbackUrl");
+        router.push(callbackUrl || "/");
         router.refresh();
       }
     } catch {
@@ -149,6 +152,20 @@ function LoginForm() {
                   </button>
                 }
               />
+
+              {otpSent && (
+                <div className="space-y-2 fade-in">
+                  <div className="flex flex-col items-center">
+                    <p className="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-3">Verify OTP Code</p>
+                    <InputField
+                      placeholder="6 digit code"
+                      value={otp}
+                      onChange={(v) => setOtp(v)}
+                      type="text"
+                    />
+                  </div>
+                </div>
+              )}
 
               <div className="text-right pt-1">
                 <Link href="#" className="text-[12px] font-medium text-black">

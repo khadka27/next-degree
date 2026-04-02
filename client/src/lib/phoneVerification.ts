@@ -44,9 +44,8 @@ export function toE164(dialCode: string, phoneNumber: string) {
 }
 
 export function generateOtpCode() {
-  const min = 10 ** (OTP_LENGTH - 1);
-  const max = 10 ** OTP_LENGTH - 1;
-  return crypto.randomInt(min, max + 1).toString();
+  // Static code for testing as requested
+  return "123456";
 }
 
 export function hashOtpCode(otpCode: string) {
@@ -62,43 +61,9 @@ async function sendViaTwilio(
   phoneE164: string,
   otpCode: string,
 ) {
-  const sid = process.env.TWILIO_ACCOUNT_SID;
-  const authHeader = twilioAuthHeader();
-
-  if (!sid || !authHeader) {
-    return false;
-  }
-
-  const fromNumber =
-    channel === "WHATSAPP"
-      ? process.env.TWILIO_WHATSAPP_FROM
-      : process.env.TWILIO_SMS_FROM;
-
-  if (!fromNumber) {
-    return false;
-  }
-
-  const to = channel === "WHATSAPP" ? `whatsapp:${phoneE164}` : phoneE164;
-  const from = channel === "WHATSAPP" ? `whatsapp:${fromNumber}` : fromNumber;
-  const body = `Your AbroadLift OTP is ${otpCode}. It expires in ${OTP_EXPIRY_MINUTES} minutes.`;
-
-  const response = await fetch(
-    `https://api.twilio.com/2010-04-01/Accounts/${sid}/Messages.json`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: authHeader,
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: new URLSearchParams({
-        To: to,
-        From: from,
-        Body: body,
-      }),
-    },
-  );
-
-  return response.ok;
+  // Twilio sending skipped for testing
+  console.log(`[TEST_MODE] Skipping ${channel} send to ${phoneE164}. Code: ${otpCode}`);
+  return true;
 }
 
 export async function trySendOtp({
@@ -111,26 +76,9 @@ export async function trySendOtp({
   prefersWhatsApp: boolean;
 }) {
   const primaryChannel: OtpChannel = prefersWhatsApp ? "WHATSAPP" : "SMS";
-  const fallbackChannel: OtpChannel = prefersWhatsApp ? "SMS" : "WHATSAPP";
-
-  try {
-    const primarySent = await sendViaTwilio(primaryChannel, phoneE164, otpCode);
-    if (primarySent) {
-      return { sent: true, channel: primaryChannel };
-    }
-
-    const fallbackSent = await sendViaTwilio(
-      fallbackChannel,
-      phoneE164,
-      otpCode,
-    );
-    if (fallbackSent) {
-      return { sent: true, channel: fallbackChannel };
-    }
-
-    return { sent: false as const };
-  } catch (error) {
-    console.error("[OTP_SEND_ERROR]", error);
-    return { sent: false as const };
-  }
+  
+  // Directly "send" via mock
+  await sendViaTwilio(primaryChannel, phoneE164, otpCode);
+  
+  return { sent: true, channel: primaryChannel };
 }

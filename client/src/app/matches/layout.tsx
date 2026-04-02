@@ -1,8 +1,16 @@
-// Matches page gets its own full-screen layout — no global Navbar/Footer
+import Navbar from "@/components/Navbar";
+
 export default function MatchesLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return <>{children}</>;
+  return (
+    <>
+      <Navbar />
+      <div className="pt-[80px] min-h-screen bg-white">
+        {children}
+      </div>
+    </>
+  );
 }

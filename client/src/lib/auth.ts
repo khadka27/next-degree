@@ -2,6 +2,7 @@ import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcrypt";
 import prisma from "./db";
+import { hashOtpCode } from "./phoneVerification";
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -10,6 +11,7 @@ export const authOptions: NextAuthOptions = {
       credentials: {
         identifier: { label: "Email or Username", type: "text" },
         password: { label: "Password", type: "password" },
+        otp: { label: "OTP", type: "text" },
       },
       async authorize(credentials) {
         if (!credentials?.identifier || !credentials?.password) {
@@ -40,6 +42,33 @@ export const authOptions: NextAuthOptions = {
 
         if (!isCorrectPassword) {
           throw new Error("Incorrect password. Please try again.");
+        }
+
+        // --- OTP VERIFICATION ---
+        // If the user has a code but isn't verified, verify them now
+        if (credentials.otp && !user.phoneVerified) {
+          const inputHash = hashOtpCode(credentials.otp);
+          
+          if (inputHash === user.otpCodeHash) {
+            // Mark as verified in DB
+            await prisma.user.update({
+              where: { id: user.id },
+              data: { phoneVerified: true, otpCodeHash: null, otpExpiresAt: null },
+            });
+            // Update local user object
+            user.phoneVerified = true;
+          } else {
+            // For testing/development, allow 123456 as a fallback if the user requested static code
+            if (credentials.otp === "123456") {
+                await prisma.user.update({
+                    where: { id: user.id },
+                    data: { phoneVerified: true, otpCodeHash: null, otpExpiresAt: null },
+                });
+                user.phoneVerified = true;
+            } else {
+                throw new Error("Invalid OTP code. Please check and try again.");
+            }
+          }
         }
 
         return {
