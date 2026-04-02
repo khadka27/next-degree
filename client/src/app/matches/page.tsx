@@ -582,18 +582,18 @@ function SearchSelect({
       {open && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-          <div className="absolute top-[calc(100%+12px)] left-0 w-full bg-white border border-slate-100 shadow-[0_20px_50px_rgba(0,0,0,0.1)] rounded-[28px] z-50 overflow-hidden flex flex-col max-h-[300px] animate-in fade-in slide-in-from-top-4 duration-300">
-            <div className="p-4 border-b border-slate-50 flex items-center gap-3 bg-slate-50/30">
-              <Search className="w-4 h-4 text-blue-500" strokeWidth={2.5} />
+          <div className="absolute top-[calc(100%+10px)] left-0 w-full bg-white border border-slate-100 shadow-xl rounded-[24px] z-50 overflow-hidden flex flex-col max-h-[220px] animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-3 border-b border-slate-50 flex items-center gap-3 bg-slate-50/50">
+              <Search className="w-5 h-5 text-blue-500 ml-2" strokeWidth={2.5} />
               <input
                 autoFocus
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Type to search..."
-                className="w-full bg-transparent p-1 text-[15px] font-semibold text-slate-900 outline-none placeholder:text-slate-400 placeholder:italic"
+                className="w-full bg-transparent p-2 text-[15px] font-semibold text-slate-900 outline-none placeholder:text-slate-400 placeholder:italic"
               />
             </div>
-            <div className="overflow-y-auto flex-1 p-2 space-y-1 override-scroll">
+            <div className="overflow-y-auto overscroll-contain flex-1 p-2 space-y-1">
               {filtered.map((opt) => (
                 <button
                   key={opt}
@@ -601,7 +601,7 @@ function SearchSelect({
                     onChange(opt);
                     setOpen(false);
                   }}
-                  className={`w-full text-left px-5 min-h-[50px] flex items-center rounded-[18px] text-[14px] font-semibold transition-all ${value === opt
+                  className={`w-full text-left px-5 min-h-[50px] flex items-center rounded-[16px] text-[15px] font-semibold transition-all ${value === opt
                     ? "bg-blue-600 text-white shadow-md"
                     : "text-slate-600 hover:bg-slate-50 hover:text-blue-600"
                     }`}
