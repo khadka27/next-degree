@@ -32,6 +32,26 @@ export function VisaEligibility({
   onComplete
 }: VisaEligibilityProps) {
 
+  const [visaGuidance, setVisaGuidance] = React.useState<any[]>([]);
+
+  React.useEffect(() => {
+    const code = selectedMatch.countryCode?.toLowerCase() || form.countries[0]?.toLowerCase() || "usa";
+    fetch(`/api/visa-guidance?countryCode=${code}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && (data.steps || data.requirements)) {
+           setVisaGuidance(data.steps || data.requirements);
+        } else {
+           // Fallback steps if data is not structured as expected
+           setVisaGuidance([
+             { title: "Proof of Funds Mapping", description: "Show source of income for 2 years", status: "PENDING" },
+             { title: "GTE Statement Forge", description: "Draft strong purpose that matches profile", status: "REQUIRED" }
+           ]);
+        }
+      })
+      .catch(console.error);
+  }, [form.countries, selectedMatch]);
+
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 max-w-full px-4 pb-32 space-y-5 bg-white min-h-screen">
       {/* Header */}
@@ -61,12 +81,12 @@ export function VisaEligibility({
             <Card className="p-5 rounded-[28px] border border-slate-100 shadow-sm bg-white">
                <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center mb-4"><TrendingUp className="w-4 h-4" /></div>
                <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">Academics</p>
-               <h5 className="font-black text-slate-900">High Trust</h5>
+               <h5 className="font-black text-slate-900 tracking-tight leading-none">High Trust</h5>
             </Card>
             <Card className="p-5 rounded-[28px] border border-slate-100 shadow-sm bg-white">
                <div className="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center mb-4"><TrendingDown className="w-4 h-4" /></div>
                <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">Financials</p>
-               <h5 className="font-black text-slate-900 italic uppercase italic">Gap In Funding</h5>
+               <h5 className="font-black text-slate-900 tracking-tight leading-none italic uppercase">Gap In Funding</h5>
             </Card>
          </div>
       </div>
@@ -81,17 +101,14 @@ export function VisaEligibility({
          </div>
 
          <div className="space-y-4">
-            {[
-              { t: "Proof of Funds Mapping", d: "Show source of income for 2 years", s: "PENDING" },
-              { t: "GTE Statement Forge", d: "Draft strong purpose that matches profile", s: "REQIRED" }
-            ].map((st, i) => (
+            {visaGuidance.map((st: any, i: number) => (
               <div key={i} className="flex items-center justify-between p-6 bg-slate-50/50 rounded-[30px] border border-slate-100 group hover:bg-white hover:shadow-xl transition-all duration-500">
                  <div className="flex-1">
-                    <h5 className="font-black text-slate-900 text-[14px] italic">{st.t}</h5>
-                    <p className="text-xs font-bold text-slate-500 leading-none mt-1">{st.d}</p>
+                    <h5 className="font-black text-slate-900 text-[14px] italic">{st.title || st.t}</h5>
+                    <p className="text-xs font-bold text-slate-500 leading-none mt-1">{st.description || st.d}</p>
                  </div>
                  <div className="flex items-center gap-2">
-                    <span className="text-[9px] font-black text-slate-400 tracking-widest uppercase">{st.s}</span>
+                    <span className="text-[9px] font-black text-slate-400 tracking-widest uppercase">{st.status || st.s || "PENDING"}</span>
                     <ChevronRight className="w-4 h-4 text-slate-300 group-hover:translate-x-1" />
                  </div>
               </div>
