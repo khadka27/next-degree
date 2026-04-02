@@ -1503,20 +1503,79 @@ export default function AbroadLiftMatchesPage() {
   const USD_TO_NPR = 138;
   const [step, setStep] = useState(1);
   const [costPeriod, setCostPeriod] = useState<string>("First year");
-  const [costBreakdownTab, setCostBreakdownTab] = useState<
-    "year1" | "perMonth" | "yearByYear"
-  >("year1");
-  const [costDisplayCurrency, setCostDisplayCurrency] = useState<"USD" | "NPR">(
-    "USD",
-  );
   const [form, setForm] = useState<Form>(DEF);
   const [matches, setMatches] = useState<Match[]>([]);
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
-  const [admissionTab, setAdmissionTab] = useState<string>("Safe");
   const [loading, setLoading] = useState(false);
   const [transitionType, setTransitionType] = useState<"matching" | "finance" | "admission" | "visa" | "roadmap" | "summary" | null>(null);
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
+  const [searchQuery, setSearchQuery] = useState(""); // For Step 3 (Field of Study)
+  const [dynamicLivingCost, setDynamicLivingCost] = useState<any>(null);
+  const [relocationStats, setRelocationStats] = useState<any>(null);
+  const [apiCostEstimate, setApiCostEstimate] = useState<any>(null);
+
+  /* ─────────────── Shared State / Calc ─────────────── */
+  const financialMetrics = useMemo(() => {
+    if (!selectedMatch) return null;
+
+    const usdToNpr = USD_TO_NPR;
+    const tuitionUsd = Math.round(
+      selectedMatch.currency === "NPR"
+        ? (selectedMatch.tuitionFee || 22000) / usdToNpr
+        : selectedMatch.tuitionFee || 22000,
+    );
+    const livingBreakdownUsd = dynamicLivingCost || {
+      rent: 3800,
+      food: 1300,
+      transport: 500,
+      insurance: 320,
+      other: 700,
+    };
+
+    const yearlyLivingUsd = Object.values(livingBreakdownUsd as Record<string, number>).reduce((s, v) => s + v, 0);
+    const setupCostsUsd = 1500;
+    const graduationDuration = parseInt(form.duration) || (form.degree === "Postgraduate" ? 2 : 4);
+
+    const totalYear1Usd = tuitionUsd + yearlyLivingUsd + setupCostsUsd;
+    const totalYear1Npr = apiCostEstimate?.total_npr || Math.round(totalYear1Usd * usdToNpr);
+
+    const totalTuitionNpr = tuitionUsd * usdToNpr * graduationDuration;
+    const totalLivingNpr = yearlyLivingUsd * usdToNpr * graduationDuration;
+    const totalDegreeCostNpr = totalYear1Npr + (tuitionUsd + yearlyLivingUsd) * usdToNpr * (graduationDuration - 1);
+
+    const itemizedMonthly = apiCostEstimate ? {
+      Education: Math.round(apiCostEstimate.education_npr),
+      Rent: Math.round(apiCostEstimate.housing_npr / 12),
+      Food: Math.round(apiCostEstimate.food_npr / 12),
+      Transport: Math.round(apiCostEstimate.transport_npr / 12),
+      Healthcare: Math.round(apiCostEstimate.healthcare_npr / 12),
+    } : {
+      Education: Math.round(tuitionUsd * usdToNpr),
+      Rent: Math.round(((livingBreakdownUsd as any).rent * usdToNpr) / 12),
+      Food: Math.round(((livingBreakdownUsd as any).food * usdToNpr) / 12),
+      Transport: Math.round(((livingBreakdownUsd as any).transport * usdToNpr) / 12),
+      Other: Math.round(((livingBreakdownUsd as any).other * usdToNpr) / 12),
+    };
+
+    const fmtNpr = (v: number) => new Intl.NumberFormat('en-NP', { style: 'currency', currency: 'NPR', maximumFractionDigits: 0 }).format(v);
+    const fmtLakhs = (v: number) => `NPR ${(v / 100000).toFixed(1)} Lakhs`;
+
+    return {
+      tuitionUsd,
+      yearlyLivingUsd,
+      setupCostsUsd,
+      graduationDuration,
+      totalYear1Npr,
+      totalDegreeCostNpr,
+      totalTuitionNpr,
+      totalLivingNpr,
+      itemizedMonthly,
+      fmtNpr,
+      fmtLakhs,
+      usdToNpr
+    };
+  }, [selectedMatch, form.duration, form.degree, dynamicLivingCost, apiCostEstimate]);
 
   const handleSavePlan = async () => {
     if (!selectedMatch) return;
@@ -1541,10 +1600,7 @@ export default function AbroadLiftMatchesPage() {
     }
   };
 
-  const [searchQuery, setSearchQuery] = useState(""); // For Step 3 (Field of Study)
-  const [dynamicLivingCost, setDynamicLivingCost] = useState<any>(null);
-  const [relocationStats, setRelocationStats] = useState<any>(null);
-  const [apiCostEstimate, setApiCostEstimate] = useState<any>(null);
+
 
   // Persistence logic
   useEffect(() => {
@@ -1647,7 +1703,6 @@ export default function AbroadLiftMatchesPage() {
               sponsorIncome: p.sponsorIncome?.toString() || prev.sponsorIncome,
               duration: p.duration?.toString() || prev.duration,
               scholarship: !!p.scholarshipNeeded,
-              passportReady: !!p.passportReady,
               testDone: !!p.testDone,
               docsReady: !!p.docsReady,
               countries: p.preferredCountry ? [p.preferredCountry] : prev.countries,
@@ -1673,7 +1728,6 @@ export default function AbroadLiftMatchesPage() {
     }));
   };
 
-  // const currentStepData = STEPS[step];
   const canContinue = () => {
     if (step === 0) return form.name.trim().length > 0;
     if (step === 1) return form.countries.length > 0;
@@ -1704,8 +1758,8 @@ export default function AbroadLiftMatchesPage() {
       return false;
     }
     if (step === 6) return !!form.intake;
-    if (step === 7) return !!selectedMatch; // Matches step
-    if (step === 8) return true; // Preview/Result steps
+    if (step === 7) return !!selectedMatch;
+    if (step === 8) return true;
     if (step === 9) return true;
     if (step === 10) return true;
     if (step === 11) return true;
@@ -1730,12 +1784,10 @@ export default function AbroadLiftMatchesPage() {
       return;
     }
     if (step === 6) {
-      // Step 6 is the last input step
       setTransitionType("matching");
       setStep(7);
       runMatch();
 
-      // Auto-save profile progress if authenticated
       if (status === "authenticated") {
         fetch("/api/profile", {
           method: "PUT",
@@ -1769,9 +1821,6 @@ export default function AbroadLiftMatchesPage() {
     } catch (err: any) {
       setError(err.message || "Something went wrong fetching matches.");
     } finally {
-      // Keep loading true until AnalyzingScreen finishes if we want, 
-      // but here we just let the API finish.
-      // We will handle the visual finish in the UI.
       setLoading(false);
     }
   };
@@ -1779,7 +1828,6 @@ export default function AbroadLiftMatchesPage() {
   const getEligibilityScore = (f: Form) => {
     let score = 0;
 
-    // 1. English (30%)
     const eng = parseFloat(f.testScore) || 0;
     if (f.testType === "IELTS") {
       if (eng >= 7.5) score += 30;
@@ -1794,12 +1842,11 @@ export default function AbroadLiftMatchesPage() {
       else score += 10;
     } else {
       if (eng >= 70)
-        score += 30; // PTE/Duo general
+        score += 30;
       else if (eng >= 60) score += 20;
       else score += 10;
     }
 
-    // 2. Aptitude (25%)
     if (f.aptitudeTest === "GRE") {
       const total =
         (parseInt(f.greVerbal) || 130) + (parseInt(f.greQuant) || 130);
@@ -1814,10 +1861,9 @@ export default function AbroadLiftMatchesPage() {
       else if (total >= 600) score += 15;
       else score += 5;
     } else {
-      score += 15; // Baseline for no-aptitude programs
+      score += 15;
     }
 
-    // 3. Academics (25%)
     let acad = 0;
     const gpa = parseFloat(f.gpa) || 3.0;
     if (gpa >= 3.8) acad = 25;
@@ -1829,7 +1875,6 @@ export default function AbroadLiftMatchesPage() {
     if (bk > 0) acad = Math.max(0, acad - bk * 2);
     score += acad;
 
-    // 4. Finance (20%)
     const bal = parseInt(f.bankBalance) || 0;
     if (bal >= 6000000) score += 20;
     else if (bal >= 4000000) score += 15;
@@ -1911,7 +1956,6 @@ export default function AbroadLiftMatchesPage() {
   };
 
   const renderStep = () => {
-    // 1: Destination Countries
     if (step === 1) {
       return (
         <div className="flex flex-col items-center animate-in fade-in zoom-in-95 duration-700 w-full max-w-2xl mx-auto pb-4">
@@ -1974,9 +2018,7 @@ export default function AbroadLiftMatchesPage() {
       );
     }
 
-    // 2: Study Level
     if (step === 2) {
-      // Simplified list based on the user's screenshot
       const DISPLAY_DEGREES = [
         { v: "bachelor-4", l: "Bachelor's Degree", icon: GraduationCap },
         { v: "masters", l: "Master's Degree", icon: BookOpen },
@@ -2043,7 +2085,6 @@ export default function AbroadLiftMatchesPage() {
       );
     }
 
-    // 3: Field Of Study
     if (step === 3) {
       const allFields = FIELDS.map((f) => f.v);
 
@@ -2127,7 +2168,6 @@ export default function AbroadLiftMatchesPage() {
         </div>
       );
     }
-    // 4: Academics
     if (step === 4) {
       const EDUCATION_LEVELS = [
         "10th Grade / SLC",
@@ -2206,13 +2246,11 @@ export default function AbroadLiftMatchesPage() {
             </div>
           </div>
 
-          {/* Extra spacing to prevent overlap with the fixed-ish footer on mobile */}
           <div className="h-32 md:hidden" />
         </div>
       );
     }
 
-    // 5: English
     if (step === 5) {
       const TESTS = ["IELTS", "TOEFL", "PTE Academic", "Duolingo", "SAT", "GRE", "GMAT"];
 
@@ -2324,7 +2362,6 @@ export default function AbroadLiftMatchesPage() {
       );
     }
 
-    // 6: Target Intake
     if (step === 6) {
       const INTAKE_OPTIONS = [
         { main: "Spring 2026", sub: "September Intake" },
@@ -2385,371 +2422,12 @@ export default function AbroadLiftMatchesPage() {
         </div>
       );
     }
-    // 7: Budget
-    if (step === -1) {
-      return (
-        <div className="flex flex-col items-center animate-in fade-in zoom-in-95 duration-700 w-full max-w-2xl mx-auto pb-12 mt-2">
 
-          <div className="space-y-10">
-            {/* 1. Univ & City Type */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-white rounded-3xl border border-slate-100 p-6 shadow-sm hover:border-blue-500 transition-all">
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">
-                  University Category
-                </p>
-                <div className="flex bg-slate-100 p-1 rounded-2xl">
-                  {["Public", "Private"].map((t) => (
-                    <button
-                      key={t}
-                      onClick={() => updateForm("univType", t)}
-                      className={`flex-1 py-2.5 rounded-xl text-xs font-black transition-all ${form.univType === t ? "bg-white text-blue-600 shadow-sm" : "text-slate-400 hover:text-slate-600"}`}
-                    >
-                      {t}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div className="bg-white rounded-3xl border border-slate-100 p-6 shadow-sm hover:border-blue-500 transition-all">
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">
-                  Location Tiering
-                </p>
-                <div className="flex bg-slate-100 p-1 rounded-2xl">
-                  {[
-                    { v: "Tier 1", l: "Elite (Metropolitan)" },
-                    { v: "Tier 2", l: "Affordable (Regional)" },
-                  ].map((t) => (
-                    <button
-                      key={t.v}
-                      onClick={() => updateForm("cityType", t.v)}
-                      className={`flex-1 py-2.5 rounded-xl text-[10px] font-black transition-all ${form.cityType === t.v ? "bg-white text-blue-600 shadow-sm" : "text-slate-400 hover:text-slate-600"}`}
-                    >
-                      {t.v}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* 2. Duration */}
-            <div className="bg-white rounded-[32px] border border-slate-100 p-8 shadow-sm text-center">
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6">
-                Estimated Course Duration
-              </p>
-              <div className="flex justify-center flex-wrap gap-4">
-                {["1", "2", "3", "4"].map((y) => (
-                  <button
-                    key={y}
-                    onClick={() => updateForm("duration", y)}
-                    className={`w-16 h-16 rounded-2xl border-2 flex flex-col items-center justify-center transition-all ${form.duration === y ? "border-blue-600 bg-blue-50 text-blue-800 shadow-lg shadow-blue-500/10" : "border-slate-50 bg-slate-50 text-slate-400 hover:border-blue-200"}`}
-                  >
-                    <span className="text-xl font-black leading-none">{y}</span>
-                    <span className="text-[8px] font-black uppercase tracking-tighter">
-                      Year{y !== "1" && "s"}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* 3. Annual Budget */}
-            <div className="bg-slate-900 rounded-[40px] p-10 text-white shadow-2xl relative overflow-hidden">
-              <div className="absolute bottom-0 right-0 p-10 opacity-10">
-                <Wallet className="w-40 h-40" />
-              </div>
-              <div className="relative z-10 text-center">
-                <p className="text-[10px] font-black text-blue-400 uppercase tracking-[0.3em] mb-6">
-                  Primary Annual Budget
-                </p>
-                <div className="flex flex-col items-center gap-6">
-                  <div className="flex bg-white/10 p-1 rounded-2xl border border-white/10">
-                    {CURRENCIES.map((c) => (
-                      <button
-                        key={c}
-                        onClick={() => updateForm("currency", c)}
-                        className={`px-4 py-1.5 rounded-xl text-[10px] font-bold transition-all ${form.currency === c ? "bg-white text-blue-600 shadow-sm" : "text-white/40"}`}
-                      >
-                        {c}
-                      </button>
-                    ))}
-                  </div>
-                  <div className="flex items-center justify-center gap-2">
-                    <span className="text-4xl font-black text-white/20 uppercase tracking-tighter">
-                      {form.currency}
-                    </span>
-                    <input
-                      type="number"
-                      value={form.budget}
-                      onChange={(e) => updateForm("budget", e.target.value)}
-                      placeholder="00,000"
-                      className="w-56 text-7xl font-black text-white outline-none bg-transparent placeholder:text-white/5"
-                    />
-                  </div>
-                  <div className="flex flex-wrap justify-center gap-3">
-                    {BUDGET_PRESETS.map((p) => (
-                      <button
-                        key={p.v}
-                        onClick={() => updateForm("budget", p.v)}
-                        className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest border transition-all ${form.budget === p.v ? "bg-blue-600 border-blue-500 text-white" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/10"}`}
-                      >
-                        {p.l}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      );
-    }
-
-    // 7: Enhanced Profile
-    if (step === -1) {
-      return (
-        <div className="flex flex-col items-center animate-in fade-in zoom-in-95 duration-700 w-full max-w-2xl mx-auto pb-12 mt-8">
-          <div className="mb-14 text-center flex flex-col items-center">
-            <h2 className="text-[20px] sm:text-[22px] font-[700] text-[#111827] mb-3 tracking-tight">
-              {STEPS[step]?.question}
-            </h2>
-            <p className="text-[#64748b] font-[400] text-[14px] sm:text-[15px] leading-snug w-full">
-              Your final profile details power our high-accuracy eligibility engine.
-            </p>
-          </div>
-
-          <div className="space-y-12">
-            {/* 1. Academic Record */}
-            <section className="space-y-6">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center text-blue-600">
-                  <GraduationCap className="w-5 h-5" />
-                </div>
-                <h3 className="text-xl font-black text-slate-900">
-                  Academic History
-                </h3>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm focus-within:border-blue-500 transition-all">
-                  <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">
-                    GPA / Percentage
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={form.gpa}
-                    onChange={(e) => updateForm("gpa", e.target.value)}
-                    placeholder="3.8"
-                    className="w-full text-xl font-black text-slate-900 outline-none bg-transparent"
-                  />
-                </div>
-                <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm focus-within:border-blue-500 transition-all">
-                  <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">
-                    Backlogs
-                  </label>
-                  <input
-                    type="number"
-                    value={form.backlogs}
-                    onChange={(e) => updateForm("backlogs", e.target.value)}
-                    placeholder="0"
-                    className="w-full text-xl font-black text-slate-900 outline-none bg-transparent"
-                  />
-                </div>
-                <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm focus-within:border-blue-500 transition-all">
-                  <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">
-                    Study Gap (Years)
-                  </label>
-                  <input
-                    type="number"
-                    value={form.studyGap}
-                    onChange={(e) => updateForm("studyGap", e.target.value)}
-                    placeholder="0"
-                    className="w-full text-xl font-black text-slate-900 outline-none bg-transparent"
-                  />
-                </div>
-              </div>
-            </section>
-
-            {/* 2. Standardized Tests (Optional) */}
-            <section className="space-y-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center text-indigo-600">
-                    <BookOpen className="w-5 h-5" />
-                  </div>
-                  <h3 className="text-xl font-black text-slate-900">
-                    Standardized Tests{" "}
-                    <span className="text-[10px] text-slate-400 font-bold ml-2 uppercase tracking-widest">
-                      (Optional)
-                    </span>
-                  </h3>
-                </div>
-                <div className="flex bg-slate-100 p-1 rounded-xl">
-                  {["GRE", "GMAT", "NONE"].map((t) => (
-                    <button
-                      key={t}
-                      onClick={() => updateForm("aptitudeTest", t)}
-                      className={`px-4 py-1.5 rounded-lg text-[10px] font-black tracking-widest transition-all ${form.aptitudeTest === t ? "bg-white text-indigo-600 shadow-sm" : "text-slate-400 hover:text-slate-600"}`}
-                    >
-                      {t}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {form.aptitudeTest === "GRE" && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 animate-in zoom-in-95 duration-300">
-                  <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm focus-within:border-indigo-500 transition-all">
-                    <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">
-                      Verbal (130-170)
-                    </label>
-                    <input
-                      type="number"
-                      value={form.greVerbal}
-                      onChange={(e) => updateForm("greVerbal", e.target.value)}
-                      placeholder="155"
-                      className="w-full text-xl font-black text-slate-900 outline-none bg-transparent"
-                    />
-                  </div>
-                  <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm focus-within:border-indigo-500 transition-all">
-                    <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">
-                      Quant (130-170)
-                    </label>
-                    <input
-                      type="number"
-                      value={form.greQuant}
-                      onChange={(e) => updateForm("greQuant", e.target.value)}
-                      placeholder="165"
-                      className="w-full text-xl font-black text-slate-900 outline-none bg-transparent"
-                    />
-                  </div>
-                  <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm focus-within:border-indigo-500 transition-all">
-                    <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">
-                      AWA (0-6)
-                    </label>
-                    <input
-                      type="number"
-                      step="0.5"
-                      value={form.greAwa}
-                      onChange={(e) => updateForm("greAwa", e.target.value)}
-                      placeholder="4.0"
-                      className="w-full text-xl font-black text-slate-900 outline-none bg-transparent"
-                    />
-                  </div>
-                </div>
-              )}
-
-              {form.aptitudeTest === "GMAT" && (
-                <div className="max-w-xs animate-in zoom-in-95 duration-300">
-                  <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm focus-within:border-indigo-500 transition-all">
-                    <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">
-                      Total GMAT Score (200-800)
-                    </label>
-                    <input
-                      type="number"
-                      value={form.gmatTotal}
-                      onChange={(e) => updateForm("gmatTotal", e.target.value)}
-                      placeholder="700"
-                      className="w-full text-xl font-black text-slate-900 outline-none bg-transparent"
-                    />
-                  </div>
-                </div>
-              )}
-            </section>
-
-            <section className="space-y-6">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-600">
-                  <Wallet className="w-5 h-5" />
-                </div>
-                <h3 className="text-xl font-black text-slate-900">
-                  Financial Capability
-                </h3>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm focus-within:border-emerald-500 transition-all">
-                  <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">
-                    Bank Balance (NPR)
-                  </label>
-                  <input
-                    type="number"
-                    value={form.bankBalance}
-                    onChange={(e) => updateForm("bankBalance", e.target.value)}
-                    placeholder="5,000,000"
-                    className="w-full text-xl font-black text-slate-900 outline-none bg-transparent"
-                  />
-                </div>
-                <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm focus-within:border-emerald-500 transition-all">
-                  <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">
-                    Sponsor Income (Monthly NPR)
-                  </label>
-                  <input
-                    type="number"
-                    value={form.sponsorIncome}
-                    onChange={(e) =>
-                      updateForm("sponsorIncome", e.target.value)
-                    }
-                    placeholder="150,000"
-                    className="w-full text-xl font-black text-slate-900 outline-none bg-transparent"
-                  />
-                </div>
-                <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm focus-within:border-emerald-500 transition-all">
-                  <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">
-                    Primary Sponsor
-                  </label>
-                  <select
-                    value={form.sponsorType}
-                    onChange={(e) => updateForm("sponsorType", e.target.value)}
-                    className="w-full text-sm font-black text-slate-900 outline-none bg-transparent cursor-pointer py-2"
-                  >
-                    <option value="Self">Self / Savings</option>
-                    <option value="Parents">Parents / Relatives</option>
-                    <option value="Bank Loan">Bank Education Loan</option>
-                    <option value="Sponsor">Private Sponsor</option>
-                    <option value="Scholarship">Full Scholarship</option>
-                  </select>
-                </div>
-              </div>
-            </section>
-
-            {/* 4. Student Identity */}
-            <section className="pt-6 border-t border-slate-100 space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-slate-50 rounded-2xl p-5 border border-slate-200 focus-within:bg-white focus-within:border-blue-600 transition-all">
-                  <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">
-                    Full Identity Name
-                  </label>
-                  <input
-                    type="text"
-                    value={form.name}
-                    onChange={(e) => updateForm("name", e.target.value)}
-                    placeholder="Jane Doe"
-                    className="w-full text-lg font-black text-slate-900 outline-none bg-transparent"
-                  />
-                </div>
-                <div className="bg-slate-50 rounded-2xl p-5 border border-slate-200 focus-within:bg-white focus-within:border-blue-600 transition-all">
-                  <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">
-                    Secure Email Communication
-                  </label>
-                  <input
-                    type="email"
-                    value={form.email}
-                    onChange={(e) => updateForm("email", e.target.value)}
-                    placeholder="jane@example.com"
-                    className="w-full text-lg font-black text-slate-900 outline-none bg-transparent"
-                  />
-                </div>
-              </div>
-            </section>
-          </div>
-        </div>
-      );
-    }
-    // Transition Screens Integration
     if (transitionType === "matching") return <MatchingEngineScreen onFinish={() => setTransitionType(null)} />;
     if (transitionType === "finance") return <FinancialEngineScreen onFinish={() => setTransitionType(null)} />;
     if (transitionType === "admission") return <AdmissionEngineScreen onFinish={() => setTransitionType(null)} />;
     if (transitionType === "visa") return <VisaEngineScreen onFinish={() => setTransitionType(null)} />;
 
-    // 7: Matches Step
     if (step === 7) {
       return (
         <div className="flex flex-col animate-in fade-in zoom-in-95 duration-700 w-full max-w-7xl mx-auto px-4 pb-20">
@@ -2786,7 +2464,6 @@ export default function AbroadLiftMatchesPage() {
       );
     }
 
-    // 8: University overview dashboard (The First Page)
     if (step === 8 && selectedMatch) {
       const profileScore = getEligibilityScore(form);
       const admissionPct = Math.max(35, Math.min(95, Math.round((selectedMatch.admissionRate || 60) * 0.5 + profileScore * 0.5)));
@@ -2818,50 +2495,22 @@ export default function AbroadLiftMatchesPage() {
       );
     }
 
-    // 9: Cost estimate - View breakdown (EXACT MOCKUP MATCH)
-    if (step === 9 && selectedMatch) {
-      const usdToNpr = USD_TO_NPR;
-      const tuitionUsd = Math.round(
-        selectedMatch.currency === "NPR"
-          ? (selectedMatch.tuitionFee || 22000) / usdToNpr
-          : selectedMatch.tuitionFee || 22000,
-      );
-      const livingBreakdownUsd = dynamicLivingCost || {
-        rent: 3800,
-        food: 1300,
-        transport: 500,
-        insurance: 320,
-        other: 700,
-      };
+    if (step === 9 && selectedMatch && financialMetrics) {
+      const { 
+        tuitionUsd, 
+        yearlyLivingUsd, 
+        setupCostsUsd, 
+        graduationDuration, 
+        totalYear1Npr, 
+        totalDegreeCostNpr, 
+        itemizedMonthly, 
+        fmtNpr, 
+        fmtLakhs, 
+        usdToNpr 
+      } = financialMetrics;
 
-      const yearlyLivingUsd = Object.values(livingBreakdownUsd as Record<string, number>).reduce((s, v) => s + v, 0);
-      const setupCostsUsd = 1500;
-      const graduationDuration = parseInt(form.duration) || (form.degree === "Postgraduate" ? 2 : 4);
-      
-      const totalYear1Usd = tuitionUsd + yearlyLivingUsd + setupCostsUsd;
-      const totalYear1Npr = apiCostEstimate?.total_npr || Math.round(totalYear1Usd * usdToNpr);
-
-      const fmtNpr = (v: number) => new Intl.NumberFormat('en-NP', { style: 'currency', currency: 'NPR', maximumFractionDigits: 0 }).format(v);
-      const fmtLakhs = (v: number) => `NPR ${(v / 100000).toFixed(1)} Lakhs`;
-
-      const itemizedMonthly = apiCostEstimate ? {
-        Education: Math.round(apiCostEstimate.education_npr),
-        Rent: Math.round(apiCostEstimate.housing_npr / 12),
-        Food: Math.round(apiCostEstimate.food_npr / 12),
-        Transport: Math.round(apiCostEstimate.transport_npr / 12),
-        Healthcare: Math.round(apiCostEstimate.healthcare_npr / 12),
-      } : {
-        Education: Math.round(tuitionUsd * usdToNpr),
-        Rent: Math.round(((livingBreakdownUsd as any).rent * usdToNpr) / 12),
-        Food: Math.round(((livingBreakdownUsd as any).food * usdToNpr) / 12),
-        Transport: Math.round(((livingBreakdownUsd as any).transport * usdToNpr) / 12),
-        Other: Math.round(((livingBreakdownUsd as any).other * usdToNpr) / 12),
-      };
-
-      const tuitionPct = apiCostEstimate ? Math.round((apiCostEstimate.education_npr / totalYear1Npr) * 100) : Math.round((tuitionUsd / totalYear1Usd) * 100);
+      const tuitionPct = apiCostEstimate ? Math.round((apiCostEstimate.education_npr / totalYear1Npr) * 100) : Math.round((tuitionUsd / (tuitionUsd + yearlyLivingUsd + setupCostsUsd)) * 100);
       const livingPct = 100 - tuitionPct;
-
-      const totalDegreeCostNpr = totalYear1Npr + (tuitionUsd + yearlyLivingUsd) * usdToNpr * (graduationDuration - 1);
       const monthlyTotalNpr = Math.round((tuitionUsd + yearlyLivingUsd) * usdToNpr / 12);
 
       const displayAmountNpr = 
@@ -3157,9 +2806,9 @@ export default function AbroadLiftMatchesPage() {
       );
     }
 
-    if (step === 12 && selectedMatch) {
+    if (step === 12 && selectedMatch && financialMetrics) {
       return (
-        <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 max-w-full px-4 pb-32 space-y-6 bg-slate-50/30 min-h-screen">
+        <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 max-w-full px-4 pb-32 space-y-6 bg-white min-h-screen">
           <div className="flex items-center justify-between pt-2 pb-4 uppercase tracking-tighter italic">
             <div className="flex items-center gap-4">
               <button onClick={() => setStep(11)} className="p-1">
@@ -3169,34 +2818,56 @@ export default function AbroadLiftMatchesPage() {
             </div>
           </div>
 
-          <Card className="p-10 rounded-[40px] bg-slate-900 text-white shadow-2xl relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full -mr-32 -mt-32 blur-3xl opacity-50" />
-            <div className="relative z-10 space-y-6">
-              <p className="text-blue-400 font-black uppercase tracking-[0.3em] text-[10px] italic">Projected ROI Breakdown</p>
-              <h2 className="text-4xl md:text-5xl font-black italic uppercase tracking-tighter">SUCCESS ROADMAP</h2>
-              <div className="grid grid-cols-2 gap-4 mt-8">
-                <div className="bg-white/10 p-4 rounded-2xl border border-white/10 uppercase italic">
-                  <p className="text-[10px] text-slate-400 font-black">Tuition</p>
-                  <p className="font-black text-lg">24 Lakhs</p>
+          <Card className="p-10 rounded-[44px] bg-slate-900 text-white shadow-2xl relative overflow-hidden border-0">
+            <div className="absolute top-0 right-0 w-80 h-80 bg-blue-500/20 rounded-full -mr-40 -mt-40 blur-[100px] opacity-60" />
+            <div className="absolute bottom-0 left-0 w-64 h-64 bg-emerald-500/10 rounded-full -ml-32 -mb-32 blur-[80px] opacity-40" />
+            
+            <div className="relative z-10 space-y-8">
+              <div className="flex items-center gap-3">
+                <div className="px-4 py-1.5 rounded-full bg-blue-500/20 text-blue-400 text-[10px] font-black uppercase tracking-[0.2em] border border-blue-500/20">
+                  Total Investment Projection
                 </div>
-                <div className="bg-white/10 p-4 rounded-2xl border border-white/10 uppercase italic">
-                  <p className="text-[10px] text-slate-400 font-black">Living</p>
-                  <p className="font-black text-lg">15 Lakhs</p>
+              </div>
+              
+              <div className="space-y-2">
+                <p className="text-slate-400 font-bold uppercase text-[11px] tracking-widest pl-1 italic">Projected Degree ROI</p>
+                <h2 className="text-5xl md:text-6xl font-black italic uppercase tracking-tighter leading-none">
+                  {financialMetrics.fmtLakhs(financialMetrics.totalDegreeCostNpr)}
+                </h2>
+              </div>
+
+              <div className="grid grid-cols-2 gap-6 pt-6">
+                <div className="bg-white/5 p-6 rounded-3xl border border-white/10 group hover:bg-white/10 transition-colors">
+                  <div className="flex items-center gap-2 mb-3">
+                    <GraduationCap className="w-4 h-4 text-blue-400" />
+                    <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Total Tuition</p>
+                  </div>
+                  <p className="font-black text-2xl tracking-tight">{financialMetrics.fmtLakhs(financialMetrics.totalTuitionNpr)}</p>
+                  <p className="text-[10px] font-bold text-slate-500 mt-1 italic">{financialMetrics.graduationDuration} Years Academic Fee</p>
+                </div>
+                
+                <div className="bg-white/5 p-6 rounded-3xl border border-white/10 group hover:bg-white/10 transition-colors">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Heart className="w-4 h-4 text-rose-400" />
+                    <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Est. Living</p>
+                  </div>
+                  <p className="font-black text-2xl tracking-tight">{financialMetrics.fmtLakhs(financialMetrics.totalLivingNpr)}</p>
+                  <p className="text-[10px] font-bold text-slate-500 mt-1 italic">Housing, Food & Lifestyle</p>
                 </div>
               </div>
             </div>
           </Card>
 
-          <div className="pt-8 space-y-4">
+          <div className="space-y-4 pt-10">
             <button
               onClick={() => { setTransitionType("summary"); setStep(13); }}
-              className="w-full h-16 bg-blue-600 text-white rounded-3xl font-black text-[15px] uppercase tracking-widest shadow-2xl shadow-blue-500/30 hover:scale-105 transition-all flex items-center justify-center gap-3 italic"
+              className="w-full h-18 bg-blue-600 text-white rounded-[32px] font-black text-[15px] uppercase tracking-widest shadow-[0_20px_40px_-5px_rgba(37,99,235,0.3)] hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-4 italic"
             >
-              Next: Financial Summary <ArrowRight className="w-5 h-5" />
+              Verify Final Summary <ArrowRight className="w-6 h-6" />
             </button>
-            <button className="w-full h-14 bg-white/50 text-slate-500 rounded-3xl font-bold text-xs uppercase tracking-[0.2em] hover:bg-white transition-all flex items-center justify-center gap-3 italic">
-              <Download className="w-4 h-4" />
-              EXPORT PDF REPORT
+            <button className="w-full h-16 bg-slate-50 text-slate-600 rounded-[32px] font-black text-xs uppercase tracking-[0.2em] hover:bg-slate-100 transition-all flex items-center justify-center gap-3 border border-slate-100 italic">
+              <Download className="w-5 h-5" />
+              GENERATE PDF REPORT
             </button>
           </div>
         </div>
@@ -3205,31 +2876,39 @@ export default function AbroadLiftMatchesPage() {
 
 
     // 13: Final Phase Financial Oracle & Roadmap
-    if (step === 13 && selectedMatch) {
-      const duration = parseInt(form.duration) || 3;
+    if (step === 13 && selectedMatch && financialMetrics) {
+      const {
+        graduationDuration: duration,
+        tuitionUsd,
+        yearlyLivingUsd,
+        usdToNpr,
+        setupCostsUsd,
+        totalDegreeCostNpr
+      } = financialMetrics;
+
       const eligScore = getEligibilityScore(form);
       const scholPercent = eligScore >= 90 ? 50 : eligScore >= 80 ? 20 : 0;
 
-      const baseTuitionAnnual = selectedMatch.tuitionFee || 25000;
-      const totalScholSavings =
-        baseTuitionAnnual * (scholPercent / 100) * duration;
+      const baseTuitionAnnualNpr = tuitionUsd * usdToNpr;
+      const totalScholSavingsNpr =
+        baseTuitionAnnualNpr * (scholPercent / 100) * duration;
 
-      const tuitionAnnual = baseTuitionAnnual * (1 - scholPercent / 100);
-      const livingAnnual = 12000;
-      const oneTime = 3500;
+      const tuitionAnnualNpr = baseTuitionAnnualNpr * (1 - scholPercent / 100);
+      const livingAnnualNpr = yearlyLivingUsd * usdToNpr;
+      const oneTimeNpr = setupCostsUsd * usdToNpr;
 
-      const totalTuition = tuitionAnnual * duration;
-      const totalLiving = livingAnnual * duration;
-      const totalInvestment = totalTuition + totalLiving + oneTime;
+      const totalTuitionNpr = tuitionAnnualNpr * duration;
+      const totalLivingNpr = livingAnnualNpr * duration;
+      const totalInvestmentNpr = totalTuitionNpr + totalLivingNpr + oneTimeNpr;
 
       const toggleUSD = form.currency === "USD";
       const displayVal = (v: number) =>
-        toggleUSD ? (v / 1.35).toFixed(1) : v.toFixed(1);
+        toggleUSD ? (v / usdToNpr / 1000).toFixed(1) : (v / 100000).toFixed(1);
       const symbol = toggleUSD ? "$" : "NPR";
       const unit = toggleUSD ? "k" : "L";
 
-      const tuitionPercent = Math.round((totalTuition / totalInvestment) * 100);
-      const livingPercent = Math.round((totalLiving / totalInvestment) * 100);
+      const tuitionPercent = Math.round((totalTuitionNpr / totalInvestmentNpr) * 100);
+      const livingPercent = Math.round((totalLivingNpr / totalInvestmentNpr) * 100);
       const miscPercent = 100 - tuitionPercent - livingPercent;
 
       const meta = {
@@ -3327,14 +3006,14 @@ export default function AbroadLiftMatchesPage() {
                   <span className="opacity-60 text-2xl mr-1 non-italic font-medium">
                     {symbol}
                   </span>
-                  {displayVal(totalInvestment)}
+                  {displayVal(totalInvestmentNpr)}
                   <span className="opacity-60 text-3xl ml-1">{unit}</span>
                 </h3>
                 {scholPercent > 0 && (
                   <div className="mt-4 px-4 py-1.5 rounded-full bg-white/20 text-[9px] font-black uppercase tracking-widest inline-flex items-center gap-2">
                     <Sparkles className="w-3 h-3" />
                     Saved {symbol}
-                    {displayVal(totalScholSavings)}
+                    {displayVal(totalScholSavingsNpr)}
                     {unit} via Merit
                   </div>
                 )}
@@ -3450,7 +3129,7 @@ export default function AbroadLiftMatchesPage() {
                   </h4>
                   <div className="flex items-end justify-between h-64 gap-6 px-4">
                     {Array.from({ length: duration }).map((_, i) => {
-                      const annualTotal = tuitionAnnual + livingAnnual;
+                      const annualTotal = tuitionAnnualNpr + (livingAnnualNpr / duration);
                       const h = 100 - i * 12;
                       return (
                         <div
@@ -3501,21 +3180,21 @@ export default function AbroadLiftMatchesPage() {
                     </thead>
                     <tbody className="text-xs font-bold text-slate-700">
                       {[
-                        { t: "Tuition Fee", f: "Annual", v: tuitionAnnual },
+                        { t: "Tuition Fee", f: "Annual", v: tuitionAnnualNpr },
                         {
                           t: "Living (Rent/Food)",
                           f: "Monthly",
-                          v: livingAnnual,
+                          v: livingAnnualNpr / 12,
                         },
-                        { t: "Health Insurance", f: "One-time", v: 800 },
-                        { t: "Resource Material", f: "Semester", v: 500 },
-                        { t: "Flight Estimate", f: "One-time", v: 1200 },
+                        { t: "Health Insurance", f: "One-time", v: 800 * usdToNpr },
+                        { t: "Resource Material", f: "Semester", v: 500 * usdToNpr },
+                        { t: "Flight Estimate", f: "One-time", v: 1200 * usdToNpr },
                         {
                           t: "Visa Fees",
                           f: "One-time",
-                          v: (meta as any).v || 350,
+                          v: (meta as any).v * usdToNpr || 350 * usdToNpr,
                         },
-                        { t: "Enrollment Fees", f: "One-time", v: 450 },
+                        { t: "Enrollment Fees", f: "One-time", v: 450 * usdToNpr },
                       ].map((item, idx) => (
                         <tr
                           key={idx}
@@ -3542,7 +3221,7 @@ export default function AbroadLiftMatchesPage() {
                         </td>
                         <td className="px-4 py-4" />
                         <td className="px-4 py-4 text-right font-black text-lg rounded-r-2xl">
-                          {symbol} {displayVal(totalInvestment)} {unit}
+                          {symbol} {displayVal(totalInvestmentNpr)} {unit}
                         </td>
                       </tr>
                     </tbody>
@@ -3588,7 +3267,7 @@ export default function AbroadLiftMatchesPage() {
                           <ShieldAlert className="w-5 h-5 text-amber-400 shrink-0 mt-1" />
                           <p className="text-sm font-medium italic">
                             Recommended visa proof: {symbol}
-                            {displayVal(totalInvestment * 1.05)}
+                            {displayVal(totalInvestmentNpr * 1.05)}
                             {unit}.
                           </p>
                         </div>
