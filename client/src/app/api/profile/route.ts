@@ -9,34 +9,31 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
-    select: {
-      id: true,
-      name: true,
-      username: true,
-      email: true,
-      role: true,
-      createdAt: true,
-      profile: {
-        select: {
-          nationality: true,
-          currentCountry: true,
-          gpa: true,
-        },
+  const [user, matchingRecords] = await Promise.all([
+    prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: {
+        id: true,
+        name: true,
+        username: true,
+        email: true,
+        role: true,
+        createdAt: true,
+        profile: true, // Fetch entire profile
       },
-      matchingRecords: {
-        orderBy: { createdAt: "desc" },
-        take: 5,
-      },
-    },
-  });
+    }),
+    prisma.matchingRecord.findMany({
+      where: { userId: session.user.id },
+      orderBy: { createdAt: "desc" },
+      take: 5,
+    }),
+  ]);
 
   if (!user) {
     return NextResponse.json({ error: "User not found" }, { status: 404 });
   }
 
-  return NextResponse.json(user);
+  return NextResponse.json({ ...user, matchingRecords });
 }
 
 export async function PUT(req: Request) {
@@ -52,10 +49,47 @@ export async function PUT(req: Request) {
     email,
     nationality,
     currentCountry,
+    highestEducation,
+    passingYear,
     gpa,
+    backlogs,
+    studyGap,
+    hasEnglishTest,
+    testType,
+    englishScore,
+    aptitudeTest,
+    greVerbal,
+    greQuant,
+    greAwa,
+    gmatTotal,
+    degree,
+    degreeLevel,
+    field,
+    program,
+    countries,
+    preferredCountry,
+    intake,
+    budget,
+    yearlyBudget,
+    currency,
+    bankBalance,
+    sponsorType,
+    sponsorIncome,
+    univType,
+    cityType,
+    duration,
+    scholarshipNeeded,
+    loanWilling,
+    passportReady,
+    testDone,
+    docsReady,
   } = body;
 
-  // Check if username is taken by another user
+  const finalDegreeLevel = degreeLevel || degree;
+  const finalPreferredCountry = preferredCountry || (countries && countries[0]);
+  const finalYearlyBudget = yearlyBudget || budget;
+
+  // Check if username is taken
   if (username) {
     const existing = await prisma.user.findUnique({ where: { username } });
     if (existing && existing.id !== session.user.id) {
@@ -63,13 +97,49 @@ export async function PUT(req: Request) {
     }
   }
 
-  // Check if email is taken by another user
+  // Check if email is taken
   if (email) {
     const existingEmail = await prisma.user.findUnique({ where: { email } });
     if (existingEmail && existingEmail.id !== session.user.id) {
       return NextResponse.json({ error: "Email already in use." }, { status: 409 });
     }
   }
+
+  const profileData = {
+    nationality: nationality || null,
+    currentCountry: currentCountry || null,
+    highestEducation: highestEducation || null,
+    passingYear: passingYear || null,
+    gpa: gpa ? parseFloat(gpa) : null,
+    backlogs: backlogs ? parseInt(backlogs) : 0,
+    studyGap: studyGap ? parseInt(studyGap) : 0,
+    hasEnglishTest: hasEnglishTest ?? null,
+    testType: testType || null,
+    englishScore: englishScore ? parseFloat(englishScore) : null,
+    aptitudeTest: aptitudeTest || null,
+    greVerbal: greVerbal ? parseFloat(greVerbal) : null,
+    greQuant: greQuant ? parseFloat(greQuant) : null,
+    greAwa: greAwa ? parseFloat(greAwa) : null,
+    gmatTotal: gmatTotal ? parseFloat(gmatTotal) : null,
+    degreeLevel: finalDegreeLevel || null,
+    field: field || null,
+    program: program || null,
+    preferredCountry: finalPreferredCountry || null,
+    intake: intake || null,
+    yearlyBudget: finalYearlyBudget ? parseFloat(finalYearlyBudget) : null,
+    currency: currency || "USD",
+    bankBalance: bankBalance ? parseFloat(bankBalance) : null,
+    sponsorType: sponsorType || null,
+    sponsorIncome: sponsorIncome ? parseFloat(sponsorIncome) : null,
+    univType: univType || null,
+    cityType: cityType || null,
+    duration: duration ? parseInt(duration) : null,
+    scholarshipNeeded: scholarshipNeeded ?? false,
+    loanWilling: loanWilling ?? false,
+    passportReady: passportReady ?? false,
+    testDone: testDone ?? false,
+    docsReady: docsReady ?? false,
+  };
 
   const user = await prisma.user.update({
     where: { id: session.user.id },
@@ -79,16 +149,8 @@ export async function PUT(req: Request) {
       ...(email && { email: email.toLowerCase().trim() }),
       profile: {
         upsert: {
-          create: {
-            nationality: nationality || null,
-            currentCountry: currentCountry || null,
-            gpa: gpa ? parseFloat(gpa) : null,
-          },
-          update: {
-            nationality: nationality || null,
-            currentCountry: currentCountry || null,
-            gpa: gpa ? parseFloat(gpa) : null,
-          },
+          create: profileData,
+          update: profileData,
         },
       },
     },
