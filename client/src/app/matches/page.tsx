@@ -1438,6 +1438,31 @@ export default function AbroadLiftMatchesPage() {
   const [loading, setLoading] = useState(false);
   const [transitionType, setTransitionType] = useState<"matching" | "finance" | "admission" | "visa" | null>(null);
   const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  const handleSavePlan = async () => {
+    if (!selectedMatch) return;
+    setSaving(true);
+    try {
+      const response = await fetch("/api/matches/save", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ formData: form, matchData: selectedMatch }),
+      });
+      if (response.ok) {
+        // Redirect to profile or show success
+        window.location.href = "/profile";
+      } else {
+        const data = await response.json();
+        setError(data.error || "Failed to save plan");
+      }
+    } catch (e) {
+      setError("Something went wrong");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const [searchQuery, setSearchQuery] = useState(""); // For Step 3 (Field of Study)
   const [dynamicLivingCost, setDynamicLivingCost] = useState<any>(null);
   const [relocationStats, setRelocationStats] = useState<any>(null);
@@ -2312,11 +2337,6 @@ export default function AbroadLiftMatchesPage() {
 
     // 7: Enhanced Profile
     if (step === -1) {
-      const isGraduate =
-        form.degree.includes("Master") ||
-        form.degree.includes("Doctoral") ||
-        form.degree.includes("Postgraduate");
-
       return (
         <div className="flex flex-col items-center animate-in fade-in zoom-in-95 duration-700 w-full max-w-2xl mx-auto pb-12 mt-8">
           <div className="mb-14 text-center flex flex-col items-center">

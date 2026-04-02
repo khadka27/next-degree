@@ -25,6 +25,10 @@ export async function GET() {
           gpa: true,
         },
       },
+      matchingRecords: {
+        orderBy: { createdAt: "desc" },
+        take: 5,
+      },
     },
   });
 

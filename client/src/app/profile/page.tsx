@@ -15,6 +15,8 @@ import {
   AlertCircle,
   ArrowLeft,
   LogOut,
+  Clock,
+  MapPin,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 
@@ -31,6 +33,7 @@ const COUNTRIES_LIST = [
 const SECTIONS = [
   { id: "personal", label: "Personal Info", icon: User },
   { id: "background", label: "Background", icon: Globe },
+  { id: "history", label: "My Saved Plans", icon: Clock },
 ];
 
 function GlassInput({ label, type = "text", placeholder, value, onChange }: {
@@ -94,6 +97,7 @@ export default function ProfilePage() {
     currentCountry: "",
     gpa: "",
   });
+  const [matchingRecords, setMatchingRecords] = useState<any[]>([]);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -119,6 +123,7 @@ export default function ProfilePage() {
           currentCountry: data.profile?.currentCountry || "",
           gpa: data.profile?.gpa?.toString() || "",
         }));
+        setMatchingRecords(data.matchingRecords || []);
       }
     } catch (e) {
       console.error(e);
@@ -287,6 +292,78 @@ export default function ProfilePage() {
                 onChange={(v) => set("currentCountry", v)}
               />
               <GlassInput label="GPA" type="number" placeholder="e.g. 3.7" value={profile.gpa} onChange={(v) => set("gpa", v)} />
+            </div>
+          )}
+
+          {/* ─── My Saved Plans ─── */}
+          {activeSection === "history" && (
+            <div className="space-y-6">
+              <h3 className="text-sm font-black mb-5 text-indigo-400">Your Recent Activity</h3>
+              {matchingRecords.length === 0 ? (
+                <div className="text-center py-10 bg-white/3 border border-white/8 rounded-2xl">
+                  <Clock className="w-8 h-8 text-slate-700 mx-auto mb-3" />
+                  <p className="text-slate-500 text-sm italic">You haven&apos;t saved any matching profiles yet.</p>
+                  <Link href="/matches" className="text-indigo-400 text-xs font-bold mt-4 inline-block hover:underline">Start Matching Engine</Link>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 gap-4">
+                  {matchingRecords.map((record: any) => {
+                    const match = record.matchData;
+                    const date = new Date(record.createdAt).toLocaleDateString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric'
+                    });
+                    
+                    return (
+                      <div key={record.id} className="group bg-white/5 border border-white/10 rounded-2xl p-5 hover:border-indigo-500/50 hover:bg-white/10 transition-all shadow-xl">
+                        <div className="flex items-center justify-between mb-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-indigo-600/20 rounded-xl flex items-center justify-center font-black text-indigo-400 border border-indigo-500/10">
+                              {match.name?.[0] || 'U'}
+                            </div>
+                            <div>
+                               <h4 className="text-white font-black text-[14px] leading-tight truncate max-w-[200px]">{match.name}</h4>
+                               <p className="text-xs text-slate-500 flex items-center gap-1">
+                                 <MapPin className="w-3 h-3" /> {match.location || 'Global destination'}
+                               </p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">{date}</span>
+                          </div>
+                        </div>
+                        
+                        <div className="grid grid-cols-3 gap-3 pt-4 border-t border-white/5">
+                           <div className="bg-white/3 p-3 rounded-xl border border-white/5 text-center">
+                              <p className="text-[9px] font-bold text-slate-500 uppercase mb-1">Tuition</p>
+                              <p className="text-[11px] font-black text-white shrink-0 truncate">${match.tuitionFee?.toLocaleString()}</p>
+                           </div>
+                           <div className="bg-white/3 p-3 rounded-xl border border-white/5 text-center">
+                              <p className="text-[9px] font-bold text-slate-500 uppercase mb-1">Success</p>
+                              <p className="text-[11px] font-black text-emerald-400">{match.admissionRate || 75}%</p>
+                           </div>
+                           <div className="bg-white/3 p-3 rounded-xl border border-white/5 text-center">
+                              <p className="text-[9px] font-bold text-slate-500 uppercase mb-1">Ranking</p>
+                              <p className="text-[11px] font-black text-amber-400">#{match.rankingWorld || 'N/A'}</p>
+                           </div>
+                        </div>
+                        
+                        <div className="mt-4 flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                               <div className="px-2 py-1 bg-white/5 rounded-md text-[9px] font-black text-slate-400 border border-white/5">
+                                  {record.formData.degree}
+                               </div>
+                            </div>
+                            <Link href="/matches" className="text-indigo-400 text-[10px] font-black flex items-center gap-1 group-hover:gap-2 transition-all">
+                               VIEW AGAIN <ChevronRight className="w-3 h-3" />
+                            </Link>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           )}
 
