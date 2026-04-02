@@ -74,6 +74,7 @@ import { UniversitySelection } from "@/components/matches/UniversitySelection";
 import { FinancialDashboard } from "@/components/matches/FinancialDashboard";
 import { AdmissionDetails } from "@/components/matches/AdmissionDetails";
 import { VisaEligibility } from "@/components/matches/VisaEligibility";
+import { StudyOverviewDashboard } from "@/components/matches/StudyOverviewDashboard";
 
 /* ─────────────── Static data ─────────────── */
 const COUNTRIES = [
@@ -1264,75 +1265,138 @@ function GenericEngineScreen({ config, onFinish }: { config: EngineConfig; onFin
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-50 overflow-hidden">
-      <div className="absolute inset-0 overflow-hidden opacity-30">
-        <motion.div
-          className={`absolute top-1/4 left-1/4 w-[600px] h-[600px] ${config.glow} rounded-full blur-[120px]`}
-          animate={{ scale: [1, 1.3, 1], opacity: [0.2, 0.4, 0.2] }}
-          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-        />
-      </div>
+  const activeTask = checklist.find(c => c.status === "loading") || checklist[checklist.length - 1];
+  const radius = 70;
+  const circumference = 2 * Math.PI * radius;
+  const strokeDashoffset = circumference - (progress / 100) * circumference;
 
-      <div className="relative z-10 w-full max-w-2xl px-12">
-        <div className="text-center mb-16">
-          <div className={`w-24 h-24 mx-auto mb-10 rounded-[38px] ${config.accent.replace('text', 'bg').replace('500', '500/10').replace('400', '400/10')} border ${config.accent.replace('text', 'border').replace('500', '500/20')} flex items-center justify-center shadow-[0_20px_50px_-20px_rgba(0,0,0,0.1)]`}>
-            <config.icon className={`w-12 h-12 ${config.accent}`} />
+  return (
+    <div className="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-[#fdfdfd] overflow-hidden">
+      {/* Abstract Animated Mesh Background Pattern */}
+      <div 
+        className="absolute inset-0 opacity-[0.02] pointer-events-none" 
+        style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, black 1px, transparent 0)', backgroundSize: '24px 24px' }}
+      />
+      
+      <div className="relative z-10 w-full max-w-sm px-8 flex flex-col items-center">
+        
+        {/* Unique Circular Progress & Icon Container */}
+        <div className="relative w-48 h-48 flex items-center justify-center mb-10">
+          
+          {/* Breathing Radial Glow */}
+          <motion.div 
+            className={`absolute inset-0 rounded-full blur-[40px] opacity-20 ${config.glow}`} 
+            animate={{ scale: [1, 1.2, 1], opacity: [0.2, 0.4, 0.2] }}
+            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+          />
+
+          {/* SVG Progress Ring */}
+          <svg className="absolute inset-0 w-full h-full -rotate-90">
+            {/* Background Track */}
+            <circle
+              cx="96"
+              cy="96"
+              r={radius}
+              strokeWidth="1"
+              stroke="currentColor"
+              fill="transparent"
+              className="text-slate-200"
+            />
+            {/* Animated Progress */}
+            <motion.circle
+              cx="96"
+              cy="96"
+              r={radius}
+              strokeWidth="2.5"
+              stroke="currentColor"
+              fill="transparent"
+              strokeLinecap="round"
+              className={config.accent}
+              initial={{ strokeDashoffset: circumference }}
+              animate={{ strokeDashoffset }}
+              transition={{ ease: "linear", duration: 0.1 }}
+              style={{ strokeDasharray: circumference }}
+            />
+          </svg>
+
+          {/* Central Animated Content */}
+          <div className="relative flex flex-col items-center justify-center gap-1 mt-1">
+            <config.icon className={`w-10 h-10 ${config.accent} opacity-90`} strokeWidth={2} />
+            <span className={`text-[20px] font-black ${config.accent} tabular-nums tracking-tighter`}>
+              {Math.round(progress)}%
+            </span>
           </div>
+
+          {/* Orbiting Satellite Dot */}
+          <motion.div
+            className={`absolute w-2 h-2 rounded-full ${config.accent.replace('text', 'bg')} shadow-sm`}
+            style={{ top: '50%', left: '50%', marginTop: '-4px', marginLeft: '-4px' }}
+            animate={{ rotate: 360 }}
+            transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+          >
+            <div className="w-full h-full translate-x-[70px]" />
+          </motion.div>
+        </div>
+
+        {/* Typographical Title Header */}
+        <div className="h-8 mb-12 flex items-center justify-center">
           <AnimatePresence mode="wait">
             <motion.h1
               key={titleIndex}
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -15 }}
-              transition={{ duration: 0.6 }}
-              className="text-4xl md:text-5xl font-black text-slate-900 tracking-tighter italic uppercase"
+              initial={{ opacity: 0, scale: 0.98, y: 5 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 1.02, y: -5 }}
+              transition={{ duration: 0.5 }}
+              className="text-[18px] md:text-[22px] font-[900] text-transparent bg-clip-text bg-gradient-to-r from-slate-900 via-slate-700 to-slate-900 tracking-[0.2em] uppercase italic drop-shadow-sm"
             >
               {config.titles[titleIndex]}
-              <motion.span animate={{ opacity: showCursor ? 1 : 0 }} className={`inline-block w-1.5 h-10 ${config.accent.replace('text', 'bg')} ml-3 align-middle`} />
             </motion.h1>
           </AnimatePresence>
         </div>
 
-        <div className="mb-16">
-          <div className="relative h-4 bg-slate-200/50 rounded-full overflow-hidden backdrop-blur-sm border border-slate-100">
-            <motion.div className={`absolute inset-y-0 left-0 rounded-full ${config.gradient}`} style={{ width: `${progress}%` }} initial={{ width: 0 }} />
-          </div>
-          <div className="flex justify-between mt-4">
-            <span className="text-[11px] text-slate-400 font-bold uppercase tracking-[0.2em]">{config.title} Status</span>
-            <span className={`text-lg ${config.accent} font-black tabular-nums tracking-tighter`}>{Math.round(progress)}%</span>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-white/80 backdrop-blur-md border border-slate-200/50 rounded-[40px] p-10 space-y-7 shadow-[0_15px_45px_-12px_rgba(0,0,0,0.03)]">
-            {checklist.map((item, idx) => (
-              <motion.div key={item.id} initial={{ opacity: 0, x: -15 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: idx * 0.1 }} className="flex items-center gap-5">
-                <div className="flex-shrink-0">{getStatusIcon(item.status)}</div>
-                <span className={`text-sm font-bold tracking-tight transition-colors uppercase italic ${item.status === "complete" ? "text-slate-300 line-through" : item.status === "loading" ? "text-slate-800" : "text-slate-400"}`}>
+        {/* Naked Architecture Dashboard */}
+        <div className="w-full max-w-[400px] flex justify-between items-end gap-6 border-t border-slate-200/40 pt-7">
+          {/* Active Logs (Left) */}
+          <div className="space-y-4 flex-1">
+            {checklist.map((item) => (
+              <motion.div 
+                key={item.id}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: item.status === "pending" ? 0.4 : 1, x: 0 }}
+                transition={{ duration: 0.4 }}
+                className="flex items-center gap-3.5"
+              >
+                {item.status === 'complete' ? (
+                  <Check className="w-[16px] h-[16px] text-emerald-500" strokeWidth={3} />
+                ) : item.status === 'loading' ? (
+                   <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }}>
+                     <Loader2 className={`w-[16px] h-[16px] ${config.accent}`} />
+                   </motion.div>
+                ) : (
+                  <div className="w-[16px] h-[16px] rounded border-2 border-slate-200" />
+                )}
+                <span className={`text-[11px] md:text-[12px] font-[800] tracking-[0.15em] uppercase ${item.status === 'complete' ? 'text-slate-400 line-through' : 'text-slate-800'}`}>
                   {item.text}
                 </span>
               </motion.div>
             ))}
           </div>
-          <div className="bg-slate-100/50 border border-slate-200/20 rounded-[40px] p-10 space-y-8">
-            {dataIndicators.map((indicator, idx) => (
-              <div key={idx} className="flex flex-col gap-2">
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">{indicator.text}</span>
-                <div className="flex items-center justify-between">
-                  <span className={`text-xl font-black tabular-nums tracking-tighter ${indicator.active ? "text-slate-900" : "text-slate-300"}`}>
-                    {indicator.active ? indicator.count.toLocaleString() : "---"}
-                  </span>
-                  {indicator.active && <div className={`w-2 h-2 rounded-full ${config.accent.replace('text', 'bg')} animate-pulse`} />}
-                </div>
+
+          {/* Rapid Data Counters (Right) */}
+          <div className="flex flex-col items-end text-right gap-6">
+            {dataIndicators.map((ind, idx) => (
+              <div key={idx} className="flex flex-col items-end">
+                <span className="text-[10px] text-slate-400 font-[800] uppercase tracking-[0.2em] leading-none mb-1.5 opacity-80">
+                  {ind.text}
+                </span>
+                <span className={`text-[24px] md:text-[28px] font-black tabular-nums tracking-tighter leading-none ${ind.active ? config.accent : "text-slate-300 drop-shadow-sm"}`}>
+                  {ind.active ? ind.count.toLocaleString() : "---"}
+                </span>
               </div>
             ))}
           </div>
         </div>
 
-        <motion.div className="mt-16 text-center" animate={{ opacity: [0.4, 0.8, 0.4] }} transition={{ duration: 2.5, repeat: Infinity }}>
-          <p className="text-slate-300 text-[11px] font-black uppercase tracking-[0.5em] italic">{config.statusText}</p>
-        </motion.div>
       </div>
     </div>
   );
@@ -1480,6 +1544,7 @@ export default function AbroadLiftMatchesPage() {
   const [searchQuery, setSearchQuery] = useState(""); // For Step 3 (Field of Study)
   const [dynamicLivingCost, setDynamicLivingCost] = useState<any>(null);
   const [relocationStats, setRelocationStats] = useState<any>(null);
+  const [apiCostEstimate, setApiCostEstimate] = useState<any>(null);
 
   // Persistence logic
   useEffect(() => {
@@ -1532,6 +1597,16 @@ export default function AbroadLiftMatchesPage() {
           }
         })
         .catch(console.error);
+
+      // Full Cost Estimate API call
+      const tuitionUsdRaw = selectedMatch.currency === "NPR" ? (selectedMatch.tuitionFee || 22000) / USD_TO_NPR : (selectedMatch.tuitionFee || 22000);
+      fetch(`/api/cost-estimate?country=${code}&city=${encodeURIComponent(selectedMatch.location?.split(',')[0] || "New York")}&tuition_usd=${Math.round(tuitionUsdRaw)}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (!data.error) setApiCostEstimate(data);
+        })
+        .catch(console.error);
+
     }
   }, [step, selectedMatch, form.countries]);
 
@@ -2726,18 +2801,18 @@ export default function AbroadLiftMatchesPage() {
       const costBand = getCostBand(totalYear1Usd, budgetUsd);
 
       return (
-        <FinancialDashboard
+        <StudyOverviewDashboard
           form={form}
           selectedMatch={selectedMatch}
-          dynamicLivingCost={livingBreakdown}
+          matches={matches}
+          session={session}
           USD_TO_NPR={USD_TO_NPR}
-          admissionPct={admissionPct}
-          admissionBand={admissionBand}
-          costBand={costBand}
           totalYear1Npr={totalYear1Npr}
+          admissionPct={admissionPct}
+          costBand={costBand}
+          admissionBand={admissionBand}
           onAdvanceToCost={() => setStep(9)}
           onAdvanceToAdmission={() => { setTransitionType("admission"); setStep(10); }}
-          onAdvanceToVisa={() => { setTransitionType("visa"); setStep(11); }}
           onGoToMatches={() => setStep(7)}
         />
       );
@@ -2762,20 +2837,26 @@ export default function AbroadLiftMatchesPage() {
       const yearlyLivingUsd = Object.values(livingBreakdownUsd as Record<string, number>).reduce((s, v) => s + v, 0);
       const setupCostsUsd = 1500;
       const totalYear1Usd = tuitionUsd + yearlyLivingUsd + setupCostsUsd;
-      const totalYear1Npr = Math.round(totalYear1Usd * usdToNpr);
+      const totalYear1Npr = apiCostEstimate?.total_npr || Math.round(totalYear1Usd * usdToNpr);
 
       const fmtNpr = (v: number) => new Intl.NumberFormat('en-NP', { style: 'currency', currency: 'NPR', maximumFractionDigits: 0 }).format(v);
       const fmtLakhs = (v: number) => `NPR ${(v / 100000).toFixed(1)} Lakhs`;
 
-      const monthlyLivingNpr = Math.round((yearlyLivingUsd * usdToNpr) / 12);
-      const itemizedMonthly = {
+      const monthlyLivingNpr = apiCostEstimate?.monthly_npr || Math.round((yearlyLivingUsd * usdToNpr) / 12);
+      
+      const itemizedMonthly = apiCostEstimate ? {
+        Rent: Math.round(apiCostEstimate.housing_npr / 12),
+        Food: Math.round(apiCostEstimate.food_npr / 12),
+        Transport: Math.round(apiCostEstimate.transport_npr / 12),
+        Healthcare: Math.round(apiCostEstimate.healthcare_npr / 12),
+      } : {
         Rent: Math.round(((livingBreakdownUsd as any).rent * usdToNpr) / 12),
         Food: Math.round(((livingBreakdownUsd as any).food * usdToNpr) / 12),
         Transport: Math.round(((livingBreakdownUsd as any).transport * usdToNpr) / 12),
         Other: Math.round(((livingBreakdownUsd as any).other * usdToNpr) / 12),
       };
 
-      const tuitionPct = Math.round((tuitionUsd / totalYear1Usd) * 100);
+      const tuitionPct = apiCostEstimate ? Math.round((apiCostEstimate.education_npr / totalYear1Npr) * 100) : Math.round((tuitionUsd / totalYear1Usd) * 100);
       const livingPct = 100 - tuitionPct;
 
       return (
