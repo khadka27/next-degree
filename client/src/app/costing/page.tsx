@@ -1,5 +1,7 @@
 "use client";
 
+/* eslint-disable complexity */
+
 import { useState, useEffect, useCallback } from "react";
 import {
   Calculator,
@@ -482,96 +484,154 @@ export default function CostingPage() {
         </div>
 
         <div className="max-w-6xl mx-auto space-y-8">
-          <div>
-            <h1 className="text-[38px] font-black text-slate-900 leading-tight tracking-tight">
-              Estimated Cost Breakdown
-            </h1>
-            <p className="mt-2 max-w-2xl text-slate-500 text-[15px] leading-6">
-              A comprehensive view of your expected expenses for the first year,
-              calculated based on current university data and living standards.
-            </p>
+          <div className="space-y-3">
+            <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-[11px] font-black uppercase tracking-[0.18em] text-slate-500 shadow-sm">
+              <TrendingUp className="w-3.5 h-3.5 text-emerald-500" />
+              {recommendationSummary}
+            </span>
+            <div className="max-w-3xl">
+              <h1 className="text-[40px] font-black text-slate-900 leading-tight tracking-tight">
+                Your Preliminary Estimate
+              </h1>
+              <p className="mt-2 text-slate-500 text-[15px] leading-6">
+                Based on your academic profile and selected university details
+                for {city}, {country.name}. The desktop view refreshes with live
+                cost and university data.
+              </p>
+            </div>
           </div>
 
-          <div className="grid grid-cols-[320px_minmax(0,1fr)] gap-5 items-start">
-            <div className="space-y-4">
-              <div className="rounded-[22px] border border-slate-100 bg-white shadow-[0_14px_30px_rgba(15,23,42,0.06)] p-4">
-                <p className="text-[11px] font-black tracking-[0.18em] text-slate-400 uppercase">
-                  Total Estimated Cost
-                </p>
-                <h2 className="mt-2 text-[34px] font-black tracking-tight text-slate-900">
-                  {data ? formatNPR(data.total_npr) : "--"}
-                </h2>
-                <p className="mt-1 text-[12px] text-slate-500">/ 1st year</p>
-                <div className="mt-4 rounded-xl border border-[#F5E7C2] bg-[#FFF9EA] px-4 py-2 flex items-center justify-center gap-2 text-[12px] font-semibold text-[#D87A00]">
-                  <span className="w-2 h-2 rounded-full bg-[#F59E0B]" />
-                  Average Cost
+          <div className="rounded-[30px] border border-slate-100 bg-white shadow-[0_18px_45px_rgba(15,23,42,0.06)] p-5 md:p-6">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+              <div className="flex items-center gap-4">
+                <div className="h-14 w-14 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center text-2xl">
+                  {country.flag}
+                </div>
+                <div>
+                  <p className="text-[11px] font-black tracking-[0.18em] text-slate-400 uppercase">
+                    Selected Destination
+                  </p>
+                  <h2 className="text-xl font-black text-slate-900 leading-tight">
+                    {city}, {country.name}
+                  </h2>
+                  <p className="text-sm text-slate-500">
+                    Live cost data synced for this destination.
+                  </p>
                 </div>
               </div>
 
-              <div className="rounded-[22px] border border-slate-100 bg-white shadow-[0_14px_30px_rgba(15,23,42,0.06)] p-4">
-                <p className="text-[11px] font-black tracking-[0.18em] text-slate-400 uppercase">
-                  Cost Benchmarks
-                </p>
-                <div className="mt-4 space-y-4">
-                  {[
-                    {
-                      label: "High",
-                      color: "bg-rose-500",
-                      value: "$45k - $85k+",
-                      width: "92%",
-                    },
-                    {
-                      label: "Average",
-                      color: "bg-amber-400",
-                      value: "$20k - $45k",
-                      width: "70%",
-                    },
-                    {
-                      label: "Low",
-                      color: "bg-emerald-500",
-                      value: "$5k - $20k",
-                      width: "36%",
-                    },
-                  ].map((item) => (
-                    <div key={item.label} className="space-y-2">
-                      <div className="flex items-center justify-between text-[11px] font-bold">
-                        <span
-                          className={
-                            item.label === "High"
-                              ? "text-rose-500"
-                              : item.label === "Average"
-                                ? "text-amber-500"
-                                : "text-emerald-500"
-                          }
-                        >
-                          {item.label}
-                        </span>
-                        <span className="text-slate-500">{item.value}</span>
-                      </div>
-                      <div className="h-1.5 rounded-full bg-slate-100 overflow-hidden">
-                        <div
-                          className={`h-full rounded-full ${item.color}`}
-                          style={{ width: item.width }}
-                        />
-                      </div>
+              <div className="flex flex-wrap items-center gap-3 text-sm">
+                <div className="rounded-full bg-slate-50 border border-slate-100 px-4 py-2 font-bold text-slate-700">
+                  Tuition {formatNPR(tuitionEstimate || 0)}
+                </div>
+                <div className="rounded-full bg-slate-50 border border-slate-100 px-4 py-2 font-bold text-slate-700">
+                  {costBand}
+                </div>
+                <Link
+                  href="/matches"
+                  className="rounded-full bg-blue-600 px-4 py-2 font-black text-white shadow-[0_10px_20px_rgba(37,99,235,0.22)] transition-colors hover:bg-blue-700"
+                >
+                  Edit Selection
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-3">
+            <div className="rounded-[24px] border border-slate-100 bg-white p-5 shadow-[0_14px_30px_rgba(15,23,42,0.05)]">
+              <p className="text-[11px] font-black tracking-[0.18em] text-slate-400 uppercase">
+                Estimated Cost
+              </p>
+              <h2 className="mt-3 text-[32px] font-black tracking-tight text-slate-900">
+                {data ? formatNPR(totalEstimate) : "--"}
+              </h2>
+              <p className="mt-1 text-[12px] text-slate-500">
+                / {period.toLowerCase()}
+              </p>
+              <div className="mt-4 rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-2 flex items-center justify-between gap-2 text-[12px] font-semibold text-emerald-700">
+                <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                <span>{periodHeading}</span>
+                <span>{data ? formatNPR(monthlyEstimate) : "--"} / month</span>
+              </div>
+            </div>
+
+            <div className="rounded-[24px] border border-slate-100 bg-white p-5 shadow-[0_14px_30px_rgba(15,23,42,0.05)]">
+              <p className="text-[11px] font-black tracking-[0.18em] text-slate-400 uppercase">
+                Cost Mix
+              </p>
+              <div className="mt-4 space-y-4">
+                {[
+                  { label: "Tuition", value: yearlyPct, color: "bg-blue-500" },
+                  {
+                    label: "Living",
+                    value: livingPct,
+                    color: "bg-emerald-500",
+                  },
+                  { label: "Other", value: otherPct, color: "bg-amber-500" },
+                ].map((item) => (
+                  <div key={item.label} className="space-y-2">
+                    <div className="flex items-center justify-between text-[11px] font-bold text-slate-500">
+                      <span>{item.label}</span>
+                      <span>{item.value}%</span>
                     </div>
+                    <div className="h-1.5 rounded-full bg-slate-100 overflow-hidden">
+                      <div
+                        className={`h-full rounded-full ${item.color}`}
+                        style={{ width: `${item.value}%` }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="rounded-[24px] border border-slate-100 bg-white p-5 shadow-[0_14px_30px_rgba(15,23,42,0.05)]">
+              <p className="text-[11px] font-black tracking-[0.18em] text-slate-400 uppercase">
+                Live Exchange
+              </p>
+              <h3 className="mt-3 text-[26px] font-black tracking-tight text-slate-900">
+                1 USD = {data ? data.exchange_rate.toFixed(2) : "--"} NPR
+              </h3>
+              <p className="mt-2 text-[13px] leading-6 text-slate-500">
+                Monthly living cost in {city} is currently{" "}
+                {data ? formatNPR(monthlyEstimate) : "loading"}.
+              </p>
+              <div className="mt-4 rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3 text-[12px] text-slate-600">
+                Tuition budget: {formatNPR(currentTuitionBudgetNpr || 0)}
+              </div>
+            </div>
+          </div>
+
+          <div className="grid gap-5 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] items-start">
+            <div className="rounded-[30px] border border-slate-100 bg-white shadow-[0_24px_60px_rgba(15,23,42,0.06)] p-6">
+              <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                <div>
+                  <h3 className="text-[15px] font-black text-slate-900">
+                    Detailed Expense Categories
+                  </h3>
+                  <p className="mt-1 text-[12px] text-slate-500">
+                    Live cost components for {country.name} based on the
+                    selected city.
+                  </p>
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  {costTabs.map((tab) => (
+                    <button
+                      key={tab}
+                      onClick={() => setPeriod(tab)}
+                      className={`h-10 rounded-full px-4 text-[12px] font-black transition-all ${period === tab ? "bg-blue-600 text-white shadow-[0_10px_20px_rgba(37,99,235,0.22)]" : "bg-white text-slate-500 border border-slate-200 hover:border-slate-300"}`}
+                    >
+                      {tab}
+                    </button>
                   ))}
                 </div>
               </div>
 
-              <button className="w-full rounded-[16px] border border-slate-200 bg-white shadow-[0_14px_30px_rgba(15,23,42,0.06)] py-4 text-[15px] font-semibold text-slate-700 hover:bg-slate-50 transition-colors">
-                Download Report
-              </button>
-            </div>
-
-            <div className="rounded-[28px] border border-slate-100 bg-white shadow-[0_24px_60px_rgba(15,23,42,0.08)] p-6">
-              <h3 className="text-[14px] font-bold text-slate-900">
-                Detailed Expense Categories
-              </h3>
-
               <div className="mt-5 space-y-3">
                 {breakdown.map((item) => {
                   const Icon = item.icon;
+                  const palette =
+                    COLOR_MAP[item.color as keyof typeof COLOR_MAP];
 
                   return (
                     <div
@@ -580,9 +640,9 @@ export default function CostingPage() {
                     >
                       <div className="flex items-center gap-3">
                         <div
-                          className={`w-9 h-9 rounded-xl flex items-center justify-center bg-${item.color}-500/10`}
+                          className={`w-9 h-9 rounded-xl flex items-center justify-center ${palette.box}`}
                         >
-                          <Icon className={`w-4 h-4 text-${item.color}-500`} />
+                          <Icon className={`w-4 h-4 ${palette.text}`} />
                         </div>
                         <div>
                           <p className="text-[13px] font-bold text-slate-900">
@@ -594,7 +654,7 @@ export default function CostingPage() {
                         </div>
                       </div>
                       <p className="text-[14px] font-black text-slate-800">
-                        {formatNPR(item.value)}
+                        {periodValue(item.value)}
                       </p>
                     </div>
                   );
@@ -602,138 +662,219 @@ export default function CostingPage() {
               </div>
 
               <div className="mt-4 rounded-[18px] border border-indigo-100 bg-[#F6F7FF] px-5 py-4 text-[13px] text-indigo-600 shadow-[0_8px_20px_rgba(99,102,241,0.08)]">
-                <p className="font-bold mb-1">Why is this an Average Cost?</p>
+                <p className="font-bold mb-1">
+                  Why this estimate feels balanced
+                </p>
                 <p className="leading-6 text-indigo-500/85">
-                  This university is situated in a region with moderate living
-                  costs. While the tuition is slightly above national averages,
-                  the lower cost of off-campus housing keeps the overall
-                  expenditure balanced.
+                  {data
+                    ? `The selected city keeps the overall estimate balanced, with tuition contributing ${yearlyPct}% and living expenses ${livingPct}% of the total.`
+                    : "We refresh the numbers from live cost data so the estimate reflects the selected city and tuition."}
                 </p>
               </div>
 
-              <div className="mt-5 flex flex-wrap items-center gap-3">
-                {["First Year", "Year on Year", "Month on Month"].map((tab) => (
-                  <button
-                    key={tab}
-                    onClick={() => setPeriod(tab)}
-                    className={`h-10 rounded-full px-4 text-[12px] font-black transition-all ${period === tab ? "bg-blue-600 text-white shadow-[0_10px_20px_rgba(37,99,235,0.22)]" : "bg-white text-slate-500 border border-slate-200 hover:border-slate-300"}`}
-                  >
-                    {tab}
-                  </button>
-                ))}
-              </div>
-
-              <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="rounded-[22px] border border-slate-100 bg-white p-5 shadow-[0_10px_24px_rgba(15,23,42,0.04)]">
-                  <div className="flex items-center justify-between mb-4">
-                    <p className="text-[13px] font-bold text-slate-800">
-                      {period}
-                    </p>
-                    <span className="text-[11px] text-slate-400">
-                      {period === "Month on Month"
-                        ? "Monthly view"
-                        : "Annual view"}
-                    </span>
-                  </div>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between text-[13px]">
-                      <span className="text-slate-400">Tuition</span>
-                      <span className="font-black text-slate-900">
-                        {data
-                          ? period === "Month on Month"
-                            ? formatNPR(data.tuition_npr / 12)
-                            : formatLakhs(data.tuition_npr)
-                          : "--"}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between text-[13px]">
-                      <span className="text-slate-400">Living</span>
-                      <span className="font-black text-slate-900">
-                        {data
-                          ? period === "Month on Month"
-                            ? formatNPR(data.living_npr / 12)
-                            : formatLakhs(data.living_npr)
-                          : "--"}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between text-[13px]">
-                      <span className="text-slate-400">Other</span>
-                      <span className="font-black text-slate-900">
-                        {data
-                          ? period === "Month on Month"
-                            ? formatNPR(data.education_npr / 12)
-                            : formatLakhs(data.education_npr)
-                          : "--"}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="rounded-[22px] border border-slate-100 bg-white p-5 shadow-[0_10px_24px_rgba(15,23,42,0.04)]">
-                  <p className="text-[13px] font-bold text-slate-800 mb-4">
-                    Expense Mix
-                  </p>
-                  <div className="flex items-center justify-center">
-                    <div className="relative w-32 h-32">
-                      <svg
-                        viewBox="0 0 36 36"
-                        className="w-full h-full -rotate-90"
-                      >
-                        <circle
-                          cx="18"
-                          cy="18"
-                          r="16"
-                          fill="transparent"
-                          stroke="#F1F5F9"
-                          strokeWidth="5"
-                        />
-                        <circle
-                          cx="18"
-                          cy="18"
-                          r="16"
-                          fill="transparent"
-                          stroke="#3B82F6"
-                          strokeWidth="5"
-                          strokeDasharray={`${yearlyPct} 100`}
-                          strokeLinecap="round"
-                        />
-                        <circle
-                          cx="18"
-                          cy="18"
-                          r="16"
-                          fill="transparent"
-                          stroke="#10B981"
-                          strokeWidth="5"
-                          strokeDasharray={`${livingPct} 100`}
-                          strokeDashoffset={`-${yearlyPct}`}
-                          strokeLinecap="round"
-                        />
-                        <circle
-                          cx="18"
-                          cy="18"
-                          r="16"
-                          fill="transparent"
-                          stroke="#F59E0B"
-                          strokeWidth="5"
-                          strokeDasharray={`${otherPct} 100`}
-                          strokeDashoffset={`-${yearlyPct + livingPct}`}
-                          strokeLinecap="round"
-                        />
-                      </svg>
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="w-14 h-14 rounded-full bg-white shadow-inner" />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-4 flex items-center gap-2 text-[11px] font-semibold text-slate-400">
+              <div className="mt-5 flex items-center gap-2 text-[11px] font-semibold text-slate-400">
                 <Info className="w-3.5 h-3.5" />
                 Living cost in {city} is dynamically calculated.
               </div>
             </div>
+
+            <div className="space-y-5">
+              <div className="rounded-[30px] border border-[#e8dcc4] bg-gradient-to-br from-[#fdfbf6] to-[#f4ead9] shadow-[0_18px_45px_rgba(15,23,42,0.06)] p-6 overflow-hidden">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="max-w-sm">
+                    <h3 className="text-lg font-black text-slate-900 flex items-center gap-2">
+                      <Info className="w-5 h-5 text-amber-500" /> Improve Your
+                      Chances
+                    </h3>
+                    <p className="text-[12px] text-slate-600 mt-2 leading-6">
+                      {topRecommendation
+                        ? `Strong live candidates include ${topRecommendation.name} and other universities in ${country.name}.`
+                        : `We’ll highlight the strongest live universities once recommendations load.`}
+                    </p>
+                    <ul className="text-[11px] font-bold text-slate-800 space-y-1.5 mt-4 ml-1">
+                      <li className="flex items-center gap-1.5">
+                        <div className="w-1 h-1 bg-slate-900 rounded-full" />{" "}
+                        Review lower-fee universities first
+                      </li>
+                      <li className="flex items-center gap-1.5">
+                        <div className="w-1 h-1 bg-slate-900 rounded-full" />{" "}
+                        Compare living costs by city
+                      </li>
+                    </ul>
+                    <Link
+                      href="/matches"
+                      className="inline-flex mt-4 items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white font-black text-[12px] px-6 py-2.5 rounded-full shadow-md shadow-blue-500/20 transition-all"
+                    >
+                      View Plan
+                    </Link>
+                  </div>
+                  <div className="w-32 h-32 rounded-[28px] bg-white/70 border border-white/80 flex items-center justify-center shadow-sm shrink-0">
+                    <div className="text-center">
+                      <TrendingUp className="w-10 h-10 text-amber-500 mx-auto mb-2" />
+                      <p className="text-[11px] font-black text-slate-500 uppercase tracking-[0.18em]">
+                        {costBand}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h2 className="font-black text-slate-900">
+                      Recommended Universities
+                    </h2>
+                    <p className="text-[10px] font-semibold text-slate-400">
+                      Based on your profile & budget
+                    </p>
+                  </div>
+                  <Link
+                    href="/matches"
+                    className="text-blue-500 text-xs font-bold hover:underline"
+                  >
+                    See All
+                  </Link>
+                </div>
+
+                {recommendationLoading && recommendations.length === 0 ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {Array.from({ length: 4 }).map((_, index) => (
+                      <div
+                        key={index}
+                        className="h-[320px] rounded-[24px] border border-slate-200 bg-white animate-pulse"
+                      />
+                    ))}
+                  </div>
+                ) : recommendationCount > 0 ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+                    {recommendations.map((uni) => {
+                      const tuitionUsd =
+                        typeof uni.tuition === "number"
+                          ? uni.tuition
+                          : Number(uni.tuition);
+                      const tuitionKnown =
+                        Number.isFinite(tuitionUsd) && tuitionUsd > 0;
+                      const tuitionNpr = tuitionKnown
+                        ? tuitionUsd * currentExchangeRate
+                        : 0;
+                      const fitLabel = tuitionKnown
+                        ? tuitionUsd <= annualTuitionUsd
+                          ? "Within budget"
+                          : "Stretch"
+                        : "Fee on request";
+                      const fitScore = tuitionKnown
+                        ? Math.max(
+                            58,
+                            Math.min(
+                              97,
+                              Math.round(
+                                100 -
+                                  (Math.abs(tuitionUsd - annualTuitionUsd) /
+                                    Math.max(annualTuitionUsd || 1, 1)) *
+                                    20 +
+                                  (uni.acceptanceRate || 0) / 3,
+                              ),
+                            ),
+                          )
+                        : Math.max(
+                            60,
+                            Math.min(94, Math.round(uni.acceptanceRate || 72)),
+                          );
+
+                      return (
+                        <div
+                          key={uni.id}
+                          className="bg-white border border-slate-200 rounded-[24px] overflow-hidden shadow-sm flex flex-col"
+                        >
+                          <div className="h-32 relative bg-gradient-to-br from-slate-900 via-slate-800 to-slate-700">
+                            <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.45),transparent_45%)]" />
+                            <div className="absolute top-3 right-3 bg-emerald-100/90 backdrop-blur-sm text-emerald-800 text-[10px] font-black px-2 py-1 rounded-full shadow-sm border border-emerald-200">
+                              {fitScore}% Fit
+                            </div>
+                            <div className="absolute left-4 bottom-4 right-4 text-white">
+                              <p className="text-[10px] font-black tracking-[0.18em] uppercase text-white/70">
+                                {uni.country}
+                              </p>
+                              <h3 className="mt-1 text-[15px] font-black leading-tight">
+                                {uni.name}
+                              </h3>
+                            </div>
+                          </div>
+
+                          <div className="p-4 flex flex-col flex-1 gap-3">
+                            <p className="text-[11px] font-semibold text-slate-500 flex items-center gap-1">
+                              <MapPin className="w-3.5 h-3.5" /> {uni.location}
+                            </p>
+
+                            <div className="grid grid-cols-2 gap-2 text-[11px]">
+                              <div className="rounded-2xl border border-slate-100 bg-slate-50 px-3 py-2">
+                                <p className="text-slate-400 font-semibold uppercase tracking-wide">
+                                  Tuition
+                                </p>
+                                <p className="mt-1 font-black text-slate-900">
+                                  {tuitionKnown
+                                    ? `${formatUSD(tuitionUsd)}`
+                                    : "Check site"}
+                                </p>
+                              </div>
+                              <div className="rounded-2xl border border-slate-100 bg-slate-50 px-3 py-2">
+                                <p className="text-slate-400 font-semibold uppercase tracking-wide">
+                                  Acceptance
+                                </p>
+                                <p className="mt-1 font-black text-slate-900">
+                                  {Math.round(uni.acceptanceRate || 0)}%
+                                </p>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center justify-between text-[11px] font-bold">
+                              <span
+                                className={`rounded-full px-2.5 py-1 ${tuitionKnown && tuitionUsd <= annualTuitionUsd ? "bg-emerald-50 text-emerald-600" : "bg-amber-50 text-amber-600"}`}
+                              >
+                                {fitLabel}
+                              </span>
+                              <span className="text-slate-500">
+                                {tuitionKnown
+                                  ? `${formatNPR(tuitionNpr)} / year`
+                                  : "Live fee band"}
+                              </span>
+                            </div>
+
+                            <div className="mt-auto grid grid-cols-2 gap-2">
+                              <a
+                                href={uni.website || "/matches"}
+                                target={uni.website ? "_blank" : undefined}
+                                rel={uni.website ? "noreferrer" : undefined}
+                                className="bg-[#f1f5f9] hover:bg-slate-200 text-slate-800 font-black text-[11px] py-2.5 rounded-lg shadow-sm text-center transition-colors"
+                              >
+                                View Details
+                              </a>
+                              <Link
+                                href="/matches"
+                                className="bg-blue-500 hover:bg-blue-600 text-white font-black text-[11px] py-2.5 rounded-lg shadow-sm text-center"
+                              >
+                                Select University
+                              </Link>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="rounded-[24px] border border-dashed border-slate-200 bg-white p-8 text-center text-slate-500">
+                    Live university recommendations will appear here once the
+                    API returns results for {country.name}.
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
+
+          <button className="w-full rounded-[16px] border border-slate-200 bg-white shadow-[0_14px_30px_rgba(15,23,42,0.06)] py-4 text-[15px] font-semibold text-slate-700 hover:bg-slate-50 transition-colors">
+            Download Report
+          </button>
         </div>
       </main>
     </div>
