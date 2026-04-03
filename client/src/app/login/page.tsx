@@ -5,17 +5,16 @@ import { signIn, useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { AlertCircle, CheckCircle2, Eye, EyeOff, Facebook } from "lucide-react";
+import { AlertCircle, CheckCircle2, Facebook } from "lucide-react";
 
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { data: session, status } = useSession();
   const [identifier, setIdentifier] = useState("");
-  const [password, setPassword] = useState("");
-  const [otp, setOtp] = useState("123456"); // Pre-filled with static code for testing
-  const [showPassword, setShowPassword] = useState(false);
+  const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
+  const [sendingOtp, setSendingOtp] = useState(false);
   const [error, setError] = useState("");
   const [justRegistered, setJustRegistered] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
@@ -55,10 +54,41 @@ function LoginForm() {
     return null;
   }
 
+  const handleSendOtp = async () => {
+    if (!identifier.trim()) {
+      setError("Please enter your email or username first.");
+      return;
+    }
+
+    setSendingOtp(true);
+    setError("");
+
+    try {
+      const res = await fetch("/api/auth/request-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ identifier }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || "Failed to send OTP.");
+        return;
+      }
+
+      setOtpSent(true);
+      setOtpChannel((data.channel || "").toLowerCase());
+    } catch {
+      setError("Unable to send OTP right now. Please try again.");
+    } finally {
+      setSendingOtp(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!identifier || !password) {
-      setError("Please fill in all fields.");
+    if (!identifier || !otp) {
+      setError("Please enter your email/username and OTP.");
       return;
     }
     setLoading(true);
@@ -67,7 +97,6 @@ function LoginForm() {
     try {
       const result = await signIn("credentials", {
         identifier,
-        password,
         otp,
         redirect: false,
       });
@@ -167,27 +196,17 @@ function LoginForm() {
                 value={identifier}
                 onChange={(v) => setIdentifier(v)}
               />
-              <InputField
-                placeholder="password"
-                type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={(v) => setPassword(v)}
-                suffix={
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="text-gray-300 hover:text-gray-500 pr-2 pt-1"
-                  >
-                    {showPassword ? (
-                      <EyeOff className="w-4 h-4" />
-                    ) : (
-                      <Eye className="w-4 h-4" />
-                    )}
-                  </button>
-                }
-              />
 
-              {otpSent && (
+              <button
+                type="button"
+                onClick={handleSendOtp}
+                disabled={sendingOtp}
+                className="w-full h-[56px] border border-[#3381FF] text-[#3381FF] font-bold rounded-[20px] text-[14px] hover:bg-blue-50 transition-all disabled:opacity-70"
+              >
+                {sendingOtp ? "Sending OTP..." : "Send OTP"}
+              </button>
+
+              {(otpSent || otpChannel) && (
                 <div className="space-y-2 fade-in">
                   <div className="flex flex-col items-center">
                     <p className="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-3">
@@ -202,12 +221,6 @@ function LoginForm() {
                   </div>
                 </div>
               )}
-
-              <div className="text-right pt-1">
-                <Link href="#" className="text-[12px] font-medium text-black">
-                  Forgot password?
-                </Link>
-              </div>
 
               <button
                 type="submit"
