@@ -6,6 +6,17 @@ export const proxy = withAuth(
     const token = req.nextauth.token;
     const path = req.nextUrl.pathname;
 
+    const isAuthPage =
+      path.startsWith("/login") ||
+      path.startsWith("/register") ||
+      path.startsWith("/signup");
+
+    if (isAuthPage && token) {
+      const redirectPath =
+        token.role === "ADMIN" ? "/admin/dashboard" : "/dashboard";
+      return NextResponse.redirect(new URL(redirectPath, req.url));
+    }
+
     if (path.startsWith("/admin") && token?.role !== "ADMIN") {
       return NextResponse.redirect(new URL("/dashboard", req.url));
     }
@@ -27,7 +38,18 @@ export const proxy = withAuth(
   },
   {
     callbacks: {
-      authorized: ({ token }) => !!token,
+      authorized: ({ req, token }) => {
+        const path = req.nextUrl.pathname;
+        if (
+          path.startsWith("/login") ||
+          path.startsWith("/register") ||
+          path.startsWith("/signup")
+        ) {
+          return true;
+        }
+
+        return !!token;
+      },
     },
     pages: {
       signIn: "/login",
@@ -37,6 +59,9 @@ export const proxy = withAuth(
 
 export const config = {
   matcher: [
+    "/login",
+    "/register",
+    "/signup",
     "/dashboard/:path*",
     "/profile/:path*",
     "/applications/:path*",
