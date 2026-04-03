@@ -121,6 +121,8 @@ const FAQS = [
   },
 ];
 
+const COUNTRY_KEYS: Array<keyof typeof DESTINATIONS> = ["Canada", "USA", "UK"];
+
 export default function HomePage() {
   const [activeCountry, setActiveCountry] =
     useState<keyof typeof DESTINATIONS>("Canada");
@@ -131,11 +133,11 @@ export default function HomePage() {
       <section className="relative px-6 pb-16 pt-28 lg:px-12 lg:pb-24 lg:pt-36">
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute -left-28 top-16 h-72 w-72 rounded-full bg-[#3b82f6]/20 blur-3xl" />
-          <div className="absolute right-0 top-0 h-[420px] w-[420px] rounded-full bg-[#22c55e]/10 blur-3xl" />
-          <div className="absolute bottom-0 left-1/2 h-56 w-[680px] -translate-x-1/2 rounded-full bg-[#2563eb]/10 blur-3xl" />
+          <div className="absolute right-0 top-0 h-105 w-105 rounded-full bg-[#22c55e]/10 blur-3xl" />
+          <div className="absolute bottom-0 left-1/2 h-56 w-170 -translate-x-1/2 rounded-full bg-[#2563eb]/10 blur-3xl" />
         </div>
 
-        <div className="relative mx-auto grid max-w-[1240px] gap-12 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+        <div className="relative mx-auto grid max-w-310 gap-12 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
           <div>
             <span className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-white px-4 py-2 text-xs font-extrabold uppercase tracking-[0.14em] text-blue-700 shadow-sm">
               <Sparkles className="h-3.5 w-3.5" />
@@ -144,12 +146,12 @@ export default function HomePage() {
 
             <h1 className="mt-6 text-[38px] font-black leading-[1.05] tracking-tight sm:text-[52px] lg:text-[68px]">
               <span className="block">Shape Your Global</span>
-              <span className="block bg-gradient-to-r from-[#2563eb] via-[#1d4ed8] to-[#14b8a6] bg-clip-text text-transparent">
+              <span className="block bg-linear-to-r from-[#2563eb] via-[#1d4ed8] to-[#14b8a6] bg-clip-text text-transparent">
                 Study Trajectory
               </span>
             </h1>
 
-            <p className="mt-6 max-w-[620px] text-base font-medium leading-relaxed text-slate-600 sm:text-lg">
+            <p className="mt-6 max-w-155 text-base font-medium leading-relaxed text-slate-600 sm:text-lg">
               Build your profile once, compare real universities instantly, and
               move from uncertainty to a confident shortlist with data-backed
               admission predictions.
@@ -171,7 +173,7 @@ export default function HomePage() {
               </Link>
             </div>
 
-            <div className="mt-8 grid max-w-[640px] grid-cols-1 gap-3 sm:grid-cols-3">
+            <div className="mt-8 grid max-w-160 grid-cols-1 gap-3 sm:grid-cols-3">
               {[
                 "160+ destinations",
                 "1,500+ institutions",
@@ -191,7 +193,7 @@ export default function HomePage() {
           <div className="relative">
             <div className="absolute -right-10 -top-8 h-40 w-40 rounded-full bg-[#2563eb]/20 blur-3xl" />
             <div className="relative rounded-[30px] border border-white/70 bg-white/90 p-5 shadow-[0_30px_80px_rgba(29,78,216,0.18)] backdrop-blur">
-              <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#0f172a] to-[#1e293b] p-5 text-white">
+              <div className="relative overflow-hidden rounded-2xl bg-linear-to-br from-[#0f172a] to-[#1e293b] p-5 text-white">
                 <div className="flex items-center justify-between">
                   <p className="text-xs font-semibold uppercase tracking-[0.12em] text-blue-200">
                     Profile Match Engine
@@ -210,7 +212,7 @@ export default function HomePage() {
                   alt="Student success"
                   width={560}
                   height={420}
-                  className="mx-auto h-auto w-full max-w-[360px] object-contain"
+                  className="mx-auto h-auto w-full max-w-90 object-contain"
                   priority
                 />
               </div>
@@ -241,7 +243,7 @@ export default function HomePage() {
       </section>
 
       <section className="px-6 py-12 lg:px-12">
-        <div className="mx-auto grid max-w-[1240px] gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mx-auto grid max-w-310 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {[
             {
               icon: Compass,
@@ -281,7 +283,7 @@ export default function HomePage() {
       </section>
 
       <section className="px-6 py-16 lg:px-12 lg:py-20">
-        <div className="mx-auto max-w-[1240px] rounded-[32px] border border-slate-200 bg-white p-7 shadow-xl shadow-slate-200/60 lg:p-10">
+        <div className="mx-auto max-w-310 rounded-4xl border border-slate-200 bg-white p-7 shadow-xl shadow-slate-200/60 lg:p-10">
           <div className="mb-8 flex flex-wrap items-end justify-between gap-6">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.14em] text-blue-700">
@@ -338,7 +340,7 @@ export default function HomePage() {
       </section>
 
       <section className="px-6 py-16 lg:px-12 lg:py-20" id="countries">
-        <div className="mx-auto max-w-[1240px]">
+        <div className="mx-auto max-w-310">
           <div className="mb-8 flex flex-wrap items-center justify-between gap-5">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.14em] text-blue-700">
@@ -358,9 +360,7 @@ export default function HomePage() {
           </div>
 
           <div className="mb-6 flex flex-wrap gap-2.5">
-            {(
-              Object.keys(DESTINATIONS) as Array<keyof typeof DESTINATIONS>
-            ).map((country) => (
+            {COUNTRY_KEYS.map((country) => (
               <button
                 key={country}
                 type="button"
@@ -442,7 +442,7 @@ export default function HomePage() {
       </section>
 
       <section className="px-6 py-16 lg:px-12 lg:py-20" id="how-it-works">
-        <div className="mx-auto grid max-w-[1240px] gap-8 rounded-[34px] bg-gradient-to-br from-[#0f172a] via-[#1e3a8a] to-[#0f766e] p-8 text-white shadow-2xl lg:grid-cols-[1fr_auto] lg:items-center lg:p-12">
+        <div className="mx-auto grid max-w-310 gap-8 rounded-[34px] bg-linear-to-br from-[#0f172a] via-[#1e3a8a] to-[#0f766e] p-8 text-white shadow-2xl lg:grid-cols-[1fr_auto] lg:items-center lg:p-12">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.14em] text-blue-100">
               Scholarship Assistant
@@ -450,7 +450,7 @@ export default function HomePage() {
             <h2 className="mt-3 text-3xl font-black leading-tight lg:text-4xl">
               Discover funding paths before you apply
             </h2>
-            <p className="mt-4 max-w-[700px] text-base font-medium text-slate-100/90">
+            <p className="mt-4 max-w-175 text-base font-medium text-slate-100/90">
               Filter scholarships by destination, eligibility profile, and
               field-of-study criteria. Prioritize opportunities with the highest
               chance of conversion.
@@ -467,7 +467,7 @@ export default function HomePage() {
       </section>
 
       <section className="px-6 py-16 lg:px-12 lg:py-24" id="features">
-        <div className="mx-auto grid max-w-[1240px] gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-start">
+        <div className="mx-auto grid max-w-310 gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-start">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.14em] text-blue-700">
               FAQ
@@ -519,7 +519,7 @@ export default function HomePage() {
       </section>
 
       <section className="px-6 pb-20 pt-6 lg:px-12 lg:pb-28">
-        <div className="mx-auto flex max-w-[1240px] flex-col items-center justify-between gap-6 rounded-[30px] border border-slate-200 bg-white p-8 text-center shadow-xl shadow-slate-200/60 lg:flex-row lg:px-10 lg:text-left">
+        <div className="mx-auto flex max-w-310 flex-col items-center justify-between gap-6 rounded-[30px] border border-slate-200 bg-white p-8 text-center shadow-xl shadow-slate-200/60 lg:flex-row lg:px-10 lg:text-left">
           <div>
             <h3 className="text-2xl font-black tracking-tight text-slate-900 lg:text-3xl">
               Ready to build your shortlist?
@@ -548,3 +548,4 @@ export default function HomePage() {
     </div>
   );
 }
+
