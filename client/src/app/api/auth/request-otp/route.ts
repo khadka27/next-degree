@@ -29,7 +29,7 @@ export async function POST(req: Request) {
       });
     }
 
-    if (!user || !user.phoneE164) {
+    if (!user?.phoneE164) {
       return NextResponse.json(
         {
           error: "No account found with a verified phone for this identifier.",
