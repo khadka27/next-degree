@@ -5,7 +5,7 @@ import { useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { AlertCircle, Eye, EyeOff } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 
 type CountryCodeOption = {
   code: string;
@@ -71,7 +71,6 @@ function RegisterForm() {
   const searchParams = useSearchParams();
   const { data: session, status } = useSession();
   const callbackUrl = searchParams.get("callbackUrl");
-  const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [serverError, setServerError] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -86,8 +85,6 @@ function RegisterForm() {
     countryDialCode: "+1",
     phone: "",
     prefersWhatsApp: true,
-    password: "",
-    confirmPassword: "",
   });
 
   useEffect(() => {
@@ -158,8 +155,6 @@ function RegisterForm() {
     if (!/^\d{6,15}$/.test(form.phone.replaceAll(/\D/g, ""))) {
       e.phone = "Enter a valid phone number.";
     }
-    if (!form.password) e.password = "Password required.";
-    if (form.password !== form.confirmPassword) e.confirmPassword = "Mismatch.";
     if (!agreed) e.agreed = "Required.";
 
     setErrors(e);
@@ -350,31 +345,11 @@ function RegisterForm() {
                 </label>
               </div>
               <InputField
-                placeholder="Password"
-                type={showPassword ? "text" : "password"}
-                value={form.password}
-                error={errors.password}
-                onChange={(v) => handleChange("password", v)}
-                suffix={
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="text-gray-300 hover:text-gray-500 pr-2 pt-1"
-                  >
-                    {showPassword ? (
-                      <EyeOff className="w-4 h-4" />
-                    ) : (
-                      <Eye className="w-4 h-4" />
-                    )}
-                  </button>
-                }
-              />
-              <InputField
-                placeholder="Confirm password"
-                type={showPassword ? "text" : "password"}
-                value={form.confirmPassword}
-                error={errors.confirmPassword}
-                onChange={(v) => handleChange("confirmPassword", v)}
+                placeholder="You will verify with OTP after signup"
+                value=""
+                onChange={() => {}}
+                type="text"
+                suffix={<span className="text-[11px] font-bold text-[#3381FF] pr-2">OTP</span>}
               />
 
               {/* Terms & Conditions */}
