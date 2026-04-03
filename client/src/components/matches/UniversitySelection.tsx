@@ -184,10 +184,14 @@ function MatchCard({
   return (
     <div
       className={`bg-white border text-left rounded-[28px] md:rounded-[36px] overflow-hidden transition-all duration-500 cursor-pointer relative group flex flex-col h-full ${selected ? "border-blue-500 ring-1 ring-blue-500/20 shadow-2xl translate-y-[-6px]" : "border-slate-100 hover:shadow-2xl hover:border-blue-200 hover:translate-y-[-4px]"}`}
-      onClick={onSelect}
+      onClick={() => {
+        if (detailsOpen) return;
+        onSelect?.();
+      }}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
+          if (detailsOpen) return;
           onSelect?.();
         }
       }}
@@ -316,13 +320,22 @@ function MatchCard({
       </div>
 
       {detailsOpen && (
-        <div className="fixed inset-0 z-[120] bg-black/50 backdrop-blur-[1px] p-3 md:p-6">
+        <div
+          className="fixed inset-0 z-[120] bg-black/50 backdrop-blur-[1px] p-3 md:p-6"
+          onClick={(e) => e.stopPropagation()}
+        >
           <button
             aria-label="Close details"
             className="absolute inset-0"
-            onClick={() => setDetailsOpen(false)}
+            onClick={(e) => {
+              e.stopPropagation();
+              setDetailsOpen(false);
+            }}
           />
-          <div className="relative mx-auto h-full w-full max-w-md md:max-w-2xl rounded-[24px] bg-white overflow-hidden flex flex-col">
+          <div
+            className="relative mx-auto h-full w-full max-w-md md:max-w-2xl rounded-[24px] bg-white overflow-hidden flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="relative h-24 md:h-36 shrink-0">
               <Image
                 src={m.banner || "/uni-default.webp"}
@@ -354,7 +367,11 @@ function MatchCard({
                 {tabs.map((tab) => (
                   <button
                     key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setActiveTab(tab.id);
+                    }}
                     className={`px-4 md:px-5 h-11 text-[12px] font-bold border-b-2 transition-colors ${
                       activeTab === tab.id
                         ? "text-blue-600 border-blue-600"
@@ -583,6 +600,7 @@ function MatchCard({
 
             <div className="shrink-0 border-t border-slate-100 p-4">
               <button
+                type="button"
                 onClick={() => {
                   setDetailsOpen(false);
                   onSelect?.();

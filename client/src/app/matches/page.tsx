@@ -2003,6 +2003,7 @@ export default function AbroadLiftMatchesPage() {
         redirectToLoginForMatches(selectedMatch);
         return;
       }
+      setTransitionType("finance");
       setStep(8);
     } else if (step < STEPS.length - 1) {
       setStep(step + 1);
@@ -2729,8 +2730,6 @@ export default function AbroadLiftMatchesPage() {
                 return;
               }
               setSelectedMatch(m);
-              setTransitionType("finance");
-              setStep(8);
             }}
             onAdjustPreferences={() => setStep(6)}
             onClearFilters={() => {
@@ -4069,7 +4068,7 @@ export default function AbroadLiftMatchesPage() {
                     : "bg-[#eff5fd] text-[#9ca3af] cursor-not-allowed"
                 }`}
               >
-                {step === 7 ? "Analyze & Match" : "Continue"}
+                Continue
               </button>
             </div>
           </div>
