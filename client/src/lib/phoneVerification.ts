@@ -62,47 +62,6 @@ export function getOtpExpiry() {
   return new Date(Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000);
 }
 
-async function sendViaWhatsApp(phoneE164: string, otpCode: string) {
-  const authHeader = twilioAuthHeader();
-  const from = process.env.TWILIO_WHATSAPP_FROM?.trim();
-
-  if (!authHeader || !from) {
-    return false;
-  }
-
-  const sid = process.env.TWILIO_ACCOUNT_SID?.trim();
-  if (!sid) return false;
-
-  try {
-    const response = await fetch(
-      `https://api.twilio.com/2010-04-01/Accounts/${sid}/Messages.json`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: authHeader,
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: new URLSearchParams({
-          From: from,
-          To: `whatsapp:${phoneE164}`,
-          Body: `Your AbroadLift verification code is ${otpCode}`,
-        }),
-      },
-    );
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("[TWILIO_WHATSAPP_ERROR]", response.status, errorText);
-      return false;
-    }
-
-    return true;
-  } catch (err) {
-    console.error("[TWILIO_WHATSAPP_EXCEPTION]", err);
-    return false;
-  }
-}
-
 async function sendViaTwilio(phoneE164: string, otpCode: string) {
   const authHeader = twilioAuthHeader();
   const from = getTwilioSmsFrom();
@@ -151,33 +110,6 @@ export async function trySendOtp({
   phoneE164: string;
   otpCode: string;
 }) {
-  const isDev = process.env.NODE_ENV === "development";
-  const hasTwilio =
-    process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN;
-
-  // Use a hardcoded test number or dev mode to skip real sending
-  const isTestNumber =
-    phoneE164 === "+9779876543210" || phoneE164 === "+977981234560";
-
-  if (isDev || isTestNumber || !hasTwilio) {
-    const channel: OtpChannel = process.env.TWILIO_WHATSAPP_FROM
-      ? "WHATSAPP"
-      : "SMS";
-    console.log(
-      `\n[TEST_MODE] Skipping ${channel} send to ${phoneE164}. Code: ${otpCode}\n`,
-    );
-    return { sent: true, channel };
-  }
-
-  // Try WhatsApp first if configured
-  if (process.env.TWILIO_WHATSAPP_FROM) {
-    const waSent = await sendViaWhatsApp(phoneE164, otpCode);
-    if (waSent) {
-      return { sent: true, channel: "WHATSAPP" as OtpChannel };
-    }
-  }
-
-  // Fallback to SMS
   const smsSent = await sendViaTwilio(phoneE164, otpCode);
   return {
     sent: smsSent,

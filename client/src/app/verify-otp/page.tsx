@@ -2,6 +2,7 @@
 
 import { Suspense, useEffect, useMemo, useState, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { AlertCircle, CheckCircle2, ShieldCheck } from "lucide-react";
 
@@ -46,26 +47,26 @@ function VerifyOtpForm() {
     setSuccess("");
 
     try {
-      const res = await fetch("/api/auth/verify-signup-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phoneE164, otp }),
+      const result = await signIn("credentials", {
+        phone: phoneE164,
+        otp: otp.trim(),
+        redirect: false,
       });
 
-      const data = await res.json();
-      if (!res.ok) {
-        setError(data.error || "OTP verification failed.");
+      if (result?.error) {
+        setError(result.error || "OTP verification failed.");
         return;
       }
 
-      setSuccess("Phone verified successfully. Redirecting to login...");
+      setSuccess("Phone verified. Redirecting to home...");
       setTimeout(() => {
-        const callbackParam = callbackUrl
-          ? `&callbackUrl=${encodeURIComponent(callbackUrl)}`
-          : "";
-        const loginUrl = `/login?registered=1${callbackParam}`;
-        router.replace(loginUrl);
-      }, 900);
+        if (callbackUrl) {
+          router.replace(callbackUrl);
+          return;
+        }
+
+        router.replace("/");
+      }, 700);
     } catch {
       setError("Something went wrong. Please try again.");
     } finally {
@@ -160,7 +161,7 @@ function VerifyOtpForm() {
         </form>
 
         <p className="mt-6 text-center text-sm text-slate-500">
-          Already verified?{" "}
+          Already have an account?{" "}
           <Link
             href="/login"
             className="font-bold text-[#3366FF] hover:underline"
@@ -185,6 +186,15 @@ function OTPInput({
   // Initialize value to 6 digits (empty or space filled if needed)
   const otpArray = value.split("").slice(0, 6);
   while (otpArray.length < 6) otpArray.push("");
+
+  const otpBoxes = [
+    { id: "otp-digit-1", index: 0 },
+    { id: "otp-digit-2", index: 1 },
+    { id: "otp-digit-3", index: 2 },
+    { id: "otp-digit-4", index: 3 },
+    { id: "otp-digit-5", index: 4 },
+    { id: "otp-digit-6", index: 5 },
+  ];
 
   const handleChange = (index: number, newVal: string) => {
     // Only allow digits
@@ -251,26 +261,24 @@ function OTPInput({
 
   return (
     <div className="flex justify-between w-full">
-      {Array(6)
-        .fill(null)
-        .map((_, index) => (
-          <input
-            key={index}
-            ref={(el) => {
-              inputRefs.current[index] = el;
-            }}
-            type="text"
-            inputMode="numeric"
-            maxLength={1}
-            value={otpArray[index]}
-            onChange={(e) => handleChange(index, e.target.value)}
-            onKeyDown={(e) => handleKeyDown(index, e)}
-            onPaste={(e) => {
-              handlePaste(index, e);
-            }}
-            className="w-12 h-12 text-center text-[20px] font-bold border-2 border-[#E5E7EB] rounded-[12px] bg-white text-[#0f172a] shadow-sm outline-none transition-all focus:border-gray-300"
-          />
-        ))}
+      {otpBoxes.map(({ id, index }) => (
+        <input
+          key={id}
+          ref={(el) => {
+            inputRefs.current[index] = el;
+          }}
+          type="text"
+          inputMode="numeric"
+          maxLength={1}
+          value={otpArray[index]}
+          onChange={(e) => handleChange(index, e.target.value)}
+          onKeyDown={(e) => handleKeyDown(index, e)}
+          onPaste={(e) => {
+            handlePaste(index, e);
+          }}
+          className="w-12 h-12 text-center text-[20px] font-bold border-2 border-[#E5E7EB] rounded-[12px] bg-white text-[#0f172a] shadow-sm outline-none transition-all focus:border-gray-300"
+        />
+      ))}
     </div>
   );
 }
