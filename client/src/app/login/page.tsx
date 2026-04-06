@@ -38,12 +38,6 @@ function LoginForm() {
       return;
     }
 
-    const callbackUrl = searchParams.get("callbackUrl");
-    if (callbackUrl) {
-      router.replace(callbackUrl);
-      return;
-    }
-
     if (session?.user?.role === "ADMIN") {
       router.replace("/admin/dashboard");
       return;
@@ -129,11 +123,7 @@ function LoginForm() {
 
       const sessionRes = await fetch("/api/auth/session");
       const currentSession = await sessionRes.json();
-      const callbackUrl = searchParams.get("callbackUrl");
-
-      if (callbackUrl) {
-        router.push(callbackUrl);
-      } else if (currentSession?.user?.role === "ADMIN") {
+      if (currentSession?.user?.role === "ADMIN") {
         router.push("/admin/dashboard");
       } else {
         router.push("/");
