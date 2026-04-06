@@ -114,7 +114,8 @@ export async function POST(req: Request) {
         if (!otpSendResult.sent) {
           return NextResponse.json(
             {
-              error: "Unable to send OTP right now. Please try again in a moment.",
+              error:
+                "Unable to send OTP right now. Please try again in a moment.",
             },
             { status: 503 },
           );
@@ -150,7 +151,11 @@ export async function POST(req: Request) {
         );
       }
 
-      if (existingEmail && existingPhone && existingEmail.id !== existingPhone.id) {
+      if (
+        existingEmail &&
+        existingPhone &&
+        existingEmail.id !== existingPhone.id
+      ) {
         return NextResponse.json(
           {
             error:
