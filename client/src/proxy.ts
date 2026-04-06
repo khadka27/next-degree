@@ -12,17 +12,15 @@ export const proxy = withAuth(
       path.startsWith("/signup");
 
     if (isAuthPage && token) {
-      const redirectPath =
-        token.role === "ADMIN" ? "/admin/dashboard" : "/dashboard";
+      const redirectPath = token.role === "ADMIN" ? "/admin/dashboard" : "/";
       return NextResponse.redirect(new URL(redirectPath, req.url));
     }
 
     if (path.startsWith("/admin") && token?.role !== "ADMIN") {
-      return NextResponse.redirect(new URL("/dashboard", req.url));
+      return NextResponse.redirect(new URL("/", req.url));
     }
 
     const studentRoutes = [
-      "/dashboard",
       "/profile",
       "/matches",
       "/applications",
@@ -62,7 +60,6 @@ export const config = {
     "/login",
     "/register",
     "/signup",
-    "/dashboard/:path*",
     "/profile/:path*",
     "/applications/:path*",
     "/eligibility/:path*",

@@ -70,8 +70,8 @@ const NAV_LINKS: NavLink[] = [
         desc: "Check your visa approval chances",
       },
       {
-        href: "/dashboard",
-        label: "Student Dashboard",
+        href: "/profile",
+        label: "My Profile",
         desc: "Manage your applications & profile",
       },
     ],
@@ -83,7 +83,6 @@ const MOBILE_TABS = [
   { href: "/", label: "Home", icon: Home },
   { href: "/search", label: "Search", icon: Search },
   { href: "/matches", label: "Matches", icon: Sparkles },
-  { href: "/dashboard", label: "Stats", icon: LayoutGrid },
   { href: "/profile", label: "Profile", icon: User },
 ];
 

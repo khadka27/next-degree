@@ -36,7 +36,7 @@ function LoginForm() {
       return;
     }
 
-    router.replace("/dashboard");
+    router.replace("/");
   }, [status, session, searchParams, router]);
 
   useEffect(() => {
@@ -111,7 +111,7 @@ function LoginForm() {
       } else if (currentSession?.user?.role === "ADMIN") {
         router.push("/admin/dashboard");
       } else {
-        router.push("/dashboard");
+        router.push("/");
       }
       router.refresh();
     } catch {
