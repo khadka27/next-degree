@@ -228,12 +228,7 @@ function LoginForm() {
                     <p className="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-4">
                       Verify OTP Code
                     </p>
-                    <InputField
-                      placeholder="6 digit code"
-                      value={otp}
-                      onChange={(v) => setOtp(v)}
-                      type="text"
-                    />
+                    <OTPInput value={otp} onChange={(v) => setOtp(v)} />
                   </div>
 
                   <button
@@ -306,6 +301,94 @@ function InputField({
       {error && (
         <p className="mt-1 text-[10px] text-red-500 font-bold px-2">{error}</p>
       )}
+    </div>
+  );
+}
+
+function OTPInput({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  const otpDigits = value.split("").slice(0, 6);
+  const inputRefs: (HTMLInputElement | null)[] = Array(6).fill(null);
+
+  const handleChange = (index: number, digit: string) => {
+    if (!/^\d*$/.test(digit)) return;
+
+    const newOtp = otpDigits.slice();
+    newOtp[index] = digit;
+    const otpString = newOtp.join("");
+
+    onChange(otpString);
+
+    if (digit && index < 5) {
+      setTimeout(() => {
+        inputRefs[index + 1]?.focus();
+      }, 0);
+    }
+  };
+
+  const handleKeyDown = (
+    index: number,
+    e: React.KeyboardEvent<HTMLInputElement>,
+  ) => {
+    if (e.key === "Backspace") {
+      if (!otpDigits[index] && index > 0) {
+        inputRefs[index - 1]?.focus();
+      } else {
+        const newOtp = otpDigits.slice();
+        newOtp[index] = "";
+        onChange(newOtp.join(""));
+      }
+    } else if (e.key === "ArrowLeft" && index > 0) {
+      inputRefs[index - 1]?.focus();
+    } else if (e.key === "ArrowRight" && index < 5) {
+      inputRefs[index + 1]?.focus();
+    }
+  };
+
+  return (
+    <div className="flex gap-3 justify-center w-full">
+      {Array(6)
+        .fill(null)
+        .map((_, index) => (
+          <input
+            key={index}
+            ref={(el) => {
+              inputRefs[index] = el;
+            }}
+            type="text"
+            inputMode="numeric"
+            maxLength={1}
+            value={otpDigits[index] || ""}
+            onChange={(e) => handleChange(index, e.target.value)}
+            onKeyDown={(e) => handleKeyDown(index, e)}
+            onPaste={(e) => {
+              e.preventDefault();
+              const pastedData = e.clipboardData
+                .getData("text")
+                .slice(0, 6 - index);
+              if (!/^\d*$/.test(pastedData)) return;
+
+              const newOtp = otpDigits.slice(0, index);
+              pastedData.split("").forEach((digit) => {
+                newOtp.push(digit);
+              });
+              onChange(newOtp.slice(0, 6).join(""));
+
+              if (pastedData.length > 0) {
+                setTimeout(() => {
+                  const focusIndex = Math.min(index + pastedData.length, 5);
+                  inputRefs[focusIndex]?.focus();
+                }, 0);
+              }
+            }}
+            className="w-12 h-12 text-center text-[18px] font-bold border-2 border-[#E5E7EB] rounded-[12px] bg-white text-[#1e293b] focus:border-[#3381FF] focus:ring-2 focus:ring-[#3381FF]/10 outline-none transition-all"
+          />
+        ))}
     </div>
   );
 }
