@@ -44,10 +44,8 @@ export function toE164(dialCode: string, phoneNumber: string) {
 }
 
 export function generateOtpCode() {
-  return crypto
-    .randomInt(0, 10 ** OTP_LENGTH)
-    .toString()
-    .padStart(OTP_LENGTH, "0");
+  // Temporary static OTP for testing signup/login flows.
+  return "123456".slice(0, OTP_LENGTH);
 }
 
 export function hashOtpCode(otpCode: string) {
