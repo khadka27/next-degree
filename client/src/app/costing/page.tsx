@@ -489,13 +489,13 @@ export default function CostingPage() {
       <main className="hidden md:block pt-24 pb-20 px-4 lg:px-6 max-w-7xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <Link
-            href="/dashboard"
+            href="/"
             className="inline-flex items-center gap-2 text-slate-500 hover:text-slate-900 text-sm font-semibold transition-colors"
           >
             <span className="w-8 h-8 rounded-full border border-slate-200 flex items-center justify-center bg-white shadow-sm">
               ←
             </span>
-            <span>Back to Dashboard</span>
+            <span>Back to Home</span>
           </Link>
           <div className="w-14 h-14 rounded-full bg-[#FFF7E8] border border-[#F7E8C6] flex items-center justify-center text-[#F6C56E] shadow-sm">
             <DollarSign className="w-7 h-7" />

@@ -58,11 +58,14 @@ export default function AdminPanel() {
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/login?callbackUrl=/admin");
-    } else if (status === "authenticated") {
-      if (session?.user?.role !== "ADMIN") {
-        router.push("/");
-      } else {
+      return;
+    }
+
+    if (status === "authenticated") {
+      if (session?.user?.role === "ADMIN") {
         fetchStudents();
+      } else {
+        router.push("/");
       }
     }
   }, [status, session, router]);

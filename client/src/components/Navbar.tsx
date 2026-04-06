@@ -14,7 +14,6 @@ import {
   Home,
   Search,
   Sparkles,
-  LayoutGrid,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 
