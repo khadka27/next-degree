@@ -12,7 +12,14 @@ export const proxy = withAuth(
       path.startsWith("/signup");
 
     if (isAuthPage && token) {
-      const redirectPath = token.role === "ADMIN" ? "/admin/dashboard" : "/";
+      const callbackUrl = req.nextUrl.searchParams.get("callbackUrl") || "";
+      const safeCallbackUrl =
+        callbackUrl.startsWith("/") && !callbackUrl.startsWith("//")
+          ? callbackUrl
+          : "";
+
+      const redirectPath =
+        token.role === "ADMIN" ? "/admin/dashboard" : safeCallbackUrl || "/";
       return NextResponse.redirect(new URL(redirectPath, req.url));
     }
 

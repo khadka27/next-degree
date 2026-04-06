@@ -23,6 +23,7 @@ function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { data: session, status } = useSession();
+  const callbackUrl = searchParams.get("callbackUrl") || "";
   const [countryDialCode, setCountryDialCode] = useState("+977");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [otp, setOtp] = useState("");
@@ -31,6 +32,11 @@ function LoginForm() {
   const [error, setError] = useState("");
   const [justRegistered, setJustRegistered] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
+
+  const safeCallbackUrl =
+    callbackUrl.startsWith("/") && !callbackUrl.startsWith("//")
+      ? callbackUrl
+      : "";
 
   useEffect(() => {
     if (status !== "authenticated") {
@@ -42,8 +48,13 @@ function LoginForm() {
       return;
     }
 
+    if (safeCallbackUrl) {
+      router.replace(safeCallbackUrl);
+      return;
+    }
+
     router.replace("/");
-  }, [status, session, searchParams, router]);
+  }, [status, session, router, safeCallbackUrl]);
 
   useEffect(() => {
     if (searchParams.get("registered") === "1") {
@@ -252,7 +263,14 @@ function LoginForm() {
 
             <p className="mt-6 text-[12px] font-medium text-black">
               Don&apos;t have an account?{" "}
-              <Link href="/register" className="text-[#3381FF] hover:underline">
+              <Link
+                href={
+                  safeCallbackUrl
+                    ? `/register?callbackUrl=${encodeURIComponent(safeCallbackUrl)}`
+                    : "/register"
+                }
+                className="text-[#3381FF] hover:underline"
+              >
                 Sign Up
               </Link>
             </p>
