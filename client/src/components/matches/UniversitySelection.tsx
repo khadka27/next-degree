@@ -141,6 +141,12 @@ function formatCurrency(value: number, currency: string) {
   }).format(value);
 }
 
+function formatCurrencyRange(value: number, currency: string, spread = 0.12) {
+  const low = Math.max(0, Math.round(value * (1 - spread)));
+  const high = Math.round(value * (1 + spread));
+  return `${formatCurrency(low, currency)} - ${formatCurrency(high, currency)}`;
+}
+
 export function UniversitySelection({
   matches,
   loading,
@@ -370,7 +376,9 @@ function MatchCard({
               </span>
             </div>
             <span className="text-[11px] md:text-[12px] font-semibold text-[#111827]">
-              {m.tuitionFee ? `${formatCurrency(m.tuitionFee, c)} / yr` : "TBD"}
+              {m.tuitionFee
+                ? `${formatCurrencyRange(m.tuitionFee, c, 0.1)} / yr`
+                : "TBD"}
             </span>
           </div>
           <div className="space-y-1.5 md:space-y-2">
@@ -529,7 +537,7 @@ function UniversityDetailsModal({
                   Estimated Total Cost / Yr
                 </p>
                 <p className="text-[34px] font-black text-slate-900 leading-none">
-                  {formatCurrency((m.tuitionFee || 0) + yearlyLiving, c)}
+                  {formatCurrencyRange((m.tuitionFee || 0) + yearlyLiving, c)}
                 </p>
                 <div className="mt-4 h-1.5 rounded-full bg-slate-100 overflow-hidden">
                   <div
@@ -658,7 +666,7 @@ function UniversityDetailsModal({
                     <p className="text-[11px] text-slate-500">Tuition Fee</p>
                     <p className="text-[18px] font-black text-slate-900">
                       {m.tuitionFee
-                        ? `${formatCurrency(m.tuitionFee, c)}/yr`
+                        ? `${formatCurrencyRange(m.tuitionFee, c, 0.1)}/yr`
                         : "TBD"}
                     </p>
                   </div>
