@@ -2297,9 +2297,8 @@ export default function AbroadLiftMatchesPage() {
                     key={c.code}
                     onClick={() => {
                       setForm((prev) => ({ ...prev, countries: [c.code] }));
-                      setStep(2);
                     }}
-                    className="group flex flex-col items-center gap-1 transition-all active:scale-95 w-full"
+                    className="group flex flex-col items-center gap-1 cursor-pointer transition-all active:scale-95 w-full"
                   >
                     <div
                       className={`relative w-[58px] h-[42px] sm:w-[80px] sm:h-[58px] rounded-[14px] sm:rounded-[20px] overflow-hidden bg-white flex items-center justify-center p-[2px] transition-all ${
@@ -2334,6 +2333,11 @@ export default function AbroadLiftMatchesPage() {
     if (step === 2) {
       const DISPLAY_DEGREES = [
         { v: "bachelor-4", l: "Bachelor's Degree", icon: GraduationCap },
+        {
+          v: "associate-foundation",
+          l: "Associate Degree (or equivalent foundation program)",
+          icon: Award,
+        },
         { v: "masters", l: "Master's Degree", icon: BookOpen },
         { v: "doctorate", l: "PHD Degree", icon: BookOpen },
         { v: "undergrad-dip-2", l: "Diploma", icon: Award },
