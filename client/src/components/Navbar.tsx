@@ -14,7 +14,6 @@ import {
   Home,
   Search,
   Sparkles,
-  LayoutGrid,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 
@@ -70,8 +69,8 @@ const NAV_LINKS: NavLink[] = [
         desc: "Check your visa approval chances",
       },
       {
-        href: "/dashboard",
-        label: "Student Dashboard",
+        href: "/profile",
+        label: "My Profile",
         desc: "Manage your applications & profile",
       },
     ],
@@ -83,7 +82,6 @@ const MOBILE_TABS = [
   { href: "/", label: "Home", icon: Home },
   { href: "/search", label: "Search", icon: Search },
   { href: "/matches", label: "Matches", icon: Sparkles },
-  { href: "/dashboard", label: "Stats", icon: LayoutGrid },
   { href: "/profile", label: "Profile", icon: User },
 ];
 
@@ -221,7 +219,7 @@ export default function Navbar() {
               </>
             ) : (
               <Link
-                href="/login"
+                href={`/login?callbackUrl=${encodeURIComponent(pathname)}`}
                 className="flex items-center gap-2 bg-[#3366FF] text-white font-bold px-7 py-3 rounded-2xl text-[15px] shadow-xl shadow-blue-500/25 hover:bg-[#2952CC] hover:-translate-y-0.5 transition-all duration-300 active:scale-95"
               >
                 Login
@@ -281,7 +279,7 @@ export default function Navbar() {
               </Link>
             ) : (
               <Link
-                href="/login"
+                href={`/login?callbackUrl=${encodeURIComponent(pathname)}`}
                 onClick={() => setMobileOpen(false)}
                 className="flex items-center justify-center gap-2 bg-[#3366FF] text-white font-bold px-6 py-4 rounded-2xl shadow-lg shadow-blue-500/20"
               >

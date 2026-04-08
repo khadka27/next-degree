@@ -1,6 +1,5 @@
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import bcrypt from "bcrypt";
 import prisma from "./db";
 import { hashOtpCode } from "./phoneVerification";
 
@@ -15,62 +14,45 @@ export const authOptions: NextAuthOptions = {
     CredentialsProvider({
       name: "Credentials",
       credentials: {
-        identifier: { label: "Email or Username", type: "text" },
-        password: { label: "Password", type: "password" },
+        phone: { label: "Phone Number", type: "text" },
         otp: { label: "OTP", type: "text" },
       },
       async authorize(credentials) {
-        if (!credentials?.identifier || !credentials?.password) {
-          throw new Error("Please enter your email/username and password.");
+        if (!credentials?.phone || !credentials?.otp) {
+          throw new Error("Please enter your phone number and OTP.");
         }
 
-        const identifier = credentials.identifier.trim().toLowerCase();
+        const phoneE164 = credentials.phone.trim();
 
-        // Try email first, then username
-        let user = await prisma.user.findUnique({
-          where: { email: identifier },
+        const user = await prisma.user.findUnique({
+          where: { phoneE164 },
         });
 
         if (!user) {
-          user = await prisma.user.findUnique({
-            where: { username: identifier },
-          });
+          throw new Error("No account found with that phone number.");
         }
 
-        if (!user?.password) {
-          throw new Error("No account found with that email or username.");
+        const inputHash = hashOtpCode(credentials.otp);
+        const isOtpValid =
+          user.otpCodeHash &&
+          user.otpExpiresAt &&
+          inputHash === user.otpCodeHash &&
+          user.otpExpiresAt.getTime() > Date.now();
+
+        if (!isOtpValid) {
+          throw new Error(
+            "Invalid or expired OTP code. Please request a new one.",
+          );
         }
 
-        const isCorrectPassword = await bcrypt.compare(
-          credentials.password,
-          user.password,
-        );
-
-        if (!isCorrectPassword) {
-          throw new Error("Incorrect password. Please try again.");
-        }
-
-        // --- OTP VERIFICATION ---
-        // If the user has a code but isn't verified, verify them now
-        if (credentials.otp && !user.phoneVerified) {
-          const inputHash = hashOtpCode(credentials.otp);
-
-          if (inputHash === user.otpCodeHash) {
-            // Mark as verified in DB
-            await prisma.user.update({
-              where: { id: user.id },
-              data: {
-                phoneVerified: true,
-                otpCodeHash: null,
-                otpExpiresAt: null,
-              },
-            });
-            // Update local user object
-            user.phoneVerified = true;
-          } else {
-            throw new Error("Invalid OTP code. Please check and try again.");
-          }
-        }
+        await prisma.user.update({
+          where: { id: user.id },
+          data: {
+            phoneVerified: true,
+            otpCodeHash: null,
+            otpExpiresAt: null,
+          },
+        });
 
         return {
           id: user.id,

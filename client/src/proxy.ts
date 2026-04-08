@@ -6,12 +6,28 @@ export const proxy = withAuth(
     const token = req.nextauth.token;
     const path = req.nextUrl.pathname;
 
+    const isAuthPage =
+      path.startsWith("/login") ||
+      path.startsWith("/register") ||
+      path.startsWith("/signup");
+
+    if (isAuthPage && token) {
+      const callbackUrl = req.nextUrl.searchParams.get("callbackUrl") || "";
+      const safeCallbackUrl =
+        callbackUrl.startsWith("/") && !callbackUrl.startsWith("//")
+          ? callbackUrl
+          : "";
+
+      const redirectPath =
+        token.role === "ADMIN" ? "/admin/dashboard" : safeCallbackUrl || "/";
+      return NextResponse.redirect(new URL(redirectPath, req.url));
+    }
+
     if (path.startsWith("/admin") && token?.role !== "ADMIN") {
-      return NextResponse.redirect(new URL("/dashboard", req.url));
+      return NextResponse.redirect(new URL("/", req.url));
     }
 
     const studentRoutes = [
-      "/dashboard",
       "/profile",
       "/matches",
       "/applications",
@@ -27,7 +43,18 @@ export const proxy = withAuth(
   },
   {
     callbacks: {
-      authorized: ({ token }) => !!token,
+      authorized: ({ req, token }) => {
+        const path = req.nextUrl.pathname;
+        if (
+          path.startsWith("/login") ||
+          path.startsWith("/register") ||
+          path.startsWith("/signup")
+        ) {
+          return true;
+        }
+
+        return !!token;
+      },
     },
     pages: {
       signIn: "/login",
@@ -37,7 +64,9 @@ export const proxy = withAuth(
 
 export const config = {
   matcher: [
-    "/dashboard/:path*",
+    "/login",
+    "/register",
+    "/signup",
     "/profile/:path*",
     "/applications/:path*",
     "/eligibility/:path*",

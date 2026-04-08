@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import bcrypt from "bcrypt";
 import prisma from "@/lib/db";
 import {
   generateOtpCode,
@@ -11,14 +10,36 @@ import {
   trySendOtp,
 } from "@/lib/phoneVerification";
 
+async function generateUniqueUsername(name: string, phoneNumber: string) {
+  const baseUsername =
+    name
+      .toLowerCase()
+      .replaceAll(/[^a-z0-9]+/g, "")
+      .slice(0, 16) || "student";
+  const suffix = phoneNumber.slice(-4) || "0000";
+
+  for (let attempt = 0; attempt < 10; attempt += 1) {
+    const candidate =
+      attempt === 0
+        ? `${baseUsername}${suffix}`
+        : `${baseUsername}${suffix}${attempt}`;
+    const existing = await prisma.user.findUnique({
+      where: { username: candidate },
+    });
+    if (!existing) {
+      return candidate;
+    }
+  }
+
+  return `${baseUsername}${suffix}${Date.now().toString().slice(-4)}`;
+}
+
 export async function POST(req: Request) {
   try {
     const body = await req.json();
     const {
       name,
-      username,
       email,
-      password,
       countryDialCode,
       phoneNumber,
       prefersWhatsApp,
@@ -29,7 +50,6 @@ export async function POST(req: Request) {
     } = body;
 
     const normalizedName = (name || "").trim();
-    const normalizedUsername = (username || "").toLowerCase().trim();
     const normalizedEmail = (email || "").toLowerCase().trim();
     const normalizedDialCode = normalizeDialCode(countryDialCode || "");
     const normalizedPhoneNumber = normalizePhoneNumber(phoneNumber || "");
@@ -38,14 +58,9 @@ export async function POST(req: Request) {
       typeof prefersWhatsApp === "boolean" ? prefersWhatsApp : true;
 
     // Validate required fields
-    if (
-      !normalizedName ||
-      !normalizedUsername ||
-      !normalizedEmail ||
-      !password
-    ) {
+    if (!normalizedName || !normalizedEmail) {
       return NextResponse.json(
-        { error: "Name, username, email and password are required." },
+        { error: "Full name and email are required." },
         { status: 400 },
       );
     }
@@ -64,55 +79,117 @@ export async function POST(req: Request) {
       );
     }
 
-    if (password.length < 8) {
-      return NextResponse.json(
-        { error: "Password must be at least 8 characters." },
-        { status: 400 },
-      );
-    }
-
     // Check existing email
     const existingEmail = await prisma.user.findUnique({
       where: { email: normalizedEmail },
     });
-    if (existingEmail) {
-      return NextResponse.json(
-        { error: "An account with this email already exists." },
-        { status: 409 },
-      );
-    }
-
-    // Check existing username
-    const existingUsername = await prisma.user.findUnique({
-      where: { username: normalizedUsername },
-    });
-    if (existingUsername) {
-      return NextResponse.json(
-        { error: "This username is already taken." },
-        { status: 409 },
-      );
-    }
-
-    // Check existing phone
     const existingPhone = await prisma.user.findUnique({
       where: { phoneE164 },
     });
-    if (existingPhone) {
+
+    if (existingEmail || existingPhone) {
+      if (
+        existingEmail &&
+        existingPhone &&
+        existingEmail.id === existingPhone.id
+      ) {
+        const existingUser = existingEmail;
+
+        if (!existingUser.phoneE164) {
+          return NextResponse.json(
+            { error: "Existing account has no valid phone number." },
+            { status: 400 },
+          );
+        }
+
+        const otpCode = generateOtpCode();
+        const otpHash = hashOtpCode(otpCode);
+        const otpExpiresAt = getOtpExpiry();
+
+        const otpSendResult = await trySendOtp({
+          phoneE164: existingUser.phoneE164,
+          otpCode,
+        });
+
+        if (!otpSendResult.sent) {
+          return NextResponse.json(
+            {
+              error:
+                "Unable to send OTP right now. Please try again in a moment.",
+            },
+            { status: 503 },
+          );
+        }
+
+        await prisma.user.update({
+          where: { id: existingUser.id },
+          data: {
+            otpCodeHash: otpHash,
+            otpExpiresAt,
+            otpLastChannel: otpSendResult.channel,
+          },
+        });
+
+        return NextResponse.json(
+          {
+            existingUser: true,
+            message: "Account already exists. OTP sent for login.",
+            user: {
+              id: existingUser.id,
+              email: existingUser.email,
+              countryDialCode: existingUser.countryDialCode,
+              phoneNumber: existingUser.phoneNumber,
+              phoneE164: existingUser.phoneE164,
+            },
+            otp: {
+              sent: true,
+              channel: otpSendResult.channel,
+              phoneE164: existingUser.phoneE164,
+            },
+          },
+          { status: 200 },
+        );
+      }
+
+      if (
+        existingEmail &&
+        existingPhone &&
+        existingEmail.id !== existingPhone.id
+      ) {
+        return NextResponse.json(
+          {
+            error:
+              "Email and phone number are already used by different accounts. Please login with phone OTP.",
+          },
+          { status: 409 },
+        );
+      }
+
+      if (existingEmail) {
+        return NextResponse.json(
+          { error: "An account with this email already exists." },
+          { status: 409 },
+        );
+      }
+
       return NextResponse.json(
         { error: "An account with this phone number already exists." },
         { status: 409 },
       );
     }
 
-    const hashedPassword = await bcrypt.hash(password, 12);
     const otpCode = generateOtpCode();
     const otpHash = hashOtpCode(otpCode);
     const otpExpiresAt = getOtpExpiry();
+    const username = await generateUniqueUsername(
+      normalizedName,
+      normalizedPhoneNumber,
+    );
 
     const user = await prisma.user.create({
       data: {
         name: normalizedName,
-        username: normalizedUsername,
+        username,
         email: normalizedEmail,
         countryDialCode: normalizedDialCode,
         phoneNumber: normalizedPhoneNumber,
@@ -121,7 +198,6 @@ export async function POST(req: Request) {
         phoneVerified: false,
         otpCodeHash: otpHash,
         otpExpiresAt,
-        password: hashedPassword,
         role: "STUDENT",
         profile: {
           create: {
@@ -147,7 +223,6 @@ export async function POST(req: Request) {
     const otpSendResult = await trySendOtp({
       phoneE164,
       otpCode,
-      prefersWhatsApp: wantsWhatsApp,
     });
 
     if (!otpSendResult.sent) {
@@ -173,6 +248,7 @@ export async function POST(req: Request) {
         otp: {
           sent: true,
           channel: otpSendResult.channel,
+          phoneE164,
         },
       },
       { status: 201 },

@@ -25,18 +25,57 @@ import {
   Handshake,
   Plus,
   Minus,
-  Facebook,
-  Twitter,
-  Instagram,
-  Linkedin,
 } from "lucide-react";
 
 export default function HomePage() {
   const [activeCountry, setActiveCountry] = useState("Canada");
+
+  const pathCards = [
+    {
+      title: "Student",
+      badge: "Most Popular",
+      desc: "Compare programs, check eligibility, and apply with one guided workflow.",
+      link: "/register",
+      cta: "Sign Up For Free",
+      bullets: [
+        "Live university comparison",
+        "AI match + admit insights",
+        "Scholarship and visa guidance",
+      ],
+      img: "https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&q=80&w=800",
+    },
+    {
+      title: "Recruitment Partner",
+      badge: "For Agents",
+      desc: "Scale admissions with automation, lead tracking, and institution-ready submissions.",
+      link: "/register?partner=1",
+      cta: "Become a Recruitment Partner",
+      bullets: [
+        "Access to global institutions",
+        "Advanced management tools",
+        "Commission tracking system",
+      ],
+      img: "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&q=80&w=800",
+    },
+    {
+      title: "Partner Institution",
+      badge: "For Schools",
+      desc: "Connect with qualified students and streamline global enrollment operations.",
+      link: "/register?institution=1",
+      cta: "Become a Partner Institution",
+      bullets: [
+        "1,500+ verified partners",
+        "Qualified student applications",
+        "Dedicated support team",
+      ],
+      img: "https://images.unsplash.com/photo-1491333078588-55b6733c7de6?auto=format&fit=crop&q=80&w=800",
+    },
+  ];
+
   return (
-    <div className="w-full bg-white text-[#0f172a] font-sans selection:bg-[#3366FF]/20 selection:text-[#3366FF] overflow-hidden">
+    <div className="w-full bg-[#F7F9FF] text-[#0f172a] font-sans selection:bg-[#3366FF]/20 selection:text-[#3366FF] overflow-hidden">
       {/* ── HERO SECTION ── */}
-      <section className="relative pt-[120px] pb-[80px] px-6 lg:px-12 overflow-hidden">
+      <section className="relative px-6 pt-[120px] pb-[92px] lg:px-12 overflow-hidden">
         {/* Background Decorations */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
           <div className="absolute top-[10%] left-[-5%] w-[400px] h-[400px] bg-blue-50/50 rounded-full blur-3xl opacity-60" />
@@ -83,10 +122,10 @@ export default function HomePage() {
           </div>
         </div>
 
-        <div className="relative max-w-[1280px] mx-auto z-10 grid grid-cols-1 lg:grid-cols-2 gap-x-12 gap-y-10 lg:gap-y-0 items-center">
+        <div className="relative max-w-[1280px] mx-auto z-10 grid grid-cols-1 lg:grid-cols-2 gap-x-12 gap-y-5 lg:gap-y-0 items-center">
           {/* ── TITLE ── */}
           <div className="fade-up order-1 lg:col-start-1 lg:row-start-1">
-            <h1 className="text-[56px] lg:text-[72px] font-extrabold leading-[1.1] mb-6 tracking-tight text-center lg:text-left">
+            <h1 className="text-[50px] lg:text-[72px] font-bold lg:font-extrabold leading-[1] mb-6 tracking-tight text-center lg:text-left">
               Your Path to <br /> Studying Abroad <br />
               <span className="text-[#3366FF]">Begins Here</span>
             </h1>
@@ -169,48 +208,54 @@ export default function HomePage() {
       </section>
 
       {/* ── TRUST BAR ── */}
-      <section className="py-12 bg-white border-t border-gray-50 drop-shadow-sm">
-        <div className="max-w-[1280px] mx-auto px-6 lg:px-12 flex flex-wrap justify-center lg:justify-between items-center gap-8">
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-full bg-blue-50 flex items-center justify-center">
-              <Globe2 className="w-6 h-6 text-[#3366FF]" />
+      <section className="py-12 bg-white/90 backdrop-blur border-y border-[#E8EEFF]">
+        <div className="max-w-[1280px] mx-auto px-6 lg:px-12 grid grid-cols-2 lg:flex lg:flex-wrap lg:justify-between items-center gap-y-10 gap-x-2 sm:gap-x-4 lg:gap-8">
+          <div className="flex items-center gap-3 lg:gap-4">
+            <div className="w-10 h-10 lg:w-14 lg:h-14 rounded-full bg-blue-50 flex items-center justify-center shrink-0">
+              <Globe2 className="w-5 h-5 lg:w-6 lg:h-6 text-[#3366FF]" />
             </div>
             <div>
-              <div className="text-[20px] font-black">160+ Countries</div>
+              <div className="text-[15px] sm:text-[18px] lg:text-[20px] font-black leading-tight">
+                160+ Countries
+              </div>
             </div>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-full bg-blue-50 flex items-center justify-center">
-              <Building2 className="w-6 h-6 text-[#3366FF]" />
+          <div className="flex items-center gap-3 lg:gap-4">
+            <div className="w-10 h-10 lg:w-14 lg:h-14 rounded-full bg-blue-50 flex items-center justify-center shrink-0">
+              <Building2 className="w-5 h-5 lg:w-6 lg:h-6 text-[#3366FF]" />
             </div>
             <div>
-              <div className="text-[20px] font-black">1000+ Universities</div>
+              <div className="text-[15px] sm:text-[18px] lg:text-[20px] font-black leading-tight">
+                1000+ Universities
+              </div>
             </div>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-full bg-blue-50 flex items-center justify-center">
-              <Users className="w-6 h-6 text-[#3366FF]" />
+          <div className="flex items-center gap-3 lg:gap-4">
+            <div className="w-10 h-10 lg:w-14 lg:h-14 rounded-full bg-blue-50 flex items-center justify-center shrink-0">
+              <Users className="w-5 h-5 lg:w-6 lg:h-6 text-[#3366FF]" />
             </div>
             <div>
-              <div className="text-[20px] font-black">
+              <div className="text-[15px] sm:text-[18px] lg:text-[20px] font-black leading-tight">
                 5000+ Students Helped
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-full bg-blue-50 flex items-center justify-center">
-              <Headphones className="w-6 h-6 text-[#3366FF]" />
+          <div className="flex items-center gap-3 lg:gap-4">
+            <div className="w-10 h-10 lg:w-14 lg:h-14 rounded-full bg-blue-50 flex items-center justify-center shrink-0">
+              <Headphones className="w-5 h-5 lg:w-6 lg:h-6 text-[#3366FF]" />
             </div>
             <div>
-              <div className="text-[20px] font-black">24/7 Student Support</div>
+              <div className="text-[15px] sm:text-[18px] lg:text-[20px] font-black leading-tight">
+                24/7 Student Support
+              </div>
             </div>
           </div>
         </div>
       </section>
 
       {/* ── IDEAL DESTINATION SECTION ── */}
-      <section className="py-24 px-6 lg:px-12 bg-white overflow-hidden">
-        <div className="max-w-[1280px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+      <section className="py-16 lg:py-24 px-6 lg:px-12 bg-white overflow-hidden">
+        <div className="max-w-[1280px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
           <div className="relative">
             <div className="relative w-full aspect-4/3 rounded-[32px] overflow-hidden shadow-2xl z-10">
               <Image
@@ -220,7 +265,7 @@ export default function HomePage() {
                 className="object-cover"
               />
             </div>
-            <div className="absolute -bottom-12 -right-12 w-[60%] aspect-4/3 rounded-[24px] overflow-hidden shadow-2xl z-20 border-8 border-white">
+            <div className="absolute -bottom-6 lg:-bottom-12 -right-4 lg:-right-12 w-[60%] aspect-4/3 rounded-[24px] overflow-hidden shadow-2xl z-20 border-4 lg:border-8 border-white">
               <Image
                 src="/students-reading.png"
                 alt="Students reading"
@@ -228,7 +273,7 @@ export default function HomePage() {
                 className="object-cover"
               />
             </div>
-            <div className="absolute top-[10%] -right-8 z-30 w-32 h-32 lg:w-40 lg:h-40 bg-[#3366FF] rounded-full flex flex-col items-center justify-center text-white border-[6px] border-white shadow-xl animate-float">
+            <div className="absolute top-[10%] -right-4 lg:-right-8 z-30 w-24 h-24 lg:w-40 lg:h-40 bg-[#3366FF] rounded-full flex flex-col items-center justify-center text-white border-4 lg:border-[6px] border-white shadow-xl animate-float">
               <span className="text-2xl lg:text-3xl font-black">95%</span>
               <span className="text-[10px] lg:text-[12px] font-bold uppercase tracking-wider text-center px-2">
                 Acceptance Rate
@@ -236,8 +281,8 @@ export default function HomePage() {
             </div>
             <div className="absolute -top-10 -left-10 w-40 h-40 bg-blue-50 rounded-full blur-3xl -z-10" />
           </div>
-          <div className="fade-up relative">
-            <h2 className="text-[40px] lg:text-[56px] font-extrabold leading-[1.1] mb-6 tracking-tight text-[#0f172a]">
+          <div className="fade-up relative mt-8 lg:mt-0">
+            <h2 className="text-[35px] sm:text-[42px] lg:text-[56px] font-extrabold leading-[1.1] mb-6 tracking-tight text-[#0f172a]">
               Find Your Ideal Study Destination
             </h2>
             <p className="text-[18px] text-gray-500 mb-10 leading-relaxed font-medium">
@@ -274,18 +319,10 @@ export default function HomePage() {
       </section>
 
       {/* ── SOLUTIONS GRID SECTION ── */}
-      <section className="py-24 px-6 lg:px-12 bg-[#F4F7FF] relative overflow-hidden">
-        <div
-          className="absolute top-0 left-0 w-full h-[500px] bg-white pointer-events-none"
-          style={{ clipPath: "ellipse(80% 50% at 50% 0%)" }}
-        />
-        <div
-          className="absolute bottom-0 left-0 w-full h-[300px] bg-white pointer-events-none"
-          style={{ clipPath: "ellipse(80% 50% at 50% 100%)" }}
-        />
+      <section className="py-10 px-6 lg:px-12 bg-gradient-to-b from-[#EEF4FF] to-[#F8FAFF] relative overflow-hidden">
         <div className="max-w-[1280px] mx-auto relative z-10 text-center">
           <div className="max-w-4xl mx-auto mb-20">
-            <h2 className="text-[40px] lg:text-[56px] font-extrabold leading-[1.1] mb-6 tracking-tight text-[#0f172a]">
+            <h2 className="text-[35px] lg:text-[56px] font-extrabold leading-[1.1] mb-6 tracking-tight text-[#0f172a]">
               Find Every Solution, From Applications to{" "}
               <span className="text-[#3366FF]">Accommodations</span>
             </h2>
@@ -379,11 +416,11 @@ export default function HomePage() {
             <h3 className="text-[#3366FF] font-black tracking-[0.2em] uppercase text-xs mb-4">
               Trusted Partners
             </h3>
-            <h2 className="text-[40px] lg:text-[48px] font-extrabold text-[#0f172a] leading-tight max-w-4xl mx-auto">
-              Trusted by 1,500+ Universities, Colleges and Schools Worldwide
+            <h2 className="text-[35px] lg:text-[48px] font-extrabold text-[#0f172a] leading-tight max-w-4xl mx-auto">
+             Trusted by 1,500+ institutions worldwide.
             </h2>
           </div>
-          <div className="flex flex-wrap justify-center gap-4 mb-16 px-4">
+          <div className="grid grid-cols-2 md:flex md:flex-wrap md:justify-center gap-2 sm:gap-4 mb-16 px-4">
             {[
               { label: "Canada", code: "CA", flag: "🇨🇦" },
               { label: "USA", code: "US", flag: "🇺🇸" },
@@ -395,7 +432,7 @@ export default function HomePage() {
               <button
                 key={country.label}
                 onClick={() => setActiveCountry(country.label)}
-                className={`flex items-center gap-3 px-4 py-2.5 rounded-2xl font-bold transition-all border ${
+                className={`flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2.5 rounded-2xl font-bold transition-all border ${
                   activeCountry === country.label
                     ? "bg-blue-50 border-[#3366FF] text-[#3366FF] shadow-md scale-105"
                     : "bg-[#F8FAFF] border-transparent text-gray-500 hover:bg-blue-50/50"
@@ -565,6 +602,16 @@ export default function HomePage() {
                 </div>
               ))}
           </div>
+
+          <div className="text-center">
+            <Link
+              href="/search"
+              className="inline-flex items-center gap-3 rounded-2xl bg-[#3366FF] px-8 py-4 text-[15px] font-bold text-white shadow-lg shadow-blue-500/25 transition-all hover:translate-y-[-1px] hover:bg-[#2952cc]"
+            >
+              Explore More {activeCountry} Institutions
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
         </div>
       </section>
 
@@ -574,7 +621,7 @@ export default function HomePage() {
           <div className="inline-flex items-center px-6 py-2 rounded-full bg-blue-50 text-[#3366FF] font-black tracking-wider text-[11px] uppercase mb-6 shadow-sm border border-blue-100/50">
             Recruitment Partners
           </div>
-          <h2 className="text-[40px] lg:text-[52px] font-extrabold text-[#0f172a] leading-tight mb-16">
+          <h2 className="text-[32px] sm:text-[40px] lg:text-[52px] font-extrabold text-[#0f172a] leading-tight mb-10 lg:mb-16">
             How We Help Recruitment Partners
           </h2>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center text-left">
@@ -626,8 +673,8 @@ export default function HomePage() {
                 <ArrowRight className="w-5 h-5" />
               </Link>
             </div>
-            <div className="grid grid-cols-2 gap-6 h-[500px]">
-              <div className="relative rounded-[32px] overflow-hidden shadow-2xl">
+            <div className="grid grid-cols-2 gap-4 lg:gap-6 h-[320px] sm:h-[400px] lg:h-[500px]">
+              <div className="relative rounded-[24px] lg:rounded-[32px] overflow-hidden shadow-2xl transition-all">
                 <Image
                   src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80&w=800"
                   alt="Team"
@@ -635,7 +682,7 @@ export default function HomePage() {
                   className="object-cover"
                 />
               </div>
-              <div className="relative rounded-[40px] overflow-hidden shadow-2xl">
+              <div className="relative rounded-[24px] lg:rounded-[40px] overflow-hidden shadow-2xl transition-all">
                 <Image
                   src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=800"
                   alt="Partner"
@@ -649,10 +696,10 @@ export default function HomePage() {
       </section>
 
       {/* ── CTA BANNER ── */}
-      <section className="py-24 px-6 lg:px-12 bg-white text-white">
-        <div className="max-w-[1280px] mx-auto bg-[#3366FF] rounded-[48px] p-10 lg:p-20 flex flex-col lg:flex-row items-center justify-between relative overflow-hidden shadow-2xl">
+      <section className="py-16 lg:py-24 px-6 lg:px-12 bg-white text-white">
+        <div className="max-w-[1280px] mx-auto bg-[#3366FF] rounded-[32px] lg:rounded-[48px] p-8 sm:p-12 lg:p-20 flex flex-col lg:flex-row items-center justify-between relative overflow-hidden shadow-2xl">
           <div className="relative z-10 max-w-xl text-center lg:text-left">
-            <h2 className="text-[32px] lg:text-[44px] font-extrabold mb-4 leading-tight">
+            <h2 className="text-[28px] lg:text-[44px] font-extrabold mb-4 leading-tight">
               Ready to Start Your Journey?
             </h2>
             <p className="text-blue-100 text-[18px] mb-10 font-medium">
@@ -687,12 +734,12 @@ export default function HomePage() {
       </section>
 
       {/* ── FEATURES ── */}
-      <section className="py-32 px-6 lg:px-12 bg-[#FAFBFF]">
+      <section className="py-16 lg:py-32 px-6 lg:px-12 bg-[#FAFBFF]">
         <div className="max-w-[1280px] mx-auto text-center">
           <h2 className="text-[#3366FF] font-black tracking-widest uppercase text-xs mb-4">
             Our Core Features
           </h2>
-          <h3 className="font-extrabold text-[42px] mb-16">
+          <h3 className="font-extrabold text-[32px] sm:text-[40px] lg:text-[42px] mb-10 lg:mb-16 leading-tight">
             Smarter matching for your future.
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
@@ -729,13 +776,13 @@ export default function HomePage() {
       </section>
 
       {/* ── FAQ ── */}
-      <section className="py-24 px-6 lg:px-12 bg-white">
+      <section className="py-16 lg:py-24 px-6 lg:px-12 bg-white">
         <div className="max-w-[1280px] mx-auto grid grid-cols-1 lg:grid-cols-[1fr_1.5fr] gap-20 items-center">
           <div>
             <div className="inline-flex items-center px-5 py-1.5 rounded-full border border-blue-200 bg-blue-50 text-[#3366FF] text-[12px] font-black tracking-widest uppercase mb-8">
               FAQ
             </div>
-            <h2 className="text-[40px] lg:text-[56px] font-extrabold text-[#0f172a] leading-tight mb-8">
+            <h2 className="text-[32px] sm:text-[40px] lg:text-[56px] font-extrabold text-[#0f172a] leading-tight mb-8">
               Frequently Asked Questions
             </h2>
             <p className="text-[18px] text-gray-500 font-medium leading-relaxed max-w-md">
@@ -747,40 +794,18 @@ export default function HomePage() {
       </section>
 
       {/* ── CHOOSE PATH ── */}
-      <section className="py-24 px-6 lg:px-12 bg-[#F8FAFF]">
+      <section className="py-16 lg:py-24 px-6 lg:px-12 bg-[#F8FAFF]">
         <div className="max-w-[1280px] mx-auto">
           <div className="text-center mb-16">
             <div className="inline-flex items-center px-6 py-2 rounded-full bg-white font-bold text-[11px] uppercase mb-6 shadow-sm border border-gray-100">
               Choose Your Path
             </div>
-            <h2 className="text-[40px] font-extrabold text-[#0f172a] mb-6">
+            <h2 className="text-[32px] sm:text-[40px] font-extrabold text-[#0f172a] mb-6 leading-tight">
               Get Started With AbroadLift
             </h2>
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {[
-              {
-                title: "Student",
-                badge: "Most Popular",
-                desc: "Are you ready to pursue your dreams?",
-                link: "/register",
-                img: "https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&q=80&w=800",
-              },
-              {
-                title: "Partner",
-                badge: "For Agents",
-                desc: "Expand your reach today.",
-                link: "/register?partner=1",
-                img: "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&q=80&w=800",
-              },
-              {
-                title: "Institution",
-                badge: "For Schools",
-                desc: "Grow your international enrollment.",
-                link: "/register?institution=1",
-                img: "https://images.unsplash.com/photo-1491333078588-55b6733c7de6?auto=format&fit=crop&q=80&w=800",
-              },
-            ].map((p, i) => (
+            {pathCards.map((p, i) => (
               <div
                 key={i}
                 className="bg-white rounded-[40px] overflow-hidden border border-gray-100 shadow-xl hover:-translate-y-2 transition-all flex flex-col h-full"
@@ -800,14 +825,25 @@ export default function HomePage() {
                   <h3 className="text-[28px] font-black text-gray-900 mb-4">
                     {p.title}
                   </h3>
-                  <p className="text-gray-500 font-medium mb-8 flex-1">
-                    {p.desc}
-                  </p>
+                  <p className="text-gray-500 font-medium mb-6">{p.desc}</p>
+
+                  <ul className="mb-8 space-y-3">
+                    {p.bullets.map((item) => (
+                      <li
+                        key={item}
+                        className="flex items-center gap-2 text-sm font-medium text-gray-600"
+                      >
+                        <span className="inline-block h-2 w-2 rounded-full bg-[#3366FF]" />
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+
                   <Link
                     href={p.link}
                     className="w-full h-[60px] bg-[#3366FF] text-white font-bold rounded-2xl flex items-center justify-center gap-2 hover:bg-[#2952cc] transition-all"
                   >
-                    Sign Up Now
+                    {p.cta}
                     <ArrowRight className="w-5 h-5" />
                   </Link>
                 </div>
@@ -818,7 +854,7 @@ export default function HomePage() {
       </section>
 
       {/* ── CTA ── */}
-      <section className="py-24 px-6 lg:px-12 shadow-2xl">
+      <section className="py-24 px-6 lg:px-12 shadow-2xl bg-white">
         <div className="max-w-[1200px] mx-auto bg-[#3366FF] rounded-[48px] p-12 lg:p-24 text-center text-white relative overflow-hidden">
           <h2 className="text-[40px] lg:text-[56px] font-extrabold mb-6 leading-none">
             Find your dream university today.
@@ -840,6 +876,53 @@ export default function HomePage() {
           </Link>
         </div>
       </section>
+
+      <style jsx global>{`
+        .animate-float {
+          animation: float 6s ease-in-out infinite;
+        }
+
+        .animate-float-slow {
+          animation: float 8s ease-in-out infinite;
+        }
+
+        .fade-up {
+          animation: fadeUp 0.8s ease forwards;
+        }
+
+        .delay-100 {
+          animation-delay: 0.1s;
+        }
+
+        .delay-200 {
+          animation-delay: 0.2s;
+        }
+
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+
+        @keyframes float {
+          0%,
+          100% {
+            transform: translateY(0px);
+          }
+          50% {
+            transform: translateY(-8px);
+          }
+        }
+
+        @keyframes fadeUp {
+          from {
+            opacity: 0;
+            transform: translateY(16px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+      `}</style>
     </div>
   );
 }
@@ -899,7 +982,7 @@ function TestimonialCarousel() {
   };
 
   return (
-    <section className="py-32 px-6 lg:px-12 bg-[#F8FAFF] relative overflow-hidden">
+    <section className="py-10 px-6 lg:px-12 bg-[#F8FAFF] relative overflow-hidden">
       <div className="max-w-[1280px] mx-auto relative z-10">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16">
           <div className="text-center md:text-left">
@@ -907,7 +990,7 @@ function TestimonialCarousel() {
               <Star className="w-3 h-3 fill-current" />
               Student Success
             </div>
-            <h2 className="text-[44px] lg:text-[64px] font-black text-[#0f172a] leading-tight tracking-tight">
+            <h2 className="text-[40px] lg:text-[64px] font-black text-[#0f172a] leading-tight tracking-tight">
               Community <span className="text-[#3366FF]">Feedback.</span>
             </h2>
           </div>
@@ -1002,6 +1085,14 @@ function FAQAccordion() {
     {
       q: "Which countries can I study in?",
       a: "We have partners in over 160 countries.",
+    },
+    {
+      q: "Can I apply to multiple universities at once?",
+      a: "Yes. You can shortlist multiple institutions, compare fit, and submit applications through one dashboard.",
+    },
+    {
+      q: "Do you also support scholarships and visa readiness?",
+      a: "Yes. We provide scholarship discovery, profile scoring, and visa-readiness guidance based on your selected destination.",
     },
   ];
   return (

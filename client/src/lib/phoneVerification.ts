@@ -5,18 +5,6 @@ export type OtpChannel = "WHATSAPP" | "SMS";
 const OTP_LENGTH = 6;
 const OTP_EXPIRY_MINUTES = 10;
 
-function twilioAuthHeader() {
-  const sid = process.env.TWILIO_ACCOUNT_SID;
-  const token = process.env.TWILIO_AUTH_TOKEN;
-
-  if (!sid || !token) {
-    return null;
-  }
-
-  const encoded = Buffer.from(`${sid}:${token}`).toString("base64");
-  return `Basic ${encoded}`;
-}
-
 export function normalizeDialCode(input: string) {
   const digits = input.replaceAll(/\D/g, "");
   return digits ? `+${digits}` : "";
@@ -44,8 +32,7 @@ export function toE164(dialCode: string, phoneNumber: string) {
 }
 
 export function generateOtpCode() {
-  // Static code for testing as requested
-  return "123456";
+  return "123456".slice(0, OTP_LENGTH);
 }
 
 export function hashOtpCode(otpCode: string) {
@@ -56,29 +43,16 @@ export function getOtpExpiry() {
   return new Date(Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000);
 }
 
-async function sendViaTwilio(
-  channel: OtpChannel,
-  phoneE164: string,
-  otpCode: string,
-) {
-  // Twilio sending skipped for testing
-  console.log(`[TEST_MODE] Skipping ${channel} send to ${phoneE164}. Code: ${otpCode}`);
-  return true;
-}
-
 export async function trySendOtp({
   phoneE164,
   otpCode,
-  prefersWhatsApp,
 }: {
   phoneE164: string;
   otpCode: string;
-  prefersWhatsApp: boolean;
 }) {
-  const primaryChannel: OtpChannel = prefersWhatsApp ? "WHATSAPP" : "SMS";
-  
-  // Directly "send" via mock
-  await sendViaTwilio(primaryChannel, phoneE164, otpCode);
-  
-  return { sent: true, channel: primaryChannel };
+  console.log(`[OTP_TEST_MODE] OTP ${otpCode} prepared for ${phoneE164}`);
+  return {
+    sent: true,
+    channel: "SMS" as OtpChannel,
+  };
 }

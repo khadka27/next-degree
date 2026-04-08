@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useState, Suspense } from "react";
+import { useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { AlertCircle, Eye, EyeOff } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 
 type CountryCodeOption = {
   code: string;
@@ -13,12 +14,12 @@ type CountryCodeOption = {
 };
 
 const FALLBACK_COUNTRY_CODES: CountryCodeOption[] = [
+  { code: "NP", label: "Nepal", dialCode: "+977" },
   { code: "US", label: "United States", dialCode: "+1" },
   { code: "GB", label: "United Kingdom", dialCode: "+44" },
   { code: "CA", label: "Canada", dialCode: "+1" },
   { code: "IN", label: "India", dialCode: "+91" },
   { code: "AU", label: "Australia", dialCode: "+61" },
-  { code: "NP", label: "Nepal", dialCode: "+977" },
   { code: "BD", label: "Bangladesh", dialCode: "+880" },
   { code: "PK", label: "Pakistan", dialCode: "+92" },
   { code: "NG", label: "Nigeria", dialCode: "+234" },
@@ -68,8 +69,8 @@ function buildCountryCodeOptions(data: unknown): CountryCodeOption[] {
 function RegisterForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { data: session, status } = useSession();
   const callbackUrl = searchParams.get("callbackUrl");
-  const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [serverError, setServerError] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -79,14 +80,30 @@ function RegisterForm() {
   );
 
   const [form, setForm] = useState({
-    username: "",
+    fullName: "",
     email: "",
-    countryDialCode: "+1",
+    countryDialCode: "+977",
     phone: "",
     prefersWhatsApp: true,
-    password: "",
-    confirmPassword: "",
   });
+
+  useEffect(() => {
+    if (status !== "authenticated") {
+      return;
+    }
+
+    if (callbackUrl) {
+      router.replace(callbackUrl);
+      return;
+    }
+
+    if (session?.user?.role === "ADMIN") {
+      router.replace("/admin/dashboard");
+      return;
+    }
+
+    router.replace("/");
+  }, [status, session, callbackUrl, router]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -118,6 +135,10 @@ function RegisterForm() {
     return () => controller.abort();
   }, []);
 
+  if (status === "loading" || status === "authenticated") {
+    return null;
+  }
+
   const handleChange = (k: string, v: string) => {
     setForm((p) => ({ ...p, [k]: v }));
     setErrors((p) => ({ ...p, [k]: "" }));
@@ -126,7 +147,7 @@ function RegisterForm() {
 
   const validate = () => {
     const e: Record<string, string> = {};
-    if (!form.username.trim()) e.username = "Username required.";
+    if (!form.fullName.trim()) e.fullName = "Full name required.";
     if (!form.email.trim()) e.email = "Email required.";
     if (!form.countryDialCode.trim())
       e.countryDialCode = "Country code required.";
@@ -134,8 +155,6 @@ function RegisterForm() {
     if (!/^\d{6,15}$/.test(form.phone.replaceAll(/\D/g, ""))) {
       e.phone = "Enter a valid phone number.";
     }
-    if (!form.password) e.password = "Password required.";
-    if (form.password !== form.confirmPassword) e.confirmPassword = "Mismatch.";
     if (!agreed) e.agreed = "Required.";
 
     setErrors(e);
@@ -155,8 +174,7 @@ function RegisterForm() {
         body: JSON.stringify({
           ...form,
           phoneNumber: form.phone,
-          name: form.username,
-          username: form.username.toLowerCase(),
+          name: form.fullName,
           email: form.email.toLowerCase(),
           nationality: "",
           currentCountry: "",
@@ -173,21 +191,41 @@ function RegisterForm() {
         }),
       });
 
+      const data = await res.json();
+
       if (!res.ok) {
-        const data = await res.json();
         setServerError(data.error || "Registration failed.");
         return;
       }
 
-      const data = await res.json();
-      const otpChannel = data?.otp?.channel;
-      const channelParam = otpChannel
-        ? `&otpChannel=${otpChannel.toLowerCase()}`
+      if (data?.existingUser) {
+        const loginDial = data?.user?.countryDialCode || form.countryDialCode;
+        const loginPhone = data?.user?.phoneNumber || form.phone;
+        const callbackParam = callbackUrl
+          ? `&callbackUrl=${encodeURIComponent(callbackUrl)}`
+          : "";
+
+        router.push(
+          `/login?existing=1&otp=1&countryDialCode=${encodeURIComponent(loginDial)}&phoneNumber=${encodeURIComponent(loginPhone)}${callbackParam}`,
+        );
+        return;
+      }
+
+      const phoneE164 = data?.user?.phoneE164 || data?.otp?.phoneE164;
+
+      if (!phoneE164) {
+        setServerError(
+          "Signup succeeded, but we could not start OTP verification.",
+        );
+        return;
+      }
+
+      const callbackParam = callbackUrl
+        ? `&callbackUrl=${encodeURIComponent(callbackUrl)}`
         : "";
-      
-      const callbackParam = callbackUrl ? `&callbackUrl=${encodeURIComponent(callbackUrl)}` : "";
-      
-      router.push(`/login?registered=1&otp=1${channelParam}${callbackParam}`);
+      router.push(
+        `/verify-otp?phoneE164=${encodeURIComponent(phoneE164)}${callbackParam}`,
+      );
     } catch {
       setServerError("Something went wrong.");
     } finally {
@@ -243,13 +281,13 @@ function RegisterForm() {
 
             <form onSubmit={handleSubmit} className="w-full space-y-4">
               <InputField
-                placeholder="Username"
-                value={form.username}
-                error={errors.username}
-                onChange={(v) => handleChange("username", v)}
+                placeholder="Full name"
+                value={form.fullName}
+                error={errors.fullName}
+                onChange={(v) => handleChange("fullName", v)}
               />
               <InputField
-                placeholder="example@gmail.com"
+                placeholder="Email"
                 type="email"
                 value={form.email}
                 error={errors.email}
@@ -319,37 +357,14 @@ function RegisterForm() {
                     </svg>
                   </div>
                   <span className="text-[13px] font-regular text-black select-none">
-                    Send OTP on WhatsApp first (fallback to SMS automatically)
+                    Send OTP via SMS for verification
                   </span>
                 </label>
               </div>
-              <InputField
-                placeholder="Password"
-                type={showPassword ? "text" : "password"}
-                value={form.password}
-                error={errors.password}
-                onChange={(v) => handleChange("password", v)}
-                suffix={
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="text-gray-300 hover:text-gray-500 pr-2 pt-1"
-                  >
-                    {showPassword ? (
-                      <EyeOff className="w-4 h-4" />
-                    ) : (
-                      <Eye className="w-4 h-4" />
-                    )}
-                  </button>
-                }
-              />
-              <InputField
-                placeholder="Confirm password"
-                type={showPassword ? "text" : "password"}
-                value={form.confirmPassword}
-                error={errors.confirmPassword}
-                onChange={(v) => handleChange("confirmPassword", v)}
-              />
+              <div className="w-full rounded-[20px] border border-blue-100 bg-blue-50 px-5 py-4 text-[12px] font-semibold text-blue-700">
+                Password is removed. After signup, we will send an SMS OTP to
+                verify and login.
+              </div>
 
               {/* Terms & Conditions */}
               <div className="pt-2">
@@ -422,7 +437,11 @@ function RegisterForm() {
             <p className="text-[14px] font-regular text-black">
               Already have an account?{" "}
               <Link
-                href="/login"
+                href={
+                  callbackUrl
+                    ? `/login?callbackUrl=${encodeURIComponent(callbackUrl)}`
+                    : "/login"
+                }
                 className="text-[#3381FF] font-bold hover:underline"
               >
                 Login
@@ -448,7 +467,6 @@ export default function RegisterPage() {
     </Suspense>
   );
 }
-
 
 function InputField({
   placeholder,

@@ -1,30 +1,38 @@
 import { NextResponse } from "next/server";
-import { encode } from "next-auth/jwt";
 import prisma from "@/lib/db";
-import { hashOtpCode } from "@/lib/phoneVerification";
+import {
+  hashOtpCode,
+  normalizeDialCode,
+  normalizePhoneNumber,
+  toE164,
+} from "@/lib/phoneVerification";
 
 export async function POST(req: Request) {
   try {
-    const { phoneE164, otp } = await req.json();
+    const { phoneE164, countryDialCode, phoneNumber, otp } = await req.json();
 
-    if (!phoneE164 || !otp) {
+    const normalizedPhoneE164 =
+      (phoneE164 || "").trim() ||
+      toE164(
+        normalizeDialCode(countryDialCode || ""),
+        normalizePhoneNumber(phoneNumber || ""),
+      );
+
+    if (!normalizedPhoneE164 || !otp) {
       return NextResponse.json(
         { error: "Phone number and OTP are required." },
         { status: 400 },
       );
     }
 
-    const normalizedPhoneE164 = phoneE164.trim();
-
     const user = await prisma.user.findUnique({
       where: { phoneE164: normalizedPhoneE164 },
-      include: { profile: true },
     });
 
     if (!user) {
       return NextResponse.json(
-        { error: "No account found with that phone number." },
-        { status: 401 },
+        { error: "No account found for this phone number." },
+        { status: 404 },
       );
     }
 
@@ -51,35 +59,9 @@ export async function POST(req: Request) {
       },
     });
 
-    const secret = process.env.NEXTAUTH_SECRET;
-    if (!secret) {
-      throw new Error("NEXTAUTH_SECRET is required for secure JWT issuance.");
-    }
-
-    const token = await encode({
-      secret,
-      maxAge: 60 * 60 * 24 * 7,
-      token: {
-        id: user.id,
-        email: user.email,
-        role: user.role,
-        tokenType: "mobile",
-      },
-    });
-
-    return NextResponse.json({
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        username: user.username,
-        role: user.role,
-        profile: user.profile,
-      },
-      token,
-    });
+    return NextResponse.json({ verified: true });
   } catch (error) {
-    console.error("[MOBILE_LOGIN_ERROR]", error);
+    console.error("[VERIFY_SIGNUP_OTP_ERROR]", error);
     return NextResponse.json(
       { error: "Something went wrong. Please try again." },
       { status: 500 },
