@@ -1688,6 +1688,7 @@ export default function AbroadLiftMatchesPage() {
   const [dynamicLivingCost, setDynamicLivingCost] = useState<any>(null);
   const [relocationStats, setRelocationStats] = useState<any>(null);
   const [apiCostEstimate, setApiCostEstimate] = useState<any>(null);
+  const [destinationInsight, setDestinationInsight] = useState<any>(null);
 
   const [hasRestored, setHasRestored] = useState(false);
 
@@ -1888,7 +1889,9 @@ export default function AbroadLiftMatchesPage() {
     if (step === 8 && selectedMatch) {
       setDynamicLivingCost(null);
       setRelocationStats(null);
+      setDestinationInsight(null);
       const code = selectedMatch.countryCode || form.countries[0] || "AU";
+      const city = selectedMatch.location?.split(",")[0] || "New York";
 
       // Cost of Living
       fetch(`/api/cost-of-living?countryCode=${code}`)
@@ -1910,13 +1913,25 @@ export default function AbroadLiftMatchesPage() {
         })
         .catch(console.error);
 
+      // Destination Insight (weather + timezone + distance)
+      fetch(
+        `/api/destination-insight?country=${code}&city=${encodeURIComponent(city)}`,
+      )
+        .then((res) => res.json())
+        .then((data) => {
+          if (data && !data.error) {
+            setDestinationInsight(data);
+          }
+        })
+        .catch(console.error);
+
       // Full Cost Estimate API call
       const tuitionUsdRaw =
         selectedMatch.currency === "NPR"
           ? (selectedMatch.tuitionFee || 22000) / USD_TO_NPR
           : selectedMatch.tuitionFee || 22000;
       fetch(
-        `/api/cost-estimate?country=${code}&city=${encodeURIComponent(selectedMatch.location?.split(",")[0] || "New York")}&tuition_usd=${Math.round(tuitionUsdRaw)}`,
+        `/api/cost-estimate?country=${code}&city=${encodeURIComponent(city)}&tuition_usd=${Math.round(tuitionUsdRaw)}`,
       )
         .then((res) => res.json())
         .then((data) => {
@@ -3166,6 +3181,81 @@ export default function AbroadLiftMatchesPage() {
       );
       const miscPercent = 100 - tuitionPercent - livingPercent;
 
+      const weatherCodeMap: Record<number, string> = {
+        0: "Clear",
+        1: "Mainly Clear",
+        2: "Partly Cloudy",
+        3: "Overcast",
+        45: "Fog",
+        48: "Depositing Rime Fog",
+        51: "Light Drizzle",
+        53: "Drizzle",
+        55: "Dense Drizzle",
+        61: "Light Rain",
+        63: "Rain",
+        65: "Heavy Rain",
+        71: "Light Snow",
+        73: "Snow",
+        75: "Heavy Snow",
+        80: "Rain Showers",
+        81: "Rain Showers",
+        82: "Violent Rain Showers",
+        95: "Thunderstorm",
+      };
+
+      const qualityOfLifeIndex = Number(
+        relocationStats?.quality_of_life_index ??
+          relocationStats?.quality_index ??
+          relocationStats?.quality_of_life ??
+          relocationStats?.qualityOfLifeIndex ??
+          NaN,
+      );
+      const safetyIndex = Number(
+        relocationStats?.safety_index ?? relocationStats?.safety ?? NaN,
+      );
+      const healthcareIndex = Number(
+        relocationStats?.healthcare_index ?? relocationStats?.healthcare ?? NaN,
+      );
+      const climateIndex = Number(
+        relocationStats?.climate_index ?? relocationStats?.climate ?? NaN,
+      );
+
+      const weatherLabel =
+        destinationInsight && Number.isFinite(destinationInsight?.condition)
+          ? weatherCodeMap[destinationInsight.condition] || "Moderate"
+          : "Unavailable";
+
+      const monthlyBuckets = [
+        {
+          label: "Housing",
+          value: apiCostEstimate?.housing_npr
+            ? Math.round(apiCostEstimate.housing_npr / 12)
+            : Math.round((livingAnnualNpr / 12) * 0.45),
+          color: "bg-blue-600",
+        },
+        {
+          label: "Food",
+          value: apiCostEstimate?.food_npr
+            ? Math.round(apiCostEstimate.food_npr / 12)
+            : Math.round((livingAnnualNpr / 12) * 0.25),
+          color: "bg-indigo-500",
+        },
+        {
+          label: "Transport",
+          value: apiCostEstimate?.transport_npr
+            ? Math.round(apiCostEstimate.transport_npr / 12)
+            : Math.round((livingAnnualNpr / 12) * 0.15),
+          color: "bg-emerald-500",
+        },
+        {
+          label: "Healthcare",
+          value: apiCostEstimate?.healthcare_npr
+            ? Math.round(apiCostEstimate.healthcare_npr / 12)
+            : Math.round((livingAnnualNpr / 12) * 0.15),
+          color: "bg-amber-500",
+        },
+      ];
+
       const meta = {
         US: { v: 185 },
         CA: { v: 110 },
@@ -3416,6 +3506,91 @@ export default function AbroadLiftMatchesPage() {
                 </Card>
               </div>
 
+              <Card className="p-8 md:p-10 rounded-[40px] md:rounded-[48px] border border-slate-100 bg-white shadow-sm">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-slate-50 pb-5 mb-6">
+                  <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                    Live Destination & Quality Snapshot
+                  </h4>
+                  <span className="text-[9px] font-black text-emerald-600 uppercase tracking-widest">
+                    Real-time API Signals
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="p-5 rounded-3xl bg-slate-50 border border-slate-100 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs font-black text-slate-800 uppercase tracking-widest">
+                        Weather
+                      </p>
+                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                        {destinationInsight?.city ||
+                          selectedMatch.location?.split(",")[0] ||
+                          "Destination"}
+                      </span>
+                    </div>
+                    <div className="flex items-end gap-3">
+                      <span className="text-4xl font-black text-slate-900">
+                        {Number.isFinite(destinationInsight?.temp)
+                          ? `${Math.round(destinationInsight.temp)}°C`
+                          : "--"}
+                      </span>
+                      <span className="text-sm font-bold text-slate-500 pb-1">
+                        {weatherLabel}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3 text-[11px] font-medium text-slate-600">
+                      <div className="p-3 rounded-xl bg-white border border-slate-100">
+                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">
+                          Local Time
+                        </p>
+                        {destinationInsight?.localTime || "--"}
+                      </div>
+                      <div className="p-3 rounded-xl bg-white border border-slate-100">
+                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">
+                          Distance
+                        </p>
+                        {destinationInsight?.distance
+                          ? `${destinationInsight.distance.toLocaleString()} km`
+                          : "--"}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-5 rounded-3xl bg-slate-50 border border-slate-100 space-y-4">
+                    <p className="text-xs font-black text-slate-800 uppercase tracking-widest">
+                      Quality Of Life Indexes
+                    </p>
+                    <div className="grid grid-cols-2 gap-3 text-[11px]">
+                      {[
+                        { label: "Quality", value: qualityOfLifeIndex },
+                        { label: "Safety", value: safetyIndex },
+                        { label: "Healthcare", value: healthcareIndex },
+                        { label: "Climate", value: climateIndex },
+                      ].map((metric) => (
+                        <div
+                          key={metric.label}
+                          className="p-3 rounded-xl bg-white border border-slate-100"
+                        >
+                          <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">
+                            {metric.label}
+                          </p>
+                          <p className="text-lg font-black text-slate-900">
+                            {Number.isFinite(metric.value)
+                              ? metric.value.toFixed(1)
+                              : "--"}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="text-[10px] text-slate-500 font-medium leading-relaxed">
+                      Source: relocation index and destination weather APIs.
+                      Values update dynamically for the selected country and
+                      city.
+                    </p>
+                  </div>
+                </div>
+              </Card>
+
               <Card className="p-10 rounded-[48px] border border-slate-100 bg-white shadow-sm overflow-hidden">
                 <div className="flex items-center justify-between mb-8 border-b border-slate-50 pb-6 uppercase tracking-widest italic font-bold">
                   <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
@@ -3425,6 +3600,32 @@ export default function AbroadLiftMatchesPage() {
                     Full Phase Breakdown
                   </span>
                 </div>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-8">
+                  {monthlyBuckets.map((bucket) => (
+                    <div
+                      key={bucket.label}
+                      className="p-4 rounded-2xl border border-slate-100 bg-slate-50"
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                          {bucket.label}
+                        </p>
+                        <span
+                          className={`w-2.5 h-2.5 rounded-full ${bucket.color}`}
+                        />
+                      </div>
+                      <p className="text-lg font-black text-slate-900">
+                        {symbol}
+                        {displayVal(bucket.value)}
+                        {unit}
+                      </p>
+                      <p className="text-[9px] font-medium text-slate-400 mt-1 uppercase tracking-widest">
+                        Monthly Dynamic
+                      </p>
+                    </div>
+                  ))}
+                </div>
+
                 <div className="w-full overflow-x-auto">
                   <table className="w-full text-left border-separate border-spacing-y-2">
                     <thead>
