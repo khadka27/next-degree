@@ -360,8 +360,9 @@ export function FinancialDashboard({
 
             {/* Potential Savings */}
             <Card className="p-8 rounded-[32px] border border-emerald-100 bg-emerald-50/30 shadow-sm">
+              <div className="flex items-center gap-2 text-emerald-700 font-bold text-xs uppercase tracking-widest mb-4">
                 <TrendingDown className="w-4 h-4" />
-                Potential Savings
+                <span>Potential Savings</span>
               </div>
               <ul className="space-y-4">
                 <li className="flex gap-3">
