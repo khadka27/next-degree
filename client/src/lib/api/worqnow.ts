@@ -16,13 +16,74 @@
 
 const BASE_URL = "https://api.worqnow.ai/education";
 
-/** Approximate annual international tuition in USD by fee band */
-const FEE_BAND_USD: Record<string, number> = {
-  low: 8_000,
-  medium: 16_000,
-  high: 26_000,
-  very_high: 45_000,
+/** Realistic annual international tuition ranges in USD by fee band */
+const FEE_BAND_USD_RANGE: Record<string, { min: number; max: number }> = {
+  low: { min: 7_500, max: 14_500 },
+  medium: { min: 13_000, max: 25_000 },
+  high: { min: 23_000, max: 42_000 },
+  very_high: { min: 38_000, max: 68_000 },
 };
+
+const COUNTRY_FEE_MULTIPLIER: Record<string, number> = {
+  usa: 1.2,
+  us: 1.2,
+  uk: 1.1,
+  gb: 1.1,
+  au: 1.0,
+  australia: 1.0,
+  ca: 0.95,
+  canada: 0.95,
+  de: 0.7,
+  germany: 0.7,
+  ie: 1.0,
+  ireland: 1.0,
+  nl: 0.95,
+  netherlands: 0.95,
+};
+
+function seededInt(seed: string, min: number, max: number) {
+  let hash = 0;
+  for (let i = 0; i < seed.length; i += 1) {
+    hash = (hash * 31 + seed.charCodeAt(i)) >>> 0;
+  }
+  const span = max - min + 1;
+  return min + (hash % span);
+}
+
+function clamp(value: number, min: number, max: number) {
+  return Math.min(max, Math.max(min, value));
+}
+
+function estimateTuitionUsd(u: any, countryCode: string): number {
+  const band = String(u?.international_fee_band || "medium").toLowerCase();
+  const range = FEE_BAND_USD_RANGE[band] || FEE_BAND_USD_RANGE.medium;
+  const seed = `${u?.code || u?.name || "uni"}-${countryCode}-${band}`;
+
+  // deterministic base within the fee-band range
+  const base = seededInt(seed, range.min, range.max);
+
+  // country-level correction so destinations have realistic spread
+  const countryKey = String(countryCode || "").toLowerCase();
+  const countryMultiplier = COUNTRY_FEE_MULTIPLIER[countryKey] ?? 1;
+
+  // higher-ranked schools are typically more expensive
+  const rankWorld = Number(u?.ranking_world);
+  const rankPremium = Number.isFinite(rankWorld)
+    ? rankWorld <= 100
+      ? 1.22
+      : rankWorld <= 300
+        ? 1.14
+        : rankWorld <= 700
+          ? 1.06
+          : 1
+    : 1;
+
+  // small deterministic jitter avoids repeated identical fees
+  const jitter = seededInt(`${seed}-jitter`, -1500, 1800);
+
+  const estimated = Math.round(base * countryMultiplier * rankPremium + jitter);
+  return clamp(estimated, 6_000, 85_000);
+}
 
 export interface WorqnowUniversity {
   id?: string;
@@ -80,10 +141,10 @@ export async function fetchWorqnowUniversities(
       ? data
       : [];
 
-  // Enrich each university with an estimated numeric fee
+  // Enrich each university with a realistic numeric fee estimate
   const transformed = list.map((u: any) => ({
     ...u,
-    estimatedFeeUSD: FEE_BAND_USD[u.international_fee_band] ?? 0,
+    estimatedFeeUSD: estimateTuitionUsd(u, countryCode),
   }));
 
   universityCache[code] = transformed;
