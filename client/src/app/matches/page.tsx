@@ -4292,6 +4292,12 @@ export default function AbroadLiftMatchesPage() {
     }
 
     if (step === 14 && selectedMatch && financialMetrics && decisionSignals) {
+      const nprRangeLakhs = (valueNpr: number, spread = 0.12) => {
+        const low = Math.max(0, Math.round(valueNpr * (1 - spread)));
+        const high = Math.round(valueNpr * (1 + spread));
+        return `NPR ${(low / 100000).toFixed(1)}L - NPR ${(high / 100000).toFixed(1)}L`;
+      };
+
       const riskFlags = [
         {
           label: "Financial Cushion",
