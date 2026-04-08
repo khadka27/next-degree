@@ -1824,17 +1824,21 @@ export default function AbroadLiftMatchesPage() {
 
   // Persistence logic
   useEffect(() => {
+    const pendingStep = localStorage.getItem(RETURN_STEP_KEY);
     const saved = localStorage.getItem(MATCH_STORAGE_KEY);
     if (saved) {
       try {
         const data = JSON.parse(saved);
         if (data.form) setForm(data.form);
-        if (data.step) setStep(data.step);
-        if (data.selectedMatch) setSelectedMatch(data.selectedMatch);
-        if (data.matches) setMatches(data.matches);
+        if (pendingStep && data.selectedMatch) setSelectedMatch(data.selectedMatch);
+        if (pendingStep && data.matches) setMatches(data.matches);
       } catch (e) {
         console.error("Failed to load match data", e);
       }
+    }
+
+    if (!pendingStep) {
+      setStep(1);
     }
     setHasRestored(true);
   }, []);
@@ -1863,7 +1867,7 @@ export default function AbroadLiftMatchesPage() {
       }
 
       const fallbackStep = Number.parseInt(pendingStep, 10);
-      setStep(Number.isNaN(fallbackStep) ? 7 : fallbackStep);
+      setStep(Number.isNaN(fallbackStep) ? 8 : fallbackStep);
     }
   }, [status]);
 
