@@ -33,7 +33,14 @@ export interface UniversityDetail extends UniversityResult {
   ranking_world?: number | string;
   ranking_national?: number | string;
   courses?: { name: string; category: string; level: string[]; fee?: string | number }[];
-  scholarships?: { name: string; value: string }[];
+  scholarships?: { 
+    name: string; 
+    type?: string;
+    value: string;
+    eligibility?: string;
+    notes?: string;
+  }[];
+  notes?: string;
 }
 
 import { fetchWorqnowUniversities, getWorqnowUniversityDetail, WorqnowUniversity } from './worqnow';
@@ -164,7 +171,8 @@ export const getUniversityDetails = async (id: string, country: string): Promise
         ...c,
         fee: processed.tuition
       })) || [],
-      scholarships: data.scholarships || []
+      scholarships: data.scholarships || [],
+      notes: (data as any).notes || ""
     };
   } catch (error) {
     console.error("Error fetching university details:", error);
@@ -216,4 +224,81 @@ const processResults = (results: any[], searchCountry: string): UniversityResult
       ...res // Allow overrides if API changes
     };
   });
+};
+
+export const getCostOfLiving = async (countryCode: string): Promise<any> => {
+  try {
+    const rawUrl = process.env.EXPO_PUBLIC_COST_ESTIMSTION_API;
+    // Handle the potential open quote in .env
+    const url = rawUrl?.startsWith('"') ? rawUrl.substring(1) : rawUrl;
+    
+    if (!url) {
+      console.warn("Cost of living API URL not found in env");
+      return null;
+    }
+
+    const response = await fetch(url);
+    if (!response.ok) throw new Error("Failed to fetch cost of living");
+    
+    const json = await response.json();
+    const data = json.data || [];
+    
+    const normalization: Record<string, string> = {
+      "USA": "US",
+      "UK": "GB",
+      "CAN": "CA",
+      "AUS": "AU",
+      "GER": "DE",
+    };
+
+    const targetCode = (normalization[countryCode.toUpperCase()] || countryCode).toUpperCase();
+    
+    let countryData = data.find((d: any) => d.country_code?.toUpperCase() === targetCode);
+    
+    // Fallback GB/UK
+    if (!countryData && targetCode === "GB") countryData = data.find((d: any) => d.country_code?.toUpperCase() === "UK");
+    if (!countryData && targetCode === "UK") countryData = data.find((d: any) => d.country_code?.toUpperCase() === "GB");
+
+    return countryData;
+  } catch (error) {
+    console.error("Error fetching cost of living:", error);
+    return null;
+  }
+};
+
+export const getRelocationIndex = async (countryCode: string): Promise<any> => {
+  try {
+    const url = process.env.EXPO_PUBLIC_QOI_API;
+    if (!url) {
+      console.warn("Relocation Index (QOI) API URL not found in env");
+      return null;
+    }
+
+    const response = await fetch(url);
+    if (!response.ok) throw new Error("Failed to fetch relocation index");
+    
+    const json = await response.json();
+    const data = json.data || [];
+    
+    const normalization: Record<string, string> = {
+      "USA": "US",
+      "UK": "GB",
+      "CAN": "CA",
+      "AUS": "AU",
+      "GER": "DE",
+    };
+
+    const targetCode = (normalization[countryCode.toUpperCase()] || countryCode).toLowerCase();
+    
+    let countryData = data.find((d: any) => d.country_code?.toLowerCase() === targetCode);
+    
+    // Fallback GB/UK
+    if (!countryData && targetCode === "gb") countryData = data.find((d: any) => d.country_code?.toLowerCase() === "uk");
+    if (!countryData && targetCode === "uk") countryData = data.find((d: any) => d.country_code?.toLowerCase() === "gb");
+
+    return countryData;
+  } catch (error) {
+    console.error("Error fetching relocation index:", error);
+    return null;
+  }
 };

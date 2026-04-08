@@ -16,7 +16,7 @@ import { Feather, Ionicons, MaterialIcons, MaterialCommunityIcons } from "@expo/
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useUser } from "../context/UserContext";
 import { ProfileAvatar } from "../../components/ProfileAvatar";
-import { getUniversityDetails, UniversityDetail } from "../../lib/api";
+import { getUniversityDetails, UniversityDetail, getCostOfLiving } from "../../lib/api";
 import { ActivityIndicator } from "react-native";
 
 const { width, height } = Dimensions.get("window");
@@ -82,15 +82,27 @@ export default function UniversityDetails() {
   const [courseSearch, setCourseSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [uniData, setUniData] = useState<UniversityDetail | null>(null);
+  const [costData, setCostData] = useState<any>(null);
+
+  const USD_TO_NPR = 134;
 
   useEffect(() => {
     let mounted = true;
     const load = async () => {
       setLoading(true);
-      const data = await getUniversityDetails(id as string, currentCountry);
-      if (mounted) {
-        setUniData(data);
-        setLoading(false);
+      try {
+        const [data, cost] = await Promise.all([
+          getUniversityDetails(id as string, currentCountry),
+          getCostOfLiving(currentCountry)
+        ]);
+        if (mounted) {
+          setUniData(data);
+          setCostData(cost);
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error("Error loading uni details/cost:", error);
+        if (mounted) setLoading(false);
       }
     };
     load();
@@ -112,15 +124,28 @@ export default function UniversityDetails() {
     fee_usd: uniData?.tuitionValue || 65000,
   };
 
-  const renderEstimates = () => (
+  const renderEstimates = () => {
+    const tuitionUsd = details.fee_usd || 20000;
+    const livingUsd = (costData?.monthly_estimate_usd || 1500) * 12;
+    const totalNpr = (tuitionUsd + livingUsd) * USD_TO_NPR;
+
+    const fmtNpr = (v: number) => {
+        if (v >= 100000) return `NPR ${(v / 100000).toFixed(1)} Lakhs`;
+        return `NPR ${v.toLocaleString()}`;
+    };
+
+    return (
     <View style={styles.tabContent}>
       <View style={styles.estimateCard}>
         <Text style={styles.estimateLabel}>ESTIMATED TOTAL COST / YR</Text>
-        <Text style={styles.estimateValue}>${details.fee_usd?.toLocaleString() || "65,000"}</Text>
+        <Text style={styles.estimateValue}>{fmtNpr(totalNpr)}</Text>
+        <Text style={{ fontSize: 13, color: THEME.textGray, marginBottom: 16, fontWeight: "600" }}>
+           Approx. ${(tuitionUsd + livingUsd).toLocaleString()} USD
+        </Text>
         <View style={styles.costBar}>
-          <View style={[styles.costSegment, { width: '65%', backgroundColor: '#6366F1' }]} />
-          <View style={[styles.costSegment, { width: '25%', backgroundColor: '#FBBF24' }]} />
-          <View style={[styles.costSegment, { width: '10%', backgroundColor: '#10B981' }]} />
+          <View style={[styles.costSegment, { width: `${(tuitionUsd / (tuitionUsd + livingUsd) * 100).toFixed(0)}%` as any, backgroundColor: '#6366F1' }]} />
+          <View style={[styles.costSegment, { width: `${(livingUsd / (tuitionUsd + livingUsd) * 100).toFixed(0)}%` as any, backgroundColor: '#FBBF24' }]} />
+          <View style={[styles.costSegment, { width: '5%', backgroundColor: '#10B981' }]} />
         </View>
         <View style={styles.costLegend}>
           <View style={styles.legendItem}>
@@ -154,13 +179,17 @@ export default function UniversityDetails() {
         </Text>
         <TouchableOpacity 
           style={styles.completeEstimateBtn}
-          onPress={() => router.push("/university/admission-chance")}
+          onPress={() => router.push({
+            pathname: "/university/cost-breakdown",
+            params: { id: id, country: currentCountry }
+          })}
         >
-          <Text style={styles.completeEstimateBtnText}>Get Complete Estimate</Text>
+          <Text style={styles.completeEstimateBtnText}>Get Complete Cost Breakdown</Text>
         </TouchableOpacity>
       </View>
     </View>
-  );
+    );
+  };
 
   const renderOverview = () => (
     <View style={styles.tabContent}>
@@ -172,6 +201,12 @@ export default function UniversityDetails() {
       </View>
       <View style={styles.overviewTextCard}>
         <Text style={styles.overviewText}>{details.description}</Text>
+        {uniData?.notes && (
+          <View style={styles.notesBox}>
+            <Text style={styles.notesLabel}>ADMISSION NOTES</Text>
+            <Text style={styles.notesText}>{uniData.notes}</Text>
+          </View>
+        )}
       </View>
 
       <View style={styles.sectionHeader}>
@@ -198,6 +233,41 @@ export default function UniversityDetails() {
         </View>
         <Text style={styles.highlightText}>High Employability</Text>
       </View>
+
+      <View style={styles.sectionHeader}>
+        <View style={styles.sectionIconBox}>
+          <Ionicons name="gift-outline" size={18} color={THEME.orange} />
+        </View>
+        <Text style={styles.contentSectionTitle}>Scholarships</Text>
+      </View>
+      
+      {uniData?.scholarships && uniData.scholarships.length > 0 ? (
+        uniData.scholarships.map((s, idx) => (
+          <View key={idx} style={styles.scholarshipCard}>
+            <View style={styles.scholarshipHeader}>
+               <Text style={styles.scholarshipName}>{s.name}</Text>
+               <Text style={styles.scholarshipValue}>{s.value}</Text>
+            </View>
+            {s.eligibility && (
+              <Text style={styles.scholarshipElig}>
+                <Text style={{ fontWeight: '700' }}>Eligibility: </Text>{s.eligibility}
+              </Text>
+            )}
+            {s.notes && (
+              <Text style={styles.scholarshipNotes}>{s.notes}</Text>
+            )}
+            {s.type && (
+              <View style={[styles.typeBadge, { backgroundColor: s.type === 'merit' ? '#FEF3C7' : '#DCFCE7' }]}>
+                <Text style={[styles.typeBadgeText, { color: s.type === 'merit' ? '#D97706' : '#166534' }]}>{s.type.toUpperCase()}</Text>
+              </View>
+            )}
+          </View>
+        ))
+      ) : (
+        <View style={styles.noScholarshipBox}>
+          <Text style={styles.noScholarshipText}>Check university website for latest scholarships.</Text>
+        </View>
+      )}
 
       <View style={styles.sectionHeader}>
         <View style={styles.sectionIconBox}>
@@ -697,6 +767,25 @@ const styles = StyleSheet.create({
     color: "#475569",
     fontWeight: "500",
   },
+  notesBox: {
+    marginTop: 16,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: "#F1F5F9",
+  },
+  notesLabel: {
+    fontSize: 11,
+    fontWeight: "800",
+    color: THEME.orange,
+    marginBottom: 4,
+    letterSpacing: 0.5,
+  },
+  notesText: {
+    fontSize: 13,
+    color: "#475569",
+    fontWeight: "600",
+    lineHeight: 20,
+  },
   highlightItem: {
     flexDirection: "row",
     alignItems: "center",
@@ -755,6 +844,69 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "900",
     color: THEME.textDark,
+  },
+  scholarshipCard: {
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: "#F1F5F9",
+    marginBottom: 16,
+  },
+  scholarshipHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    marginBottom: 8,
+    gap: 12,
+  },
+  scholarshipName: {
+    flex: 1,
+    fontSize: 15,
+    fontWeight: "800",
+    color: THEME.textDark,
+  },
+  scholarshipValue: {
+    fontSize: 16,
+    fontWeight: "900",
+    color: THEME.green,
+  },
+  scholarshipElig: {
+    fontSize: 13,
+    color: "#64748B",
+    marginBottom: 6,
+    lineHeight: 18,
+  },
+  scholarshipNotes: {
+    fontSize: 12,
+    color: "#94A3B8",
+    fontStyle: "italic",
+    marginBottom: 12,
+  },
+  typeBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+    alignSelf: "flex-start",
+  },
+  typeBadgeText: {
+    fontSize: 10,
+    fontWeight: "800",
+  },
+  noScholarshipBox: {
+    padding: 20,
+    backgroundColor: "#F8FAFC",
+    borderRadius: 16,
+    borderStyle: "dashed",
+    borderWidth: 1,
+    borderColor: "#CBD5E1",
+    marginBottom: 24,
+    alignItems: "center",
+  },
+  noScholarshipText: {
+    fontSize: 13,
+    color: "#94A3B8",
+    fontWeight: "600",
   },
   rankingGlobalCard: {
     backgroundColor: THEME.blue,
