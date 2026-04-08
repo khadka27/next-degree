@@ -561,25 +561,29 @@ function SearchSelect({
           setOpen(!open);
           setQuery("");
         }}
-        className={`w-full relative flex items-center pl-10 pr-4 h-[50px] md:h-[60px] bg-[#f8fafc] border rounded-[18px] md:rounded-[22px] text-left transition-all ${open
+        className={`w-full relative flex items-center pl-10 pr-4 h-[50px] md:h-[60px] bg-[#f8fafc] border rounded-[18px] md:rounded-[22px] text-left transition-all ${
+          open
             ? "border-blue-500 ring-4 ring-blue-500/5 bg-white shadow-lg"
             : "border-slate-200 hover:border-blue-200 shadow-sm"
-          }`}
+        }`}
       >
         <Search
-          className={`w-[20px] h-[20px] absolute left-4 top-1/2 -translate-y-1/2 transition-colors ${open ? "text-blue-500" : "text-slate-400"
-            }`}
+          className={`w-[20px] h-[20px] absolute left-4 top-1/2 -translate-y-1/2 transition-colors ${
+            open ? "text-blue-500" : "text-slate-400"
+          }`}
           strokeWidth={2}
         />
         <span
-          className={`text-[15px] font-semibold truncate ${value ? "text-slate-900" : "text-slate-400"
-            }`}
+          className={`text-[15px] font-semibold truncate ${
+            value ? "text-slate-900" : "text-slate-400"
+          }`}
         >
           {value || placeholder}
         </span>
         <ChevronDown
-          className={`ml-auto w-5 h-5 text-slate-400 transition-transform ${open ? "rotate-180 text-blue-500" : ""
-            }`}
+          className={`ml-auto w-5 h-5 text-slate-400 transition-transform ${
+            open ? "rotate-180 text-blue-500" : ""
+          }`}
         />
       </button>
 
@@ -608,10 +612,11 @@ function SearchSelect({
                     onChange(opt);
                     setOpen(false);
                   }}
-                  className={`w-full text-left px-5 min-h-[50px] flex items-center rounded-[16px] text-[15px] font-semibold transition-all ${value === opt
+                  className={`w-full text-left px-5 min-h-[50px] flex items-center rounded-[16px] text-[15px] font-semibold transition-all ${
+                    value === opt
                       ? "bg-blue-600 text-white shadow-md"
                       : "text-slate-600 hover:bg-slate-50 hover:text-blue-600"
-                    }`}
+                  }`}
                 >
                   {opt}
                 </button>
@@ -693,10 +698,11 @@ function TagSelect({
                   className="w-full flex items-center gap-3 p-2 rounded-xl hover:bg-blue-50/50 transition-all text-left"
                 >
                   <div
-                    className={`w-5 h-5 rounded-lg border-2 flex items-center justify-center transition-all ${isSel
+                    className={`w-5 h-5 rounded-lg border-2 flex items-center justify-center transition-all ${
+                      isSel
                         ? "bg-blue-600 border-blue-600 shadow-md shadow-blue-500/20"
                         : "border-slate-100"
-                      }`}
+                    }`}
                   >
                     {isSel && (
                       <CheckCircle2 className="w-3.5 h-3.5 text-white" />
@@ -755,10 +761,11 @@ function MatchCard({
 
   return (
     <div
-      className={`bg-white border text-left rounded-[36px] overflow-hidden transition-all duration-500 cursor-pointer relative group flex flex-col h-full ${selected
+      className={`bg-white border text-left rounded-[36px] overflow-hidden transition-all duration-500 cursor-pointer relative group flex flex-col h-full ${
+        selected
           ? "border-blue-500 ring-1 ring-blue-500/20 shadow-2xl translate-y-[-6px]"
           : "border-slate-100 hover:shadow-2xl hover:border-blue-200 hover:translate-y-[-4px]"
-        }`}
+      }`}
       onClick={onSelect}
     >
       {/* Banner Image */}
@@ -1689,7 +1696,12 @@ export default function AbroadLiftMatchesPage() {
     const nextStep = 8; // Move to Cost Estimation after selection
     localStorage.setItem(
       MATCH_STORAGE_KEY,
-      JSON.stringify({ form, step: nextStep, selectedMatch: nextMatch, matches }),
+      JSON.stringify({
+        form,
+        step: nextStep,
+        selectedMatch: nextMatch,
+        matches,
+      }),
     );
     localStorage.setItem(RETURN_STEP_KEY, String(nextStep));
     if (nextMatch) {
@@ -1739,23 +1751,23 @@ export default function AbroadLiftMatchesPage() {
 
     const itemizedMonthly = apiCostEstimate
       ? {
-        Education: Math.round(apiCostEstimate.education_npr),
-        Rent: Math.round(apiCostEstimate.housing_npr / 12),
-        Food: Math.round(apiCostEstimate.food_npr / 12),
-        Transport: Math.round(apiCostEstimate.transport_npr / 12),
-        Healthcare: Math.round(apiCostEstimate.healthcare_npr / 12),
-      }
+          Education: Math.round(apiCostEstimate.education_npr),
+          Rent: Math.round(apiCostEstimate.housing_npr / 12),
+          Food: Math.round(apiCostEstimate.food_npr / 12),
+          Transport: Math.round(apiCostEstimate.transport_npr / 12),
+          Healthcare: Math.round(apiCostEstimate.healthcare_npr / 12),
+        }
       : {
-        Education: Math.round(tuitionUsd * usdToNpr),
-        Rent: Math.round(((livingBreakdownUsd as any).rent * usdToNpr) / 12),
-        Food: Math.round(((livingBreakdownUsd as any).food * usdToNpr) / 12),
-        Transport: Math.round(
-          ((livingBreakdownUsd as any).transport * usdToNpr) / 12,
-        ),
-        Other: Math.round(
-          ((livingBreakdownUsd as any).other * usdToNpr) / 12,
-        ),
-      };
+          Education: Math.round(tuitionUsd * usdToNpr),
+          Rent: Math.round(((livingBreakdownUsd as any).rent * usdToNpr) / 12),
+          Food: Math.round(((livingBreakdownUsd as any).food * usdToNpr) / 12),
+          Transport: Math.round(
+            ((livingBreakdownUsd as any).transport * usdToNpr) / 12,
+          ),
+          Other: Math.round(
+            ((livingBreakdownUsd as any).other * usdToNpr) / 12,
+          ),
+        };
 
     const fmtNpr = (v: number) =>
       new Intl.NumberFormat("en-NP", {
@@ -2020,7 +2032,7 @@ export default function AbroadLiftMatchesPage() {
     return false;
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (step === 8) {
       setStep(9);
       return;
@@ -2037,8 +2049,16 @@ export default function AbroadLiftMatchesPage() {
     }
     if (step === 6) {
       setTransitionType("matching");
-      setStep(7);
-      runMatch();
+      const fetchedMatches = await runMatch();
+
+      if (session && fetchedMatches.length > 0) {
+        setSelectedMatch((prev) => prev ?? fetchedMatches[0]);
+        setTransitionType("finance");
+        setStep(8);
+      } else {
+        setTransitionType(null);
+        setStep(7);
+      }
 
       if (status === "authenticated") {
         fetch("/api/profile", {
@@ -2076,9 +2096,12 @@ export default function AbroadLiftMatchesPage() {
         throw new Error("Our matching engine is temporarily overloaded.");
       const data = await res.json();
 
-      setMatches(data.matches || []);
+      const nextMatches = data.matches || [];
+      setMatches(nextMatches);
+      return nextMatches;
     } catch (err: any) {
       setError(err.message || "Something went wrong fetching matches.");
+      return [];
     } finally {
       setLoading(false);
     }
@@ -2253,10 +2276,11 @@ export default function AbroadLiftMatchesPage() {
                     className="group flex flex-col items-center gap-1 transition-all active:scale-95 w-full"
                   >
                     <div
-                      className={`relative w-[58px] h-[42px] sm:w-[80px] sm:h-[58px] rounded-[14px] sm:rounded-[20px] overflow-hidden bg-white flex items-center justify-center p-[2px] transition-all ${isSel
+                      className={`relative w-[58px] h-[42px] sm:w-[80px] sm:h-[58px] rounded-[14px] sm:rounded-[20px] overflow-hidden bg-white flex items-center justify-center p-[2px] transition-all ${
+                        isSel
                           ? "ring-[2.5px] ring-blue-500 shadow-lg transform scale-[1.05]"
                           : "shadow-[0_4px_12px_-4px_rgba(0,0,0,0.08)] border border-slate-50 hover:border-blue-200"
-                        }`}
+                      }`}
                     >
                       <div className="w-full h-full rounded-[12px] sm:rounded-[18px] overflow-hidden">
                         <FlagIcon
@@ -2266,8 +2290,9 @@ export default function AbroadLiftMatchesPage() {
                       </div>
                     </div>
                     <span
-                      className={`text-[11px] sm:text-[13px] font-[600] text-center tracking-tight transition-colors ${isSel ? "text-blue-600" : "text-[#475569]"
-                        }`}
+                      className={`text-[11px] sm:text-[13px] font-[600] text-center tracking-tight transition-colors ${
+                        isSel ? "text-blue-600" : "text-[#475569]"
+                      }`}
                     >
                       {c.name}
                     </span>
@@ -2315,22 +2340,25 @@ export default function AbroadLiftMatchesPage() {
                 <button
                   key={d.v}
                   onClick={() => updateForm("degree", d.v)}
-                  className={`group relative flex items-center gap-4 md:gap-6 px-5 md:px-8 py-3.5 md:py-5 rounded-[18px] md:rounded-[22px] border transition-all duration-300 ${isSel
+                  className={`group relative flex items-center gap-4 md:gap-6 px-5 md:px-8 py-3.5 md:py-5 rounded-[18px] md:rounded-[22px] border transition-all duration-300 ${
+                    isSel
                       ? "border-blue-500 bg-white shadow-lg shadow-blue-500/5 -translate-y-0.5"
                       : "border-slate-100 bg-white shadow-sm hover:border-blue-200"
-                    }`}
+                  }`}
                 >
                   <div
-                    className={`shrink-0 w-[40px] h-[40px] md:w-[52px] md:h-[52px] rounded-xl flex items-center justify-center transition-all border ${isSel
+                    className={`shrink-0 w-[40px] h-[40px] md:w-[52px] md:h-[52px] rounded-xl flex items-center justify-center transition-all border ${
+                      isSel
                         ? "bg-white text-slate-900 border-blue-500 shadow-sm"
                         : "bg-slate-50 text-slate-400 border-slate-100"
-                      }`}
+                    }`}
                   >
                     <Icon className="w-5 h-5 md:w-6 md:h-6" strokeWidth={1.5} />
                   </div>
                   <span
-                    className={`text-[15px] md:text-[17px] font-semibold ${isSel ? "text-slate-900" : "text-slate-700"
-                      }`}
+                    className={`text-[15px] md:text-[17px] font-semibold ${
+                      isSel ? "text-slate-900" : "text-slate-700"
+                    }`}
                   >
                     {d.l}
                   </span>
@@ -2400,10 +2428,11 @@ export default function AbroadLiftMatchesPage() {
                       updateForm("field", isSel ? "" : f);
                       updateForm("program", "");
                     }}
-                    className={`w-full h-[50px] md:h-[64px] px-5 md:px-8 flex items-center justify-between rounded-[16px] md:rounded-[22px] border transition-all duration-300 ${isSel
+                    className={`w-full h-[50px] md:h-[64px] px-5 md:px-8 flex items-center justify-between rounded-[16px] md:rounded-[22px] border transition-all duration-300 ${
+                      isSel
                         ? "border-blue-500 bg-white shadow-lg shadow-blue-500/5 -translate-y-0.5"
                         : "border-slate-100 bg-white shadow-sm hover:border-blue-200"
-                      }`}
+                    }`}
                   >
                     <span
                       className={`text-[14px] md:text-[16px] font-semibold ${isSel ? "text-slate-900" : "text-slate-700"}`}
@@ -2421,10 +2450,11 @@ export default function AbroadLiftMatchesPage() {
                         <button
                           key={p}
                           onClick={() => updateForm("program", p)}
-                          className={`w-full text-left px-4 md:px-5 py-2.5 md:py-3.5 rounded-[12px] md:rounded-[16px] text-[13px] md:text-[14px] font-semibold transition-all ${form.program === p
+                          className={`w-full text-left px-4 md:px-5 py-2.5 md:py-3.5 rounded-[12px] md:rounded-[16px] text-[13px] md:text-[14px] font-semibold transition-all ${
+                            form.program === p
                               ? "bg-blue-600 text-white shadow-md"
                               : "text-slate-600 hover:bg-white hover:shadow-sm"
-                            }`}
+                          }`}
                         >
                           {p}
                         </button>
@@ -2561,10 +2591,11 @@ export default function AbroadLiftMatchesPage() {
             <div className="grid grid-cols-2 gap-3 w-full mb-5">
               <button
                 onClick={() => updateForm("hasEnglishTest", true)}
-                className={`h-[48px] md:h-[54px] flex items-center justify-center rounded-[22px] font-bold text-[15px] transition-all border ${form.hasEnglishTest === true
+                className={`h-[48px] md:h-[54px] flex items-center justify-center rounded-[22px] font-bold text-[15px] transition-all border ${
+                  form.hasEnglishTest === true
                     ? "bg-blue-600 text-white border-blue-600 shadow-lg shadow-blue-500/20"
                     : "bg-white text-slate-600 border-slate-100 shadow-sm hover:border-blue-200"
-                  }`}
+                }`}
               >
                 Yes, I have
               </button>
@@ -2574,10 +2605,11 @@ export default function AbroadLiftMatchesPage() {
                   updateForm("testType", "NONE");
                   updateForm("testScore", "0");
                 }}
-                className={`h-[48px] md:h-[54px] flex items-center justify-center rounded-[22px] font-bold text-[15px] transition-all border ${form.hasEnglishTest === false
+                className={`h-[48px] md:h-[54px] flex items-center justify-center rounded-[22px] font-bold text-[15px] transition-all border ${
+                  form.hasEnglishTest === false
                     ? "bg-blue-600 text-white border-blue-600 shadow-lg shadow-blue-500/20"
                     : "bg-white text-slate-600 border-slate-100 shadow-sm hover:border-blue-200"
-                  }`}
+                }`}
               >
                 No, I haven&apos;t
               </button>
@@ -2708,10 +2740,11 @@ export default function AbroadLiftMatchesPage() {
                 <button
                   key={opt.main}
                   onClick={() => updateForm("intake", opt.main)}
-                  className={`flex flex-col items-start gap-0.5 p-2.5 md:p-5 lg:p-6 rounded-[18px] md:rounded-[20px] border transition-all text-left group overflow-hidden relative ${isSel
+                  className={`flex flex-col items-start gap-0.5 p-2.5 md:p-5 lg:p-6 rounded-[18px] md:rounded-[20px] border transition-all text-left group overflow-hidden relative ${
+                    isSel
                       ? "border-blue-500 bg-blue-50/20 shadow-lg shadow-blue-500/10"
                       : "border-slate-100 bg-white shadow-sm hover:border-blue-200"
-                    }`}
+                  }`}
                 >
                   <div className="flex items-center gap-1 md:gap-1.5">
                     <Calendar
@@ -3154,7 +3187,7 @@ export default function AbroadLiftMatchesPage() {
         selectedMatch.countryCode === "US" || selectedMatch.countryCode === "UK"
           ? "premium"
           : selectedMatch.countryCode === "CA" ||
-            selectedMatch.countryCode === "AU"
+              selectedMatch.countryCode === "AU"
             ? "average"
             : "budget";
 
@@ -3535,15 +3568,17 @@ export default function AbroadLiftMatchesPage() {
                       return (
                         <div
                           key={band.key}
-                          className={`p-3 rounded-2xl border transition-all ${isSelected
+                          className={`p-3 rounded-2xl border transition-all ${
+                            isSelected
                               ? "bg-white border-blue-300 shadow-sm"
                               : "bg-transparent border-slate-200"
-                            }`}
+                          }`}
                         >
                           <div className="flex items-center justify-between gap-2">
                             <span
-                              className={`text-xs font-black ${isSelected ? "text-blue-700" : "text-slate-700"
-                                }`}
+                              className={`text-xs font-black ${
+                                isSelected ? "text-blue-700" : "text-slate-700"
+                              }`}
                             >
                               {band.label}
                             </span>
@@ -3744,8 +3779,9 @@ export default function AbroadLiftMatchesPage() {
               {Array.from({ length: 6 }).map((_, i) => (
                 <div
                   key={i}
-                  className={`h-[4px] rounded-full transition-all duration-500 ease-out ${i + 1 === step ? "w-8 bg-blue-500" : "w-8 bg-slate-100"
-                    }`}
+                  className={`h-[4px] rounded-full transition-all duration-500 ease-out ${
+                    i + 1 === step ? "w-8 bg-blue-500" : "w-8 bg-slate-100"
+                  }`}
                 />
               ))}
             </div>
@@ -3772,10 +3808,11 @@ export default function AbroadLiftMatchesPage() {
               <button
                 onClick={handleNext}
                 disabled={!canContinue()}
-                className={`w-full h-14 rounded-[30px] font-bold text-[16px] transition-all flex items-center justify-center tracking-wide ${canContinue()
+                className={`w-full h-14 rounded-[30px] font-bold text-[16px] transition-all flex items-center justify-center tracking-wide ${
+                  canContinue()
                     ? "bg-[#3686FF] text-white shadow-[0_8px_20px_-6px_rgba(59,130,246,0.35)]"
                     : "bg-[#eff5fd] text-[#9ca3af] cursor-not-allowed"
-                  }`}
+                }`}
               >
                 Continue
               </button>
