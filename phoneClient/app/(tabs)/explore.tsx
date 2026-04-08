@@ -19,7 +19,7 @@ import { Feather, Ionicons, MaterialIcons, MaterialCommunityIcons } from "@expo/
 import { LinearGradient } from "expo-linear-gradient";
 import { useUser } from "../context/UserContext";
 import { ProfileAvatar } from "../../components/ProfileAvatar";
-import { searchUniversities, UniversityResult } from "../../lib/api";
+import { searchUniversities, calculateAcceptanceChance, UniversityResult } from "../../lib/api";
 import { useFocusEffect } from "@react-navigation/native";
 
 const { width } = Dimensions.get("window");
@@ -55,7 +55,57 @@ export default function DashboardScreen() {
   const [showPlanModal, setShowPlanModal] = React.useState(false);
   const [modalStep, setModalStep] = React.useState<'options' | 'country'>('options');
   const [recommendedUnis, setRecommendedUnis] = React.useState<UniversityResult[]>([]);
+  const [estimatedCost, setEstimatedCost] = React.useState<string>("--");
+  const [acceptanceChance, setAcceptanceChance] = React.useState<string>("--");
+  const [visaReadiness, setVisaReadiness] = React.useState<string>("--");
   const [loadingUnis, setLoadingUnis] = React.useState(true);
+
+  const USD_TO_NPR = 134;
+
+  const calculateDynamicMetrics = (user: any) => {
+    // 1. Acceptance Chance calculation
+    const gpa = parseFloat(user.cgpa || "0");
+    const engScore = parseFloat(user.score || "0");
+    
+    // Normalize GPA
+    let gpaNorm = gpa / 4.0;
+    if (gpa > 4.5) gpaNorm = gpa / 10.0;
+    if (gpaNorm > 1) gpaNorm = 1;
+
+    // Normalize English (assuming IELTS 0-9)
+    let engNorm = engScore / 9.0;
+    if (engNorm > 1) engNorm = 1;
+
+    // Base probability
+    let prob = 35 + (gpaNorm * 40) + (engNorm * 20);
+
+    // Rank Factor
+    if (user.selectedUniversities?.length > 0) {
+      const rankStr = user.selectedUniversities[0].rank || "";
+      const rankVal = parseInt(rankStr.replace(/[^0-9]/g, ""));
+      if (!isNaN(rankVal)) {
+        if (rankVal < 50) prob -= 20;
+        else if (rankVal < 200) prob -= 10;
+        else if (rankVal > 500) prob += 10;
+      }
+    }
+
+    const finalProb = Math.min(98, Math.max(5, Math.round(prob)));
+    let chanceLabel = "Moderate";
+    if (finalProb >= 80) chanceLabel = "Very High";
+    else if (finalProb >= 65) chanceLabel = "High";
+    else if (finalProb < 45) chanceLabel = "Low";
+
+    setAcceptanceChance(`${finalProb}% - ${chanceLabel}`);
+
+    // 2. Visa Readiness (Placeholder dynamic)
+    let visaScore = 50 + (gpaNorm * 20) + (engNorm * 10);
+    const finalVisa = Math.min(95, Math.round(visaScore));
+    let visaLabel = "Good";
+    if (finalVisa < 65) visaLabel = "Needs Work";
+    else if (finalVisa > 85) visaLabel = "Strong";
+    setVisaReadiness(`${finalVisa}% - ${visaLabel}`);
+  };
 
   useFocusEffect(
     React.useCallback(() => {
@@ -63,19 +113,59 @@ export default function DashboardScreen() {
       const load = async () => {
         try {
           setLoadingUnis(true);
-          const results = await searchUniversities("", userData.country || "UK");
+          const { getCostOfLiving } = require("../../lib/api");
+          
+          const [results, costData] = await Promise.all([
+            searchUniversities("", userData.country || "UK"),
+            getCostOfLiving(userData.country || "UK")
+          ]);
+
           if (mounted) {
-            setRecommendedUnis(results.slice(0, 5));
+            // Filter by study level first
+            let filtered = results;
+            if (userData.studyLevel) {
+              const userLevel = userData.studyLevel.toLowerCase();
+              filtered = results.filter(uni => {
+                if (!uni.levels || uni.levels.length === 0) return true;
+                const uniLevels = uni.levels.map((l: string) => l.toLowerCase());
+                
+                if (userLevel.includes("bachelor") || userLevel.includes("undergrad")) {
+                   return uniLevels.some(l => l.includes("bachelor") || l.includes("undergrad"));
+                }
+                if (userLevel.includes("master") || userLevel.includes("postgrad") || userLevel.includes("pg")) {
+                   return uniLevels.some(l => l.includes("master") || l.includes("postgrad") || l.includes("pg"));
+                }
+                return true;
+              });
+            }
+
+            setRecommendedUnis(filtered.slice(0, 5));
+            
+            if (costData) {
+              const monthlyUsd = costData.monthly_estimate_usd || 1500;
+              const annualLivingUsd = monthlyUsd * 12;
+              
+              // Tuition logic: use selected uni if available, else regional average
+              let tuitionUsd = 20000;
+              if (userData.selectedUniversities?.length > 0) {
+                tuitionUsd = userData.selectedUniversities[0].tuitionValue || 20000;
+              }
+
+              const totalNpr = (annualLivingUsd + tuitionUsd) * USD_TO_NPR;
+              setEstimatedCost(`NPR ${(totalNpr / 1000000).toFixed(1)}M`);
+            }
+            
+            calculateDynamicMetrics(userData);
             setLoadingUnis(false);
           }
         } catch (error) {
-          console.error("Error loading recommendations:", error);
+          console.error("Error loading dashboard data:", error);
           if (mounted) setLoadingUnis(false);
         }
       };
       load();
       return () => { mounted = false; };
-    }, [userData.country])
+    }, [userData])
   );
 
   return (
@@ -101,7 +191,11 @@ export default function DashboardScreen() {
         </View>
       </View>
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+      <ScrollView 
+        style={{ flex: 1 }}
+        showsVerticalScrollIndicator={false} 
+        contentContainerStyle={styles.scrollContent}
+      >
         
         {/* Study Plan Card */}
         <TouchableOpacity 
@@ -109,9 +203,9 @@ export default function DashboardScreen() {
           onPress={() => setShowPlanModal(true)}
         >
           <View style={styles.studyPlanInfo}>
-            <Text style={styles.flagEmoji}>{userData.flag}</Text>
+            <Text style={styles.flagEmoji}>{userData.flag || "🗺️"}</Text>
             <View style={styles.studyPlanTextWrapper}>
-                <Text style={styles.studyPlanLabel}>Study Plan <Text style={styles.studyCountry}>{userData.country}</Text></Text>
+                <Text style={styles.studyPlanLabel}>Study Plan <Text style={styles.studyCountry}>{userData.country || "Select country"}</Text></Text>
             </View>
           </View>
           <View style={styles.editButton}>
@@ -127,11 +221,11 @@ export default function DashboardScreen() {
               <View>
                 <View style={styles.statIconHeader}>
                   <View style={[styles.statIconBox, { backgroundColor: "#F3F4F6" }]}>
-                    <MaterialCommunityIcons name="currency-inr" size={20} color={THEME.textDark} />
+                    <MaterialCommunityIcons name="currency-usd" size={20} color={THEME.textDark} />
                   </View>
                   <Text style={styles.statTitle}>Estimated Cost</Text>
                 </View>
-                <Text style={styles.statValue}>NPR 20,500,00 <Text style={styles.statUnit}>/ year</Text></Text>
+                <Text style={styles.statValue}>{estimatedCost} <Text style={styles.statUnit}>/ year</Text></Text>
                 <View style={styles.statBadge}>
                   <View style={styles.affordableDot} />
                   <Text style={styles.statBadgeText}>Affordable</Text>
@@ -142,7 +236,7 @@ export default function DashboardScreen() {
                 style={[styles.statButton, { backgroundColor: THEME.green }]}
                 onPress={() => router.push({
                   pathname: "/university/cost-breakdown",
-                  params: { country: userData.country }
+                  params: { country: userData.country || "UK" }
                 })}
               >
                 <Text style={styles.statButtonText}>View Breakdown</Text>
@@ -156,9 +250,9 @@ export default function DashboardScreen() {
                    <View style={[styles.statIconBox, { backgroundColor: "#FFF7ED" }]}>
                      <MaterialCommunityIcons name="target" size={20} color={THEME.orange} />
                    </View>
-                   <Text style={styles.statTitle}>Admission Chances</Text>
+                   <Text style={styles.statTitle}>Acceptance Chance</Text>
                  </View>
-                 <Text style={styles.statValue}>75% <Text style={styles.statUnit}>- Moderate</Text></Text>
+                 <Text style={styles.statValue}>{acceptanceChance}</Text>
                  
                  <View style={styles.checkRow}>
                     <Ionicons name="checkmark-circle" size={16} color={THEME.green} />
@@ -187,7 +281,7 @@ export default function DashboardScreen() {
                    </View>
                    <Text style={styles.statTitle}>Visa Readiness</Text>
                  </View>
-                 <Text style={styles.statValue}>60% <Text style={[styles.statUnit, { color: THEME.red, fontWeight: "800" }]}>- Needs Work</Text></Text>
+                 <Text style={styles.statValue}>{visaReadiness}</Text>
                  
                  <View style={styles.progressBarContainer}>
                     <View style={[styles.progressBarFull, { width: "60%", backgroundColor: THEME.blue }]} />
@@ -219,12 +313,11 @@ export default function DashboardScreen() {
                  <Ionicons name="sparkles" size={18} color={THEME.orange} />
                  <Text style={styles.improveTitle}>Improve Your Chances</Text>
               </View>
-              <Text style={styles.improveSubtitle}>Follow these steps to boost your success rate.</Text>
-              <View style={styles.improveBullets}>
-                 <Text style={styles.bulletItem}>• Increase IELTS</Text>
-                 <Text style={styles.bulletItem}>• Apply for safer Unis</Text>
-              </View>
-              <TouchableOpacity style={styles.viewPlanButton}>
+              <Text style={styles.improveSubtitle} numberOfLines={2}>Get personalized steps to boost your success.</Text>
+              <TouchableOpacity 
+                 style={styles.viewPlanButton}
+                 onPress={() => router.push("/university/admission-chance")}
+              >
                 <Text style={styles.viewPlanButtonText}>View Plan</Text>
               </TouchableOpacity>
            </View>
@@ -275,7 +368,7 @@ export default function DashboardScreen() {
                      style={styles.uniImage} 
                    />
                    <View style={styles.matchBadge}>
-                      <Text style={styles.matchText}>{uni.matchRating ? `${(parseFloat(uni.matchRating)*20).toFixed(0)}%` : "85%"} Match</Text>
+                      <Text style={styles.matchText}>{calculateAcceptanceChance(userData, uni).score}% Match</Text>
                    </View>
                 </View>
                 <View style={styles.uniCardContent}>
@@ -693,6 +786,7 @@ const styles = StyleSheet.create({
     borderRadius: 3,
   },
   improveBanner: {
+    height: 160,
     marginHorizontal: 20,
     backgroundColor: "#FDF5E1",
     borderRadius: 24,
@@ -705,6 +799,7 @@ const styles = StyleSheet.create({
   improveContent: {
     flex: 1,
     padding: 24,
+    justifyContent: "center",
   },
   improveTitleRow: {
     flexDirection: "row",
