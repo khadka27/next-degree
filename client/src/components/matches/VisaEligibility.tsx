@@ -241,7 +241,13 @@ export function VisaEligibility({
     visaCountry,
   ]);
 
-  const categoryCards = [
+  const categoryCards: Array<{
+    title: string;
+    detail: string;
+    percent: number;
+    icon: React.ComponentType<{ className?: string }>;
+    tone: "blue" | "green" | "amber";
+  }> = [
     {
       title: "Identity & Forms",
       detail: form.passportReady
