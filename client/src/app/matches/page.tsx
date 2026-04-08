@@ -385,6 +385,165 @@ const PROGRAMS: Record<string, string[]> = {
   ],
 };
 
+const LEVEL_PROGRAMS: Record<string, Record<string, string[]>> = {
+  "associate-foundation": {
+    "Business & Management": [
+      "Foundation in Business",
+      "Associate of Arts (AA)",
+      "Associate of Science (AS)",
+      "Business Administration",
+      "Accounting",
+      "Hospitality Management",
+    ],
+    "Computer Science & IT": [
+      "Foundation in Computer Science / IT",
+      "Associate of Applied Science (AAS)",
+      "IT Support / Networking",
+      "Computer Systems",
+      "Web Foundations",
+    ],
+    Engineering: [
+      "Foundation in Engineering",
+      "Engineering Fundamentals",
+      "Mechanical Technology",
+      "Civil Technology",
+      "Electrical Technology",
+    ],
+    "Medicine & Health": [
+      "Foundation in Health & Medicine",
+      "Nursing Assistant",
+      "Health Sciences",
+      "Public Health Foundation",
+    ],
+    "Arts & Humanities": [
+      "Foundation in Arts & Design",
+      "Associate of Arts (AA)",
+      "Media & Communication",
+      "Design Foundations",
+    ],
+  },
+  "bachelor-4": {
+    "Computer Science & IT": [
+      "BSc Computer Science",
+      "Software Engineering",
+      "Data Science / AI",
+      "Cybersecurity",
+      "IT",
+    ],
+    Engineering: [
+      "Mechanical Engineering",
+      "Civil Engineering",
+      "Electrical Engineering",
+      "Robotics",
+      "Computer Engineering",
+    ],
+    "Business & Management": [
+      "BBA (Business Administration)",
+      "BCom (Commerce)",
+      "Finance",
+      "Accounting",
+      "Marketing",
+      "International Business",
+      "Human Resource Management",
+    ],
+    "Medicine & Health": [
+      "Biology / Biotechnology",
+      "Nursing",
+      "Pharmacy",
+      "Public Health",
+      "MBBS (Medicine)",
+    ],
+    "Arts & Humanities": [
+      "Psychology",
+      "Sociology",
+      "Political Science",
+      "Journalism / Media",
+      "English Literature",
+      "International Relations",
+      "Fine Arts / Design",
+    ],
+  },
+  masters: {
+    "Business & Management": [
+      "MBA (Master of Business Administration)",
+      "MSc Finance",
+      "MSc Marketing",
+      "MSc International Business",
+      "MSc HR Management",
+    ],
+    "Computer Science & IT": [
+      "MSc Computer Science",
+      "MSc Data Science / AI",
+      "MSc Cybersecurity",
+      "MSc Software Engineering",
+    ],
+    Law: [
+      "LLM (Law)",
+      "International Relations",
+      "Public Policy",
+      "Development Studies",
+    ],
+    Engineering: [
+      "MEng (Engineering)",
+      "MSc Physics / Chemistry",
+      "MSc Biotechnology",
+      "MSc Environmental Science",
+    ],
+    "Arts & Humanities": [
+      "MA Psychology",
+      "MA Journalism",
+      "MA Design / Fashion",
+    ],
+  },
+  doctorate: {
+    "Computer Science & IT": [
+      "PhD in Computer Science / AI",
+      "PhD in Data Science",
+    ],
+    Engineering: ["PhD in Engineering", "PhD in Robotics", "PhD in Energy"],
+    "Medicine & Health": [
+      "PhD in Medicine / Healthcare",
+      "PhD in Public Health",
+    ],
+    "Business & Management": [
+      "PhD in Business / Management",
+      "PhD in Economics / Finance",
+    ],
+    "Arts & Humanities": [
+      "PhD in Psychology",
+      "PhD in Sociology",
+      "PhD in International Relations",
+    ],
+    "Natural Sciences": [
+      "PhD in Physics",
+      "PhD in Chemistry",
+      "PhD in Biotechnology",
+    ],
+  },
+  "undergrad-dip-2": {
+    "Business & Management": [
+      "Diploma in Business Management",
+      "Diploma in Accounting",
+      "Diploma in Digital Marketing",
+      "Diploma in Hospitality & Hotel Management",
+    ],
+    "Computer Science & IT": [
+      "Diploma in Web Development",
+      "Diploma in IT Support",
+      "Diploma in Networking",
+    ],
+    "Arts & Humanities": [
+      "Diploma in Graphic Design",
+      "Diploma in Animation / Film",
+      "Diploma in Media & Communication",
+    ],
+    "Medicine & Health": [
+      "Diploma in Nursing / Healthcare",
+      "Diploma in Public Health Assistance",
+    ],
+  },
+};
+
 const INTAKES = [
   "Dec 2025 - Mar 2026",
   "March 2026",
@@ -2407,6 +2566,7 @@ export default function AbroadLiftMatchesPage() {
 
     if (step === 3) {
       const allFields = FIELDS.map((f) => f.v);
+      const programsByLevel = LEVEL_PROGRAMS[form.degree] || PROGRAMS;
 
       const filteredFields = allFields.filter((f) =>
         f.toLowerCase().includes(searchQuery.toLowerCase()),
@@ -2476,7 +2636,9 @@ export default function AbroadLiftMatchesPage() {
 
                   {isSel && (
                     <div className="mt-2 md:mt-3 p-2 md:p-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-1.5 md:gap-2 animate-in fade-in slide-in-from-top-2 duration-300 bg-slate-50/50 rounded-[18px] md:rounded-[24px] border border-slate-100">
-                      {(PROGRAMS[f] || []).map((p) => (
+                      {(
+                        (programsByLevel[f] || PROGRAMS[f] || []) as string[]
+                      ).map((p) => (
                         <button
                           key={p}
                           onClick={() => updateForm("program", p)}
