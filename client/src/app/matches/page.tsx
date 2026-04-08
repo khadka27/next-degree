@@ -2482,7 +2482,7 @@ export default function AbroadLiftMatchesPage() {
     }
   };
 
-  const getEligibilityScore = (f: Form) => {
+  function getEligibilityScore(f: Form) {
     let score = 0;
 
     const eng = parseFloat(f.testScore) || 0;
@@ -2538,7 +2538,7 @@ export default function AbroadLiftMatchesPage() {
     else score += 5;
 
     return Math.min(100, score);
-  };
+  }
 
   const getRateBand = (value: number) => {
     if (value >= 80) {
