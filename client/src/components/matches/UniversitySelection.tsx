@@ -161,6 +161,10 @@ export function UniversitySelection({
     setActiveTab("estimates");
   };
 
+  const matchesByAcceptance = [...matches].sort(
+    (a, b) => getRelevantAcceptanceRate(b) - getRelevantAcceptanceRate(a),
+  );
+
   if (loading) return null; // Handled by transition screen in parent
 
   if (error) {
@@ -237,7 +241,7 @@ export function UniversitySelection({
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 pb-8 md:pb-12">
-        {matches.map((m) => (
+        {matchesByAcceptance.map((m) => (
           <div key={m.id} className="relative h-full">
             <MatchCard
               match={m}
