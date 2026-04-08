@@ -69,6 +69,70 @@ function getAcceptanceMeta(rate: number) {
   };
 }
 
+function seededOffset(seed: string, min: number, max: number) {
+  let hash = 0;
+  for (let i = 0; i < seed.length; i += 1) {
+    hash = (hash * 31 + seed.charCodeAt(i)) >>> 0;
+  }
+  const span = max - min + 1;
+  return min + (hash % span);
+}
+
+function getRelevantAcceptanceRate(m: Match) {
+  const baseRate =
+    typeof m.admissionRate === "number" && Number.isFinite(m.admissionRate)
+      ? m.admissionRate
+      : 62;
+
+  const rank = m.rankingWorld || 0;
+  const rankAdjustment = rank
+    ? rank <= 50
+      ? -16
+      : rank <= 100
+        ? -12
+        : rank <= 250
+          ? -8
+          : rank <= 500
+            ? -4
+            : rank <= 1000
+              ? 0
+              : 3
+    : 0;
+
+  const tuition = m.tuitionFee || 0;
+  const tuitionAdjustment = tuition
+    ? tuition >= 50000
+      ? -6
+      : tuition >= 35000
+        ? -3
+        : tuition <= 15000
+          ? 5
+          : tuition <= 22000
+            ? 2
+            : 0
+    : 0;
+
+  const intl = m.internationalPercentage || 0;
+  const intlAdjustment = intl >= 30 ? 4 : intl >= 20 ? 2 : intl <= 10 ? -3 : 0;
+
+  const seed = `${m.id || m.name}-${m.countryCode || "global"}`;
+  const variance = seededOffset(seed, -5, 5);
+
+  return Math.max(
+    18,
+    Math.min(
+      93,
+      Math.round(
+        baseRate +
+          rankAdjustment +
+          tuitionAdjustment +
+          intlAdjustment +
+          variance,
+      ),
+    ),
+  );
+}
+
 function formatCurrency(value: number, currency: string) {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
@@ -219,7 +283,7 @@ function MatchCard({
   onSelect?: () => void;
   onOpenDetails?: () => void;
 }) {
-  const acceptanceRate = Math.max(5, Math.min(95, m.admissionRate || 78));
+  const acceptanceRate = getRelevantAcceptanceRate(m);
   const acceptanceMeta = getAcceptanceMeta(acceptanceRate);
 
   return (
@@ -384,7 +448,7 @@ function UniversityDetailsModal({
   onClose: () => void;
   onShortlist: () => void;
 }) {
-  const admissionChance = Math.max(10, Math.min(95, m.admissionRate || 60));
+  const admissionChance = getRelevantAcceptanceRate(m);
   const yearlyLiving = Math.round((m.tuitionFee || 20000) * 0.45);
   const courses =
     m.popularPrograms && m.popularPrograms.length > 0
