@@ -39,6 +39,8 @@ export interface VisaGuidanceItem {
   s?: string;
 }
 
+type CardTone = "blue" | "green" | "amber";
+
 const getSuccessMeta = (successChance: number) => {
   if (successChance >= 80) {
     return {
@@ -246,7 +248,7 @@ export function VisaEligibility({
     detail: string;
     percent: number;
     icon: React.ComponentType<{ className?: string }>;
-    tone: "blue" | "green" | "amber";
+    tone: CardTone;
   }> = [
     {
       title: "Identity & Forms",
