@@ -637,6 +637,10 @@ const STEPS = [
     label: "Financial Summary",
     question: "Total investment for your journey from start to end.",
   },
+  {
+    label: "Final Recommendation",
+    question: "Your counselor-style decision summary and action plan.",
+  },
 ];
 
 const DEF: Form = {
@@ -1959,6 +1963,180 @@ export default function AbroadLiftMatchesPage() {
     apiCostEstimate,
   ]);
 
+  const decisionSignals = useMemo(() => {
+    if (!selectedMatch || !financialMetrics) return null;
+
+    const budgetRaw = Number.parseFloat(form.budget) || 0;
+    const budgetNpr =
+      form.currency === "USD"
+        ? Math.round(budgetRaw * financialMetrics.usdToNpr)
+        : Math.round(budgetRaw);
+
+    const yearOneNeedNpr = financialMetrics.totalYear1Npr;
+    const profileScore = getEligibilityScore(form);
+    const backlogPenalty = Math.min(18, (Number(form.backlogs) || 0) * 3);
+    const gapPenalty = Math.min(12, (Number(form.studyGap) || 0) * 2);
+
+    const parsedTest = Number.parseFloat(form.testScore || "0");
+    const englishScoreNorm =
+      form.hasEnglishTest === false
+        ? 58
+        : form.hasEnglishTest === true
+          ? (() => {
+              if (!Number.isFinite(parsedTest)) return 45;
+              switch (form.testType) {
+                case "IELTS":
+                  return Math.round((parsedTest / 9) * 100);
+                case "TOEFL":
+                  return Math.round((parsedTest / 120) * 100);
+                case "PTE Academic":
+                  return Math.round((parsedTest / 90) * 100);
+                case "Duolingo":
+                  return Math.round((parsedTest / 160) * 100);
+                case "GRE":
+                  return Math.round((parsedTest / 340) * 100);
+                case "SAT":
+                  return Math.round((parsedTest / 1600) * 100);
+                case "GMAT":
+                  return Math.round((parsedTest / 800) * 100);
+                default:
+                  return 50;
+              }
+            })()
+          : 45;
+
+    const sponsorIncome = Number.parseFloat(form.sponsorIncome || "0");
+    const sponsorBoost =
+      form.sponsorType === "Family" && sponsorIncome >= 30000
+        ? 5
+        : form.sponsorType === "Self" && budgetRaw >= 20000
+          ? 4
+          : 1;
+
+    const academicReadiness = Math.max(
+      20,
+      Math.min(
+        98,
+        Math.round(
+          profileScore * 0.62 +
+            englishScoreNorm * 0.26 +
+            sponsorBoost -
+            backlogPenalty -
+            gapPenalty,
+        ),
+      ),
+    );
+
+    const baselineAdmission = selectedMatch.admissionRate || 60;
+    const admissionConfidence = Math.max(
+      30,
+      Math.min(
+        96,
+        Math.round(baselineAdmission * 0.55 + academicReadiness * 0.45),
+      ),
+    );
+
+    const budgetCoverage = Math.max(
+      20,
+      Math.min(
+        190,
+        Math.round((budgetNpr / Math.max(1, yearOneNeedNpr)) * 100),
+      ),
+    );
+
+    const docsReadyCount = [
+      !!form.passportReady,
+      !!form.docsReady,
+      !!form.testDone,
+      !!form.passingYear,
+    ].filter(Boolean).length;
+    const docReadiness = Math.round((docsReadyCount / 4) * 100);
+
+    const qualityOfLifeIndex = Number(
+      relocationStats?.quality_of_life_index ??
+        relocationStats?.quality_index ??
+        relocationStats?.quality_of_life ??
+        relocationStats?.qualityOfLifeIndex ??
+        NaN,
+    );
+    const safetyIndex = Number(
+      relocationStats?.safety_index ?? relocationStats?.safety ?? NaN,
+    );
+    const healthcareIndex = Number(
+      relocationStats?.healthcare_index ?? relocationStats?.healthcare ?? NaN,
+    );
+    const climateIndex = Number(
+      relocationStats?.climate_index ?? relocationStats?.climate ?? NaN,
+    );
+
+    const qualitySignals = [
+      qualityOfLifeIndex,
+      safetyIndex,
+      healthcareIndex,
+      climateIndex,
+    ].filter((value) => Number.isFinite(value));
+
+    const destinationFit = Math.round(
+      qualitySignals.length > 0
+        ? qualitySignals.reduce((sum, value) => sum + value, 0) /
+            qualitySignals.length
+        : 62,
+    );
+
+    const visaConfidence = Math.max(
+      25,
+      Math.min(
+        97,
+        Math.round(
+          academicReadiness * 0.34 +
+            admissionConfidence * 0.24 +
+            Math.min(100, budgetCoverage) * 0.32 +
+            docReadiness * 0.1,
+        ),
+      ),
+    );
+
+    const overallConfidence = Math.max(
+      25,
+      Math.min(
+        97,
+        Math.round(
+          admissionConfidence * 0.35 +
+            visaConfidence * 0.35 +
+            Math.min(100, budgetCoverage) * 0.2 +
+            destinationFit * 0.1,
+        ),
+      ),
+    );
+
+    const budgetStressBand =
+      budgetCoverage >= 115
+        ? "low"
+        : budgetCoverage >= 85
+          ? "moderate"
+          : "high";
+    const counselorVerdict =
+      overallConfidence >= 78 && budgetStressBand !== "high"
+        ? "Strong Proceed"
+        : overallConfidence >= 62
+          ? "Proceed With Conditions"
+          : "Refine Profile First";
+
+    return {
+      admissionConfidence,
+      visaConfidence,
+      overallConfidence,
+      academicReadiness,
+      budgetCoverage,
+      budgetStressBand,
+      destinationFit,
+      counselorVerdict,
+      docReadiness,
+      yearOneNeedNpr,
+      budgetNpr,
+    };
+  }, [form, selectedMatch, financialMetrics, relocationStats]);
+
   const handleSavePlan = async () => {
     if (!selectedMatch) return;
     setSaving(true);
@@ -2208,6 +2386,7 @@ export default function AbroadLiftMatchesPage() {
     if (step === 11) return true;
     if (step === 12) return true;
     if (step === 13) return true;
+    if (step === 14) return true;
     return false;
   };
 
@@ -2237,6 +2416,10 @@ export default function AbroadLiftMatchesPage() {
       return;
     }
     if (step === 13) {
+      setStep(14);
+      return;
+    }
+    if (step === 14) {
       return;
     }
     if (step === 6) {
@@ -3106,15 +3289,17 @@ export default function AbroadLiftMatchesPage() {
     // 8+: Universal Analytical Context
     if (step >= 8 && selectedMatch) {
       const profileScore = getEligibilityScore(form);
-      const admissionPct = Math.max(
-        35,
-        Math.min(
-          95,
-          Math.round(
-            (selectedMatch.admissionRate || 60) * 0.5 + profileScore * 0.5,
+      const admissionPct =
+        decisionSignals?.admissionConfidence ||
+        Math.max(
+          35,
+          Math.min(
+            95,
+            Math.round(
+              (selectedMatch.admissionRate || 60) * 0.5 + profileScore * 0.5,
+            ),
           ),
-        ),
-      );
+        );
       const admissionBand = getRateBand(admissionPct);
       const budgetRaw = Number.parseFloat(form.budget) || 0;
       const budgetUsd =
@@ -3144,78 +3329,152 @@ export default function AbroadLiftMatchesPage() {
       const totalYear1Npr = Math.round(totalYear1Usd * USD_TO_NPR);
       const costBand = getCostBand(totalYear1Usd, budgetUsd);
 
+      const signalCards = [
+        {
+          label: "Admission Confidence",
+          value: `${admissionPct}%`,
+          tone:
+            admissionPct >= 75
+              ? "text-emerald-700 bg-emerald-50 border-emerald-100"
+              : admissionPct >= 60
+                ? "text-amber-700 bg-amber-50 border-amber-100"
+                : "text-rose-700 bg-rose-50 border-rose-100",
+        },
+        {
+          label: "Visa Readiness",
+          value: `${decisionSignals?.visaConfidence || 58}%`,
+          tone:
+            (decisionSignals?.visaConfidence || 0) >= 72
+              ? "text-emerald-700 bg-emerald-50 border-emerald-100"
+              : (decisionSignals?.visaConfidence || 0) >= 58
+                ? "text-amber-700 bg-amber-50 border-amber-100"
+                : "text-rose-700 bg-rose-50 border-rose-100",
+        },
+        {
+          label: "Year-1 Budget Coverage",
+          value: `${decisionSignals?.budgetCoverage || 65}%`,
+          tone:
+            (decisionSignals?.budgetCoverage || 0) >= 100
+              ? "text-emerald-700 bg-emerald-50 border-emerald-100"
+              : (decisionSignals?.budgetCoverage || 0) >= 85
+                ? "text-amber-700 bg-amber-50 border-amber-100"
+                : "text-rose-700 bg-rose-50 border-rose-100",
+        },
+      ];
+
+      const insightsPanel = (
+        <Card className="mx-4 md:mx-6 lg:mx-8 mt-4 p-4 md:p-5 rounded-2xl border border-slate-100 bg-white shadow-sm">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-3">
+            <h4 className="text-[11px] font-black uppercase tracking-widest text-slate-500">
+              Dynamic Counselor Signals
+            </h4>
+            <span className="text-[10px] font-black uppercase tracking-widest text-blue-600">
+              {decisionSignals?.counselorVerdict || "Evaluating"}
+            </span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+            {signalCards.map((item) => (
+              <div
+                key={item.label}
+                className={`rounded-xl border px-3 py-2.5 ${item.tone}`}
+              >
+                <p className="text-[9px] font-black uppercase tracking-widest opacity-75">
+                  {item.label}
+                </p>
+                <p className="text-base font-black tracking-tight mt-1">
+                  {item.value}
+                </p>
+              </div>
+            ))}
+          </div>
+        </Card>
+      );
+
       if (step === 8) {
         return (
-          <StudyOverviewDashboard
-            form={form}
-            selectedMatch={selectedMatch}
-            matches={matches}
-            session={session}
-            USD_TO_NPR={USD_TO_NPR}
-            totalYear1Npr={totalYear1Npr}
-            admissionPct={admissionPct}
-            costBand={costBand}
-            admissionBand={admissionBand}
-            onAdvanceToCost={() => setStep(9)}
-            onAdvanceToAdmission={() => {
-              setTransitionType("admission");
-              setStep(10);
-            }}
-            onAdvanceToVisa={() => {
-              setTransitionType("visa");
-              setStep(11);
-            }}
-            onGoToMatches={() => setStep(7)}
-          />
+          <>
+            <StudyOverviewDashboard
+              form={form}
+              selectedMatch={selectedMatch}
+              matches={matches}
+              session={session}
+              USD_TO_NPR={USD_TO_NPR}
+              totalYear1Npr={totalYear1Npr}
+              admissionPct={admissionPct}
+              costBand={costBand}
+              admissionBand={admissionBand}
+              onAdvanceToCost={() => setStep(9)}
+              onAdvanceToAdmission={() => {
+                setTransitionType("admission");
+                setStep(10);
+              }}
+              onAdvanceToVisa={() => {
+                setTransitionType("visa");
+                setStep(11);
+              }}
+              onGoToMatches={() => setStep(7)}
+            />
+            {insightsPanel}
+          </>
         );
       }
 
       if (step === 9 && financialMetrics) {
         return (
-          <FinancialDashboard
-            form={form}
-            selectedMatch={selectedMatch}
-            financialMetrics={financialMetrics}
-            dynamicLivingCost={dynamicLivingCost}
-            costBand={costBand}
-            onBack={() => setStep(8)}
-          />
+          <>
+            <FinancialDashboard
+              form={form}
+              selectedMatch={selectedMatch}
+              financialMetrics={financialMetrics}
+              dynamicLivingCost={dynamicLivingCost}
+              costBand={costBand}
+              onBack={() => setStep(8)}
+            />
+            {insightsPanel}
+          </>
         );
       }
 
       if (step === 10) {
         return (
-          <AdmissionDetails
-            form={form}
-            selectedMatch={selectedMatch}
-            admissionPct={admissionPct}
-            admissionBand={admissionBand}
-            onBack={() => setStep(8)}
-            onAdvanceToVisa={() => {
-              setTransitionType("visa");
-              setStep(11);
-            }}
-          />
+          <>
+            <AdmissionDetails
+              form={form}
+              selectedMatch={selectedMatch}
+              admissionPct={admissionPct}
+              admissionBand={admissionBand}
+              onBack={() => setStep(8)}
+              onAdvanceToVisa={() => {
+                setTransitionType("visa");
+                setStep(11);
+              }}
+            />
+            {insightsPanel}
+          </>
         );
       }
 
       if (step === 11) {
         return (
-          <VisaEligibility
-            form={form}
-            selectedMatch={selectedMatch}
-            onBack={() => setStep(8)}
-            onComplete={() => {
-              setTransitionType("roadmap");
-              setStep(12);
-            }}
-          />
+          <>
+            <VisaEligibility
+              form={form}
+              selectedMatch={selectedMatch}
+              onBack={() => setStep(8)}
+              onComplete={() => {
+                setTransitionType("roadmap");
+                setStep(12);
+              }}
+            />
+            {insightsPanel}
+          </>
         );
       }
 
       if (step === 12 && financialMetrics) {
         return (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 max-w-full px-4 pb-16 space-y-5 bg-white min-h-screen">
+            {insightsPanel}
             <div className="flex items-center justify-between pt-2 pb-4 uppercase tracking-tighter italic">
               <div className="flex items-center gap-4">
                 <button onClick={() => setStep(11)} className="p-1">
@@ -4020,6 +4279,188 @@ export default function AbroadLiftMatchesPage() {
       );
     }
 
+    if (step === 14 && selectedMatch && financialMetrics && decisionSignals) {
+      const riskFlags = [
+        {
+          label: "Financial Cushion",
+          value:
+            decisionSignals.budgetCoverage >= 115
+              ? "Healthy"
+              : decisionSignals.budgetCoverage >= 85
+                ? "Tight"
+                : "At Risk",
+          score: Math.min(100, decisionSignals.budgetCoverage),
+        },
+        {
+          label: "Admission Outlook",
+          value:
+            decisionSignals.admissionConfidence >= 75
+              ? "Strong"
+              : decisionSignals.admissionConfidence >= 60
+                ? "Balanced"
+                : "Competitive",
+          score: decisionSignals.admissionConfidence,
+        },
+        {
+          label: "Visa Readiness",
+          value:
+            decisionSignals.visaConfidence >= 72
+              ? "Ready"
+              : decisionSignals.visaConfidence >= 58
+                ? "Needs Proof"
+                : "Improve Profile",
+          score: decisionSignals.visaConfidence,
+        },
+      ];
+
+      const strengths = [
+        decisionSignals.academicReadiness >= 70
+          ? "Academic profile is in a competitive range for this destination."
+          : "Academic profile is workable, but needs stronger positioning.",
+        decisionSignals.destinationFit >= 65
+          ? "Destination quality-of-life indicators are favorable."
+          : "Destination indicators are mixed; shortlist backup cities.",
+        decisionSignals.docReadiness >= 75
+          ? "Core paperwork readiness is strong for filing timeline."
+          : "Document readiness is partial, complete critical missing items.",
+      ];
+
+      const nextActions = [
+        decisionSignals.budgetCoverage < 90
+          ? "Strengthen proof-of-funds with sponsor letters or an education loan sanction."
+          : "Keep 10-15% reserve above Year-1 projection for visa confidence.",
+        decisionSignals.visaConfidence < 70
+          ? "Improve visa narrative with clearer intent, ties to home country, and source-of-funds clarity."
+          : "Prepare a structured visa file with dated financial statements and document index.",
+        decisionSignals.admissionConfidence < 70
+          ? "Add 1-2 safer universities in the same country to reduce outcome variance."
+          : "Prioritize early application windows to maximize scholarship probability.",
+      ];
+
+      return (
+        <div className="animate-in fade-in slide-in-from-bottom-2 duration-500 max-w-5xl mx-auto px-4 md:px-6 pb-32 space-y-5">
+          <Card className="p-6 md:p-8 rounded-[28px] md:rounded-[36px] border border-slate-100 bg-white shadow-sm">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
+                  Step 14 • Final Counselor Verdict
+                </p>
+                <h2 className="text-2xl md:text-4xl font-black text-slate-900 tracking-tight mt-2">
+                  {decisionSignals.counselorVerdict}
+                </h2>
+                <p className="text-sm text-slate-500 mt-2">
+                  Decision confidence for {selectedMatch.name} in{" "}
+                  {selectedMatch.countryCode}
+                </p>
+              </div>
+              <div className="px-6 py-4 rounded-2xl bg-blue-600 text-white text-center min-w-[170px]">
+                <p className="text-[9px] font-black uppercase tracking-widest opacity-80">
+                  Overall Confidence
+                </p>
+                <p className="text-4xl font-black leading-none mt-1">
+                  {decisionSignals.overallConfidence}%
+                </p>
+              </div>
+            </div>
+          </Card>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {riskFlags.map((item) => (
+              <Card
+                key={item.label}
+                className="p-4 rounded-2xl border border-slate-100 bg-white shadow-sm"
+              >
+                <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+                  {item.label}
+                </p>
+                <div className="mt-2 flex items-end justify-between gap-2">
+                  <p className="text-2xl font-black text-slate-900">
+                    {item.score}%
+                  </p>
+                  <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">
+                    {item.value}
+                  </p>
+                </div>
+                <div className="h-2 bg-slate-100 rounded-full mt-3 overflow-hidden">
+                  <div
+                    className="h-full bg-blue-600 rounded-full"
+                    style={{ width: `${Math.min(100, item.score)}%` }}
+                  />
+                </div>
+              </Card>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <Card className="p-5 rounded-2xl border border-emerald-100 bg-emerald-50/40">
+              <h3 className="text-sm font-black text-emerald-800 uppercase tracking-widest">
+                Strengths
+              </h3>
+              <ul className="mt-3 space-y-2 text-sm text-emerald-900">
+                {strengths.map((text) => (
+                  <li key={text} className="flex items-start gap-2">
+                    <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
+                    <span>{text}</span>
+                  </li>
+                ))}
+              </ul>
+            </Card>
+
+            <Card className="p-5 rounded-2xl border border-amber-100 bg-amber-50/40">
+              <h3 className="text-sm font-black text-amber-800 uppercase tracking-widest">
+                Recommended Actions
+              </h3>
+              <ul className="mt-3 space-y-2 text-sm text-amber-900">
+                {nextActions.map((text) => (
+                  <li key={text} className="flex items-start gap-2">
+                    <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+                    <span>{text}</span>
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          </div>
+
+          <Card className="p-5 rounded-2xl border border-slate-100 bg-white shadow-sm">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
+                <p className="text-[9px] font-black uppercase tracking-widest text-slate-500">
+                  Year-1 Need
+                </p>
+                <p className="text-xl font-black text-slate-900 mt-1">
+                  NPR {(decisionSignals.yearOneNeedNpr / 100000).toFixed(1)}L
+                </p>
+              </div>
+              <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
+                <p className="text-[9px] font-black uppercase tracking-widest text-slate-500">
+                  Declared Budget
+                </p>
+                <p className="text-xl font-black text-slate-900 mt-1">
+                  NPR {(decisionSignals.budgetNpr / 100000).toFixed(1)}L
+                </p>
+              </div>
+              <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
+                <p className="text-[9px] font-black uppercase tracking-widest text-slate-500">
+                  Program Duration
+                </p>
+                <p className="text-xl font-black text-slate-900 mt-1">
+                  {financialMetrics.graduationDuration} Years
+                </p>
+              </div>
+              <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
+                <p className="text-[9px] font-black uppercase tracking-widest text-slate-500">
+                  Destination Fit
+                </p>
+                <p className="text-xl font-black text-slate-900 mt-1">
+                  {decisionSignals.destinationFit}%
+                </p>
+              </div>
+            </div>
+          </Card>
+        </div>
+      );
+    }
+
     return null;
   };
 
@@ -4199,19 +4640,19 @@ export default function AbroadLiftMatchesPage() {
           </div>
         )}
 
-        {step >= 8 && step <= 13 && (
+        {step >= 8 && step <= 14 && (
           <div className="fixed bottom-0 left-0 right-0 pb-6 px-4 md:pb-8 md:px-6 bg-white/90 backdrop-blur-md pt-3 z-[70] border-t border-slate-100 flex justify-center shrink-0 shadow-[0_-10px_30px_rgba(0,0,0,0.03)]">
             <div className="w-full max-w-[520px] flex justify-center">
               <button
                 onClick={handleNext}
-                disabled={step === 13}
+                disabled={step === 14}
                 className={`w-full h-14 rounded-[24px] font-bold text-[15px] transition-all flex items-center justify-center tracking-wide ${
-                  step === 13
+                  step === 14
                     ? "bg-[#eff5fd] text-[#9ca3af] cursor-not-allowed"
                     : "bg-[#3686FF] text-white shadow-[0_8px_20px_-6px_rgba(59,130,246,0.35)]"
                 }`}
               >
-                {step === 13 ? "Final Step Reached" : "Next Step"}
+                {step === 14 ? "Final Step Reached" : "Next Step"}
               </button>
             </div>
           </div>
