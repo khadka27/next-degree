@@ -3490,7 +3490,7 @@ export default function AbroadLiftMatchesPage() {
             label: "Cost",
             value: nprRangeLakhs(financialMetrics.totalTuitionNpr),
             helper: `${financialMetrics.graduationDuration} year tuition outlook`,
-            accent: "from-sky-500 to-cyan-400",
+            accent: "from-[#3366FF] to-[#6FA8FF]",
             onClick: () => setStep(9),
           },
           {
@@ -3498,7 +3498,7 @@ export default function AbroadLiftMatchesPage() {
             label: "Admission",
             value: `${admissionPct}%`,
             helper: "Acceptance momentum and profile fit",
-            accent: "from-amber-500 to-orange-400",
+            accent: "from-[#1D4ED8] to-[#60A5FA]",
             onClick: () => setStep(10),
           },
           {
@@ -3506,46 +3506,46 @@ export default function AbroadLiftMatchesPage() {
             label: "Visa",
             value: `${decisionSignals?.visaConfidence || 58}%`,
             helper: "Document and funds readiness",
-            accent: "from-emerald-500 to-teal-400",
+            accent: "from-[#0EA5E9] to-[#A5D8FF]",
             onClick: () => setStep(11),
           },
         ];
 
         return (
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 min-h-screen bg-slate-50 px-4 pb-20 md:px-8 lg:px-12">
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 min-h-screen bg-[#F7F9FF] px-4 pb-20 md:px-8 lg:px-12 text-[#0f172a]">
             {insightsPanel}
             <div className="mx-auto max-w-7xl space-y-5 pt-3">
               <div className="flex items-center justify-between gap-3">
                 <button
                   onClick={() => setStep(11)}
-                  className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-[13px] font-semibold text-slate-700 shadow-sm transition-colors hover:border-slate-300 hover:text-slate-950"
+                  className="inline-flex items-center gap-2 rounded-full border border-[#D8E4FF] bg-white px-4 py-2 text-[13px] font-semibold text-[#475569] shadow-sm transition-colors hover:border-[#BFD0FF] hover:text-[#3366FF]"
                 >
-                  <ChevronLeft className="w-4 h-4" />
+                  <ChevronLeft className="w-4 h-4 text-[#3366FF]" />
                   Back to Visa
                 </button>
-                <div className="rounded-full border border-slate-200 bg-white px-4 py-2 text-[11px] font-black uppercase tracking-[0.22em] text-slate-500 shadow-sm">
+                <div className="rounded-full border border-[#D8E4FF] bg-white px-4 py-2 text-[11px] font-black uppercase tracking-[0.22em] text-[#64748B] shadow-sm">
                   Step 12 of 15
                 </div>
               </div>
 
-              <Card className="relative overflow-hidden rounded-4xl border-0 bg-linear-to-br from-slate-950 via-slate-900 to-[#10213d] p-6 text-white shadow-[0_28px_80px_rgba(15,23,42,0.24)] md:p-10">
-                <div className="absolute top-0 right-0 h-72 w-72 rounded-full bg-sky-500/20 -mr-36 -mt-36 blur-[100px] opacity-70" />
-                <div className="absolute bottom-0 left-0 h-56 w-56 rounded-full bg-emerald-500/12 -ml-28 -mb-28 blur-[90px] opacity-50" />
+              <Card className="relative overflow-hidden rounded-4xl border border-[#D8E4FF] bg-white p-6 shadow-[0_24px_70px_rgba(51,102,255,0.08)] md:p-10">
+                <div className="absolute top-0 right-0 h-72 w-72 rounded-full bg-[#3366FF]/10 -mr-36 -mt-36 blur-[100px] opacity-80" />
+                <div className="absolute bottom-0 left-0 h-56 w-56 rounded-full bg-[#A5D8FF]/18 -ml-28 -mb-28 blur-[90px] opacity-70" />
 
                 <div className="relative z-10 grid gap-8 lg:grid-cols-[1.2fr_0.8fr] lg:items-end">
                   <div className="space-y-6">
-                    <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.22em] text-sky-200">
+                    <div className="inline-flex items-center gap-2 rounded-full border border-[#D8E4FF] bg-[#F7F9FF] px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.22em] text-[#3366FF]">
                       Total Investment Projection
                     </div>
 
                     <div className="space-y-2">
-                      <p className="text-[10px] font-black uppercase tracking-[0.28em] text-slate-400 italic">
+                      <p className="text-[10px] font-black uppercase tracking-[0.28em] text-[#64748B] italic">
                         Projected Degree ROI
                       </p>
-                      <h2 className="text-4xl font-black italic uppercase tracking-tight leading-[0.92] md:text-6xl">
+                      <h2 className="text-4xl font-black italic uppercase tracking-tight leading-[0.92] text-[#111827] md:text-6xl">
                         {nprRangeLakhs(financialMetrics.totalDegreeCostNpr)}
                       </h2>
-                      <p className="max-w-2xl text-[14px] leading-relaxed text-slate-300 md:text-[16px]">
+                      <p className="max-w-2xl text-[14px] leading-relaxed text-[#475569] md:text-[16px]">
                         A final counselor-style roadmap for your study plan:
                         review the cost, tighten the admission strategy, and
                         verify visa readiness before moving forward.
@@ -3553,15 +3553,15 @@ export default function AbroadLiftMatchesPage() {
                     </div>
 
                     <div className="flex flex-wrap gap-2.5">
-                      <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[11px] font-bold text-slate-200">
+                      <span className="rounded-full border border-[#D8E4FF] bg-[#F7F9FF] px-3 py-1.5 text-[11px] font-bold text-[#0f172a]">
                         Tuition:{" "}
                         {nprRangeLakhs(financialMetrics.totalTuitionNpr, 0.1)}
                       </span>
-                      <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[11px] font-bold text-slate-200">
+                      <span className="rounded-full border border-[#D8E4FF] bg-[#F7F9FF] px-3 py-1.5 text-[11px] font-bold text-[#0f172a]">
                         Living:{" "}
                         {nprRangeLakhs(financialMetrics.totalLivingNpr, 0.1)}
                       </span>
-                      <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[11px] font-bold text-sky-200">
+                      <span className="rounded-full border border-[#D8E4FF] bg-[#EAF2FF] px-3 py-1.5 text-[11px] font-bold text-[#3366FF]">
                         {decisionSignals?.counselorVerdict ||
                           "Review In Progress"}
                       </span>
@@ -3585,12 +3585,12 @@ export default function AbroadLiftMatchesPage() {
                     ].map((stat) => (
                       <div
                         key={stat.label}
-                        className="rounded-3xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm"
+                        className="rounded-3xl border border-[#D8E4FF] bg-[#F7F9FF] p-4 backdrop-blur-sm"
                       >
-                        <p className="text-[10px] font-black uppercase tracking-[0.24em] text-slate-400">
+                        <p className="text-[10px] font-black uppercase tracking-[0.24em] text-[#64748B]">
                           {stat.label}
                         </p>
-                        <p className="mt-2 text-2xl font-black tracking-tight text-white">
+                        <p className="mt-2 text-2xl font-black tracking-tight text-[#111827]">
                           {stat.value}
                         </p>
                       </div>
@@ -3604,26 +3604,26 @@ export default function AbroadLiftMatchesPage() {
                   <button
                     key={card.key}
                     onClick={card.onClick}
-                    className="group rounded-3xl border border-slate-200 bg-white p-5 text-left shadow-sm transition-transform hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-lg"
+                    className="group rounded-3xl border border-[#D8E4FF] bg-white p-5 text-left shadow-sm transition-transform hover:-translate-y-0.5 hover:border-[#BFD0FF] hover:shadow-[0_16px_40px_rgba(51,102,255,0.08)]"
                   >
                     <div
                       className={`h-1.5 w-16 rounded-full bg-linear-to-r ${card.accent}`}
                     />
                     <div className="mt-4 flex items-start justify-between gap-3">
                       <div>
-                        <p className="text-[11px] font-black uppercase tracking-[0.24em] text-slate-400">
+                        <p className="text-[11px] font-black uppercase tracking-[0.24em] text-[#64748B]">
                           Step
                         </p>
-                        <h3 className="mt-1 text-[20px] font-semibold text-slate-900">
+                        <h3 className="mt-1 text-[20px] font-semibold text-[#111827]">
                           {card.label}
                         </h3>
                       </div>
-                      <ChevronRight className="w-5 h-5 text-slate-400 transition-transform group-hover:translate-x-0.5 group-hover:text-slate-700" />
+                      <ChevronRight className="w-5 h-5 text-[#94A3B8] transition-transform group-hover:translate-x-0.5 group-hover:text-[#3366FF]" />
                     </div>
-                    <p className="mt-2 text-[13px] leading-relaxed text-slate-500">
+                    <p className="mt-2 text-[13px] leading-relaxed text-[#475569]">
                       {card.helper}
                     </p>
-                    <div className="mt-4 text-[15px] font-black tracking-tight text-slate-900">
+                    <div className="mt-4 text-[15px] font-black tracking-tight text-[#3366FF]">
                       {card.value}
                     </div>
                   </button>
@@ -3636,14 +3636,14 @@ export default function AbroadLiftMatchesPage() {
                     setTransitionType("summary");
                     setStep(13);
                   }}
-                  className="inline-flex h-14 items-center justify-center gap-3 rounded-3xl bg-blue-600 px-5 text-[13px] font-black uppercase tracking-[0.2em] text-white shadow-[0_20px_40px_-5px_rgba(37,99,235,0.3)] transition-transform hover:scale-[1.01] active:scale-95"
+                  className="inline-flex h-14 items-center justify-center gap-3 rounded-3xl bg-[#3366FF] px-5 text-[13px] font-black uppercase tracking-[0.2em] text-white shadow-[0_20px_40px_-5px_rgba(51,102,255,0.28)] transition-transform hover:scale-[1.01] active:scale-95"
                 >
                   Continue to Summary
                   <ArrowRight className="w-5 h-5" />
                 </button>
                 <button
                   onClick={() => setStep(8)}
-                  className="inline-flex h-14 items-center justify-center gap-3 rounded-3xl border border-slate-200 bg-white px-5 text-[12px] font-black uppercase tracking-[0.2em] text-slate-600 shadow-sm transition-colors hover:border-slate-300 hover:text-slate-900"
+                  className="inline-flex h-14 items-center justify-center gap-3 rounded-3xl border border-[#D8E4FF] bg-white px-5 text-[12px] font-black uppercase tracking-[0.2em] text-[#475569] shadow-sm transition-colors hover:border-[#BFD0FF] hover:text-[#3366FF]"
                 >
                   Review Full Analysis
                 </button>
