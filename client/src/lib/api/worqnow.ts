@@ -35,11 +35,53 @@ const COUNTRY_FEE_MULTIPLIER: Record<string, number> = {
   canada: 0.95,
   de: 0.7,
   germany: 0.7,
+  jp: 0.95,
+  japan: 0.95,
+  kr: 0.85,
+  korea: 0.85,
+  korean: 0.85,
+  "south korea": 0.85,
+  "republic of korea": 0.85,
   ie: 1.0,
   ireland: 1.0,
   nl: 0.95,
   netherlands: 0.95,
 };
+
+const COUNTRY_ALIAS_TO_API_CODE: Record<string, string> = {
+  US: "usa",
+  USA: "usa",
+  "UNITED STATES": "usa",
+  "UNITED STATES OF AMERICA": "usa",
+  UK: "uk",
+  GB: "uk",
+  "UNITED KINGDOM": "uk",
+  CA: "ca",
+  CANADA: "ca",
+  AU: "au",
+  AUSTRALIA: "au",
+  DE: "de",
+  GERMANY: "de",
+  JP: "jp",
+  JAPAN: "jp",
+  KR: "kr",
+  KOREA: "kr",
+  KOREAN: "kr",
+  "SOUTH KOREA": "kr",
+  "REPUBLIC OF KOREA": "kr",
+  IE: "ie",
+  IRELAND: "ie",
+  NL: "nl",
+  NETHERLANDS: "nl",
+};
+
+export function normalizeCountryCodeForWorqnow(countryCode: string): string {
+  const key = String(countryCode || "")
+    .trim()
+    .toUpperCase();
+  if (!key) return "";
+  return COUNTRY_ALIAS_TO_API_CODE[key] || key.toLowerCase();
+}
 
 function seededInt(seed: string, min: number, max: number) {
   let hash = 0;
@@ -107,14 +149,16 @@ const universityCache: Record<string, WorqnowUniversity[]> = {};
 export async function fetchWorqnowUniversities(
   countryCode: string,
 ): Promise<WorqnowUniversity[]> {
-  const code = countryCode.toLowerCase();
+  const code = normalizeCountryCodeForWorqnow(countryCode);
+  if (!code) return [];
+
   if (universityCache[code]) {
     return universityCache[code];
   }
 
   const apiKey = process.env.WORQNOW_API_KEY;
 
-  const url = `${BASE_URL}/${countryCode.toLowerCase()}/universities`;
+  const url = `${BASE_URL}/${code}/universities`;
 
   const headers: HeadersInit = {
     "Content-Type": "application/json",
@@ -144,7 +188,7 @@ export async function fetchWorqnowUniversities(
   // Enrich each university with a realistic numeric fee estimate
   const transformed = list.map((u: any) => ({
     ...u,
-    estimatedFeeUSD: estimateTuitionUsd(u, countryCode),
+    estimatedFeeUSD: estimateTuitionUsd(u, code),
   }));
 
   universityCache[code] = transformed;

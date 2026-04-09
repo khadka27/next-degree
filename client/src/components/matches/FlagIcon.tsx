@@ -1,7 +1,17 @@
 "use client";
 
 import React from "react";
-import { CA, US, AU, GB, DE, IE, NL } from "country-flag-icons/react/3x2";
+import {
+  CA,
+  US,
+  AU,
+  GB,
+  DE,
+  IE,
+  NL,
+  JP,
+  KR,
+} from "country-flag-icons/react/3x2";
 
 const map: Record<string, any> = {
   CA,
@@ -11,6 +21,8 @@ const map: Record<string, any> = {
   GB,
   UK: GB,
   DE,
+  JP,
+  KR,
   IE,
   NL,
   CH: US, // Placeholder

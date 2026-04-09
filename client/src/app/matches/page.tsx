@@ -86,6 +86,8 @@ const COUNTRIES = [
   { code: "CA", name: "Canada" },
   { code: "AU", name: "Australia" },
   { code: "DE", name: "Germany" },
+  { code: "JP", name: "Japan" },
+  { code: "KR", name: "South Korea" },
   { code: "IE", name: "Ireland" },
   { code: "NL", name: "Netherlands" },
 ];

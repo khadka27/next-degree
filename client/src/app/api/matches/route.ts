@@ -1,6 +1,42 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from "next/server";
 import { fetchWorqnowUniversities } from "@/lib/api/worqnow";
+import {
+  fetchHipolabsUniversities,
+  normalizeCountryForHipolabs,
+} from "@/lib/api/hipolabs";
+
+const COUNTRY_ALIAS_TO_CODE: Record<string, string> = {
+  US: "USA",
+  USA: "USA",
+  "UNITED STATES": "USA",
+  UK: "UK",
+  GB: "UK",
+  "UNITED KINGDOM": "UK",
+  CA: "CA",
+  CANADA: "CA",
+  AU: "AU",
+  AUSTRALIA: "AU",
+  DE: "DE",
+  GERMANY: "DE",
+  JP: "JP",
+  JAPAN: "JP",
+  KR: "KR",
+  KOREA: "KR",
+  KOREAN: "KR",
+  "SOUTH KOREA": "KR",
+  "REPUBLIC OF KOREA": "KR",
+  IE: "IE",
+  IRELAND: "IE",
+  NL: "NL",
+  NETHERLANDS: "NL",
+};
+
+function normalizeCountryCode(country: string): string {
+  const key = (country || "").trim().toUpperCase();
+  if (!key) return "";
+  return COUNTRY_ALIAS_TO_CODE[key] || key;
+}
 
 function seededInt(seed: string, min: number, max: number) {
   let hash = 0;
@@ -156,11 +192,47 @@ function mapSchoolToMatch({
   };
 }
 
+function mapHipolabsUniversityToMatch({
+  school,
+  country,
+  degreeLevel,
+}: {
+  school: any;
+  country: string;
+  degreeLevel: string;
+}) {
+  const seed = `${school.name || "hipolabs"}-${country}`;
+  const estimatedFeeUSD = seededInt(`${seed}-fee`, 8000, 24000);
+
+  return mapSchoolToMatch({
+    school: {
+      code: `hipolabs-${seed}`,
+      name: school.name,
+      city: school["state-province"] || school.country,
+      region: school.country,
+      website: Array.isArray(school.web_pages) ? school.web_pages[0] : null,
+      international_fee_band: "medium",
+      estimatedFeeUSD,
+      ranking_world: undefined,
+      ranking_national: undefined,
+      scholarships: [],
+      courses: [],
+      description: `${school.name} sourced from Hipolabs open university directory for ${normalizeCountryForHipolabs(country)}.`,
+    },
+    country,
+    degreeLevel,
+    matchType: "similar",
+  });
+}
+
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const countriesParam =
     searchParams.get("countries") || searchParams.get("country") || "USA";
-  const selectedCountries = countriesParam.split(",");
+  const selectedCountries = countriesParam
+    .split(",")
+    .map((country) => normalizeCountryCode(country))
+    .filter(Boolean);
   const budget = Number.parseFloat(searchParams.get("budget") || "0");
   const degreeLevel = searchParams.get("degreeLevel") || "";
   const field = searchParams.get("field") || "";
@@ -178,7 +250,10 @@ export async function GET(req: NextRequest) {
         /* ─────────────────────────────────────────────
            All countries — WorqNow Education API
         ───────────────────────────────────────────── */
-        const results = await fetchWorqnowUniversities(trimmedCountry);
+        const [results, hipolabsResults] = await Promise.all([
+          fetchWorqnowUniversities(trimmedCountry),
+          fetchHipolabsUniversities(trimmedCountry),
+        ]);
 
         // Pass 1: Strict Match (Degree Level + Field + Budget)
         const exactMatches = results
@@ -238,11 +313,31 @@ export async function GET(req: NextRequest) {
             }),
           );
 
-        countryMatches = [...exactMatches, ...recommendations].slice(0, 15);
+        const hipolabsMatches = hipolabsResults
+          .map((school: any) =>
+            mapHipolabsUniversityToMatch({
+              school,
+              country: trimmedCountry,
+              degreeLevel,
+            }),
+          )
+          .filter((m: any) => {
+            if (!budget || budget <= 0) return true;
+            return (m.tuitionFee || 0) <= budget * 1.25;
+          });
+
+        countryMatches = [
+          ...exactMatches,
+          ...recommendations,
+          ...hipolabsMatches,
+        ].slice(0, 20);
 
         // Ultimate Fallback
-        if (countryMatches.length === 0 && results.length > 0) {
-          countryMatches = results.slice(0, 5).map((school: any) =>
+        if (
+          countryMatches.length === 0 &&
+          (results.length > 0 || hipolabsResults.length > 0)
+        ) {
+          const worqFallback = results.slice(0, 5).map((school: any) =>
             mapSchoolToMatch({
               school,
               country: trimmedCountry,
@@ -250,6 +345,18 @@ export async function GET(req: NextRequest) {
               matchType: "similar",
             }),
           );
+
+          const hipolabsFallback = hipolabsResults
+            .slice(0, 5)
+            .map((school: any) =>
+              mapHipolabsUniversityToMatch({
+                school,
+                country: trimmedCountry,
+                degreeLevel,
+              }),
+            );
+
+          countryMatches = [...worqFallback, ...hipolabsFallback].slice(0, 8);
         }
 
         allMatches = [...allMatches, ...countryMatches];

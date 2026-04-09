@@ -21,19 +21,25 @@ const FOOTER_LINKS = {
     { href: "/matches?country=AU", label: "Australia" },
     { href: "/matches?country=CA", label: "Canada" },
     { href: "/matches?country=DE", label: "Germany" },
+    { href: "/matches?country=JP", label: "Japan" },
+    { href: "/matches?country=KR", label: "South Korea" },
     { href: "/matches?country=IE", label: "Ireland" },
     { href: "/matches?country=NL", label: "Netherlands" },
   ],
   "Data Sources": [
     { href: "https://collegescorecard.ed.gov", label: "US College Scorecard" },
     { href: "https://api.worqnow.ai", label: "WorqNow Education API" },
+    {
+      href: "http://universities.hipolabs.com",
+      label: "Hipolabs University API",
+    },
     { href: "https://api.data.gov", label: "Data.gov" },
   ],
 };
 
 const BADGES = [
   { icon: ShieldCheck, label: "No Login Required" },
-  { icon: Globe2, label: "7 Countries" },
+  { icon: Globe2, label: "9 Countries" },
   { icon: Building2, label: "Government Data" },
   { icon: Zap, label: "Real-Time Matches" },
 ];
@@ -52,10 +58,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[2.5fr_1fr_1fr_1fr] gap-12 lg:gap-8 mb-16">
           {/* Brand column */}
           <div className="max-w-xs">
-            <Link
-              href="/"
-              className="group mb-8 block w-fit no-underline"
-            >
+            <Link href="/" className="group mb-8 block w-fit no-underline">
               <div className="relative w-[200px] h-[60px] group-hover:scale-105 transition-transform duration-300">
                 <Image
                   src="/logo.png"
@@ -83,7 +86,10 @@ export default function Footer() {
           {/* Link columns */}
           {Object.entries(FOOTER_LINKS).map(([group, links]) => (
             <div key={group}>
-              <div className="text-[11px] font-black tracking-[0.15em] uppercase mb-6" style={{ color: "#1e3a8a" }}>
+              <div
+                className="text-[11px] font-black tracking-[0.15em] uppercase mb-6"
+                style={{ color: "#1e3a8a" }}
+              >
                 {group}
               </div>
               <ul className="flex flex-col gap-4 list-none m-0 p-0">
@@ -107,7 +113,10 @@ export default function Footer() {
 
         {/* Bottom bar */}
         <div className="border-t border-gray-200 pt-8 flex flex-col md:flex-row items-center justify-between gap-6">
-          <p className="text-[13px] font-black text-center md:text-left" style={{ color: "#1e3a8a" }}>
+          <p
+            className="text-[13px] font-black text-center md:text-left"
+            style={{ color: "#1e3a8a" }}
+          >
             © {year} AbroadLift — Built for students attempting to change the
             world.
           </p>
