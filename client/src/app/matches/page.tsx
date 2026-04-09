@@ -3484,89 +3484,170 @@ export default function AbroadLiftMatchesPage() {
       }
 
       if (step === 12 && financialMetrics) {
+        const roadmapCards = [
+          {
+            key: "cost",
+            label: "Cost",
+            value: nprRangeLakhs(financialMetrics.totalTuitionNpr),
+            helper: `${financialMetrics.graduationDuration} year tuition outlook`,
+            accent: "from-sky-500 to-cyan-400",
+            onClick: () => setStep(9),
+          },
+          {
+            key: "admission",
+            label: "Admission",
+            value: `${admissionPct}%`,
+            helper: "Acceptance momentum and profile fit",
+            accent: "from-amber-500 to-orange-400",
+            onClick: () => setStep(10),
+          },
+          {
+            key: "visa",
+            label: "Visa",
+            value: `${decisionSignals?.visaConfidence || 58}%`,
+            helper: "Document and funds readiness",
+            accent: "from-emerald-500 to-teal-400",
+            onClick: () => setStep(11),
+          },
+        ];
+
         return (
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 max-w-full px-4 pb-16 space-y-5 bg-white min-h-screen">
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 min-h-screen bg-slate-50 px-4 pb-20 md:px-8 lg:px-12">
             {insightsPanel}
-            <div className="flex items-center justify-between pt-2 pb-4 uppercase tracking-tighter italic">
-              <div className="flex items-center gap-4">
-                <button onClick={() => setStep(11)} className="p-1">
-                  <ChevronLeft className="w-6 h-6 text-slate-900" />
+            <div className="mx-auto max-w-7xl space-y-5 pt-3">
+              <div className="flex items-center justify-between gap-3">
+                <button
+                  onClick={() => setStep(11)}
+                  className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-[13px] font-semibold text-slate-700 shadow-sm transition-colors hover:border-slate-300 hover:text-slate-950"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                  Back to Visa
                 </button>
-                <h1 className="text-xl font-black text-slate-900 tracking-tight">
-                  Final Roadmap
-                </h1>
-              </div>
-            </div>
-
-            <Card className="p-6 md:p-10 rounded-[28px] md:rounded-[44px] bg-slate-900 text-white shadow-2xl relative overflow-hidden border-0">
-              <div className="absolute top-0 right-0 w-80 h-80 bg-blue-500/20 rounded-full -mr-40 -mt-40 blur-[100px] opacity-60" />
-              <div className="absolute bottom-0 left-0 w-64 h-64 bg-emerald-500/10 rounded-full -ml-32 -mb-32 blur-[80px] opacity-40" />
-
-              <div className="relative z-10 space-y-8">
-                <div className="flex items-center gap-3">
-                  <div className="px-4 py-1.5 rounded-full bg-blue-500/20 text-blue-400 text-[10px] font-black uppercase tracking-[0.2em] border border-blue-500/20">
-                    Total Investment Projection
-                  </div>
-                </div>
-
-                <div className="space-y-1">
-                  <p className="text-slate-400 font-bold uppercase text-[10px] tracking-widest pl-1 italic">
-                    Projected Degree ROI
-                  </p>
-                  <h2 className="text-3xl md:text-6xl font-black italic uppercase tracking-tighter leading-none">
-                    {nprRangeLakhs(financialMetrics.totalDegreeCostNpr)}
-                  </h2>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3 md:gap-6 pt-2 md:pt-6">
-                  <div className="bg-white/5 p-4 md:p-6 rounded-2xl md:rounded-3xl border border-white/10 group hover:bg-white/10 transition-colors">
-                    <div className="flex items-center gap-2 mb-2 md:mb-3">
-                      <GraduationCap className="w-3.5 h-3.5 md:w-4 md:h-4 text-blue-400" />
-                      <p className="text-[9px] text-slate-400 font-black uppercase tracking-widest">
-                        Total Tuition
-                      </p>
-                    </div>
-                    <p className="font-black text-lg md:text-2xl tracking-tight">
-                      {nprRangeLakhs(financialMetrics.totalTuitionNpr, 0.1)}
-                    </p>
-                    <p className="text-[9px] font-bold text-slate-500 mt-1 italic">
-                      {financialMetrics.graduationDuration} Years Academic Fee
-                    </p>
-                  </div>
-
-                  <div className="bg-white/5 p-4 md:p-6 rounded-2xl md:rounded-3xl border border-white/10 group hover:bg-white/10 transition-colors">
-                    <div className="flex items-center gap-2 mb-2 md:mb-3">
-                      <Heart className="w-3.5 h-3.5 md:w-4 md:h-4 text-rose-400" />
-                      <p className="text-[9px] text-slate-400 font-black uppercase tracking-widest">
-                        Est. Living
-                      </p>
-                    </div>
-                    <p className="font-black text-lg md:text-2xl tracking-tight">
-                      {nprRangeLakhs(financialMetrics.totalLivingNpr, 0.1)}
-                    </p>
-                    <p className="text-[9px] font-bold text-slate-500 mt-1 italic">
-                      Housing, Food & Lifestyle
-                    </p>
-                  </div>
+                <div className="rounded-full border border-slate-200 bg-white px-4 py-2 text-[11px] font-black uppercase tracking-[0.22em] text-slate-500 shadow-sm">
+                  Step 12 of 15
                 </div>
               </div>
-            </Card>
 
-            <div className="space-y-4 pt-4">
-              <button
-                onClick={() => {
-                  setTransitionType("summary");
-                  setStep(13);
-                }}
-                className="w-full h-14 md:h-18 bg-blue-600 text-white rounded-[24px] md:rounded-[32px] font-black text-[14px] md:text-[15px] uppercase tracking-widest shadow-[0_20px_40px_-5px_rgba(37,99,235,0.3)] hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-4 italic"
-              >
-                Verify Final Summary{" "}
-                <ArrowRight className="w-5 h-5 md:w-6 md:h-6" />
-              </button>
-              <button className="w-full h-14 md:h-16 bg-slate-50 text-slate-600 rounded-[24px] md:rounded-[32px] font-black text-[10px] md:text-xs uppercase tracking-[0.2em] hover:bg-slate-100 transition-all flex items-center justify-center gap-3 border border-slate-100 italic">
-                <Download className="w-4 h-4 md:w-5 md:h-5" />
-                GENERATE PDF REPORT
-              </button>
+              <Card className="relative overflow-hidden rounded-4xl border-0 bg-linear-to-br from-slate-950 via-slate-900 to-[#10213d] p-6 text-white shadow-[0_28px_80px_rgba(15,23,42,0.24)] md:p-10">
+                <div className="absolute top-0 right-0 h-72 w-72 rounded-full bg-sky-500/20 -mr-36 -mt-36 blur-[100px] opacity-70" />
+                <div className="absolute bottom-0 left-0 h-56 w-56 rounded-full bg-emerald-500/12 -ml-28 -mb-28 blur-[90px] opacity-50" />
+
+                <div className="relative z-10 grid gap-8 lg:grid-cols-[1.2fr_0.8fr] lg:items-end">
+                  <div className="space-y-6">
+                    <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.22em] text-sky-200">
+                      Total Investment Projection
+                    </div>
+
+                    <div className="space-y-2">
+                      <p className="text-[10px] font-black uppercase tracking-[0.28em] text-slate-400 italic">
+                        Projected Degree ROI
+                      </p>
+                      <h2 className="text-4xl font-black italic uppercase tracking-tight leading-[0.92] md:text-6xl">
+                        {nprRangeLakhs(financialMetrics.totalDegreeCostNpr)}
+                      </h2>
+                      <p className="max-w-2xl text-[14px] leading-relaxed text-slate-300 md:text-[16px]">
+                        A final counselor-style roadmap for your study plan:
+                        review the cost, tighten the admission strategy, and
+                        verify visa readiness before moving forward.
+                      </p>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2.5">
+                      <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[11px] font-bold text-slate-200">
+                        Tuition:{" "}
+                        {nprRangeLakhs(financialMetrics.totalTuitionNpr, 0.1)}
+                      </span>
+                      <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[11px] font-bold text-slate-200">
+                        Living:{" "}
+                        {nprRangeLakhs(financialMetrics.totalLivingNpr, 0.1)}
+                      </span>
+                      <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[11px] font-bold text-sky-200">
+                        {decisionSignals?.counselorVerdict ||
+                          "Review In Progress"}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
+                    {[
+                      {
+                        label: "Budget coverage",
+                        value: `${decisionSignals?.budgetCoverage || 0}%`,
+                      },
+                      {
+                        label: "Admission confidence",
+                        value: `${admissionPct}%`,
+                      },
+                      {
+                        label: "Visa readiness",
+                        value: `${decisionSignals?.visaConfidence || 58}%`,
+                      },
+                    ].map((stat) => (
+                      <div
+                        key={stat.label}
+                        className="rounded-3xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm"
+                      >
+                        <p className="text-[10px] font-black uppercase tracking-[0.24em] text-slate-400">
+                          {stat.label}
+                        </p>
+                        <p className="mt-2 text-2xl font-black tracking-tight text-white">
+                          {stat.value}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </Card>
+
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                {roadmapCards.map((card) => (
+                  <button
+                    key={card.key}
+                    onClick={card.onClick}
+                    className="group rounded-3xl border border-slate-200 bg-white p-5 text-left shadow-sm transition-transform hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-lg"
+                  >
+                    <div
+                      className={`h-1.5 w-16 rounded-full bg-linear-to-r ${card.accent}`}
+                    />
+                    <div className="mt-4 flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-[11px] font-black uppercase tracking-[0.24em] text-slate-400">
+                          Step
+                        </p>
+                        <h3 className="mt-1 text-[20px] font-semibold text-slate-900">
+                          {card.label}
+                        </h3>
+                      </div>
+                      <ChevronRight className="w-5 h-5 text-slate-400 transition-transform group-hover:translate-x-0.5 group-hover:text-slate-700" />
+                    </div>
+                    <p className="mt-2 text-[13px] leading-relaxed text-slate-500">
+                      {card.helper}
+                    </p>
+                    <div className="mt-4 text-[15px] font-black tracking-tight text-slate-900">
+                      {card.value}
+                    </div>
+                  </button>
+                ))}
+              </div>
+
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 pt-2">
+                <button
+                  onClick={() => {
+                    setTransitionType("summary");
+                    setStep(13);
+                  }}
+                  className="inline-flex h-14 items-center justify-center gap-3 rounded-3xl bg-blue-600 px-5 text-[13px] font-black uppercase tracking-[0.2em] text-white shadow-[0_20px_40px_-5px_rgba(37,99,235,0.3)] transition-transform hover:scale-[1.01] active:scale-95"
+                >
+                  Continue to Summary
+                  <ArrowRight className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={() => setStep(8)}
+                  className="inline-flex h-14 items-center justify-center gap-3 rounded-3xl border border-slate-200 bg-white px-5 text-[12px] font-black uppercase tracking-[0.2em] text-slate-600 shadow-sm transition-colors hover:border-slate-300 hover:text-slate-900"
+                >
+                  Review Full Analysis
+                </button>
+              </div>
             </div>
           </div>
         );
