@@ -212,3 +212,172 @@ All paths below are relative to that base (example: `/api/profile`).
 - `API_NINJAS_KEY`
 - `WHERENEXT_API_URL`
 - `WHERENEXT_RELOCATION_URL`
+
+---
+
+## Study Intakes By Country (Reference)
+
+Use this section for intake guidance in forms, profile advice, and roadmap messaging.
+
+### USA
+
+- Intakes:
+  - Fall (main): Aug-Sep
+  - Spring: Jan
+  - Summer (limited): May
+- Typical application windows:
+  - Fall intake: Nov-Jan
+  - Spring intake: Jul-Sep
+
+### UK
+
+- Intakes:
+  - September (main)
+  - January (limited)
+- Typical application windows:
+  - September intake: Dec-Jun
+  - January intake: Sep-Nov
+
+### Canada
+
+- Intakes:
+  - September (main)
+  - January
+  - May (limited)
+- Typical application windows:
+  - September intake: Nov-Mar
+  - January intake: Jul-Oct
+
+### Australia
+
+- Intakes:
+  - February (main)
+  - July
+  - November (some colleges)
+- Typical application windows:
+  - February intake: Oct-Dec
+  - July intake: Mar-May
+
+### Germany
+
+- Intakes:
+  - Winter (main): Oct
+  - Summer: Apr
+- Typical application windows:
+  - October intake: May-Jul
+  - April intake: Dec-Jan
+
+### Japan
+
+- Intakes:
+  - April (main)
+  - October
+- Typical application windows:
+  - April intake: Oct-Jan
+  - October intake: Apr-Jun
+
+### South Korea
+
+- Intakes:
+  - March (Spring)
+  - September (Fall)
+- Typical application windows:
+  - March intake: Sep-Nov
+  - September intake: May-Jun
+
+### Ireland
+
+- Intakes:
+  - September (main)
+  - January
+- Typical application windows:
+  - September intake: Nov-May
+  - January intake: Jul-Oct
+
+### Netherlands
+
+- Intakes:
+  - September (main)
+  - February (limited)
+- Typical application windows:
+  - September intake: Dec-Apr
+  - February intake: Sep-Nov
+
+### France
+
+- Intakes:
+  - September (main)
+  - January (some)
+- Typical application windows:
+  - September intake: Jan-Apr
+
+### Italy
+
+- Intakes:
+  - September (main)
+  - February (limited)
+- Typical application windows:
+  - September intake: Jan-May
+
+### Spain
+
+- Intakes:
+  - September (main)
+  - January
+- Typical application windows:
+  - September intake: Jan-May
+
+### Sweden
+
+- Intakes:
+  - Aug-Sep (main)
+  - January
+- Typical application windows:
+  - September intake: Oct-Jan (strict deadlines)
+
+### Switzerland
+
+- Intakes:
+  - September (main)
+  - February
+- Typical application windows:
+  - September intake: Dec-Apr
+
+### New Zealand
+
+- Intakes:
+  - February (main)
+  - July
+- Typical application windows:
+  - February intake: Oct-Nov
+  - July intake: Apr-May
+
+### Singapore
+
+- Intakes:
+  - August (main)
+  - January (some)
+- Typical application windows:
+  - August intake: Oct-Mar
+
+### UAE
+
+- Intakes:
+  - September
+  - January
+  - May
+- Typical application windows:
+  - September intake: Apr-Aug
+  - January intake: Oct-Dec
+
+## Quick Intake Summary
+
+- Sep/Fall: USA, UK, Canada, most of Europe
+- Jan: UK, Canada, Ireland, selected Asia programs
+- Feb/Mar: Australia, New Zealand, South Korea
+- Oct: Germany, Japan
+
+## Notes
+
+- Timelines vary by university and by visa processing time.
+- For high-demand programs, aim to apply 2-4 months earlier than the typical window.

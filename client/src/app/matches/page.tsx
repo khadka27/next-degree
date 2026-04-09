@@ -589,6 +589,244 @@ const INTAKES = [
   "March 2028",
 ];
 
+const COUNTRY_INTAKE_GUIDE: Record<
+  string,
+  {
+    countryName: string;
+    intakes: Array<{
+      label: string;
+      months: string;
+      applyWindow: string;
+      isMain?: boolean;
+      isLimited?: boolean;
+    }>;
+  }
+> = {
+  USA: {
+    countryName: "USA",
+    intakes: [
+      {
+        label: "Fall",
+        months: "Aug-Sep",
+        applyWindow: "Nov-Jan",
+        isMain: true,
+      },
+      { label: "Spring", months: "Jan", applyWindow: "Jul-Sep" },
+      {
+        label: "Summer",
+        months: "May",
+        applyWindow: "Varies",
+        isLimited: true,
+      },
+    ],
+  },
+  UK: {
+    countryName: "UK",
+    intakes: [
+      {
+        label: "September",
+        months: "Sep",
+        applyWindow: "Dec-Jun",
+        isMain: true,
+      },
+      {
+        label: "January",
+        months: "Jan",
+        applyWindow: "Sep-Nov",
+        isLimited: true,
+      },
+    ],
+  },
+  CA: {
+    countryName: "Canada",
+    intakes: [
+      {
+        label: "September",
+        months: "Sep",
+        applyWindow: "Nov-Mar",
+        isMain: true,
+      },
+      { label: "January", months: "Jan", applyWindow: "Jul-Oct" },
+      { label: "May", months: "May", applyWindow: "Varies", isLimited: true },
+    ],
+  },
+  AU: {
+    countryName: "Australia",
+    intakes: [
+      {
+        label: "February",
+        months: "Feb",
+        applyWindow: "Oct-Dec",
+        isMain: true,
+      },
+      { label: "July", months: "Jul", applyWindow: "Mar-May" },
+      {
+        label: "November",
+        months: "Nov",
+        applyWindow: "Varies",
+        isLimited: true,
+      },
+    ],
+  },
+  DE: {
+    countryName: "Germany",
+    intakes: [
+      { label: "Winter", months: "Oct", applyWindow: "May-Jul", isMain: true },
+      { label: "Summer", months: "Apr", applyWindow: "Dec-Jan" },
+    ],
+  },
+  JP: {
+    countryName: "Japan",
+    intakes: [
+      { label: "April", months: "Apr", applyWindow: "Oct-Jan", isMain: true },
+      { label: "October", months: "Oct", applyWindow: "Apr-Jun" },
+    ],
+  },
+  KR: {
+    countryName: "South Korea",
+    intakes: [
+      { label: "March", months: "Mar", applyWindow: "Sep-Nov" },
+      { label: "September", months: "Sep", applyWindow: "May-Jun" },
+    ],
+  },
+  IE: {
+    countryName: "Ireland",
+    intakes: [
+      {
+        label: "September",
+        months: "Sep",
+        applyWindow: "Nov-May",
+        isMain: true,
+      },
+      { label: "January", months: "Jan", applyWindow: "Jul-Oct" },
+    ],
+  },
+  NL: {
+    countryName: "Netherlands",
+    intakes: [
+      {
+        label: "September",
+        months: "Sep",
+        applyWindow: "Dec-Apr",
+        isMain: true,
+      },
+      {
+        label: "February",
+        months: "Feb",
+        applyWindow: "Sep-Nov",
+        isLimited: true,
+      },
+    ],
+  },
+  FR: {
+    countryName: "France",
+    intakes: [
+      {
+        label: "September",
+        months: "Sep",
+        applyWindow: "Jan-Apr",
+        isMain: true,
+      },
+      {
+        label: "January",
+        months: "Jan",
+        applyWindow: "Varies",
+        isLimited: true,
+      },
+    ],
+  },
+  IT: {
+    countryName: "Italy",
+    intakes: [
+      {
+        label: "September",
+        months: "Sep",
+        applyWindow: "Jan-May",
+        isMain: true,
+      },
+      {
+        label: "February",
+        months: "Feb",
+        applyWindow: "Varies",
+        isLimited: true,
+      },
+    ],
+  },
+  ES: {
+    countryName: "Spain",
+    intakes: [
+      {
+        label: "September",
+        months: "Sep",
+        applyWindow: "Jan-May",
+        isMain: true,
+      },
+      { label: "January", months: "Jan", applyWindow: "Varies" },
+    ],
+  },
+  SE: {
+    countryName: "Sweden",
+    intakes: [
+      {
+        label: "August/September",
+        months: "Aug-Sep",
+        applyWindow: "Oct-Jan (strict)",
+        isMain: true,
+      },
+      { label: "January", months: "Jan", applyWindow: "Varies" },
+    ],
+  },
+  CH: {
+    countryName: "Switzerland",
+    intakes: [
+      {
+        label: "September",
+        months: "Sep",
+        applyWindow: "Dec-Apr",
+        isMain: true,
+      },
+      { label: "February", months: "Feb", applyWindow: "Varies" },
+    ],
+  },
+  NZ: {
+    countryName: "New Zealand",
+    intakes: [
+      {
+        label: "February",
+        months: "Feb",
+        applyWindow: "Oct-Nov",
+        isMain: true,
+      },
+      { label: "July", months: "Jul", applyWindow: "Apr-May" },
+    ],
+  },
+  SG: {
+    countryName: "Singapore",
+    intakes: [
+      { label: "August", months: "Aug", applyWindow: "Oct-Mar", isMain: true },
+      {
+        label: "January",
+        months: "Jan",
+        applyWindow: "Varies",
+        isLimited: true,
+      },
+    ],
+  },
+  AE: {
+    countryName: "UAE",
+    intakes: [
+      {
+        label: "September",
+        months: "Sep",
+        applyWindow: "Apr-Aug",
+        isMain: true,
+      },
+      { label: "January", months: "Jan", applyWindow: "Oct-Dec" },
+      { label: "May", months: "May", applyWindow: "Varies" },
+    ],
+  },
+};
+
 const PROGRAM_TAGS = [
   "Fast Acceptance",
   "High Job Demand",
@@ -3096,11 +3334,20 @@ export default function AbroadLiftMatchesPage() {
     }
 
     if (step === 6) {
+      const selectedCountryCode = form.countries[0] || "USA";
+      const countryGuide =
+        COUNTRY_INTAKE_GUIDE[selectedCountryCode] || COUNTRY_INTAKE_GUIDE.USA;
       const INTAKE_OPTIONS = [
-        { main: "Spring 2026", sub: "September Intake" },
-        { main: "Summer 2026", sub: "September Intake" },
-        { main: "Fall 2025", sub: "September Intake" },
-        { main: "Not Sure", sub: "We'll suggest" },
+        ...countryGuide.intakes.map((item) => ({
+          main: `${item.label} Intake`,
+          sub: `${item.months} | Apply: ${item.applyWindow}`,
+          meta: item.isMain ? "Main" : item.isLimited ? "Limited" : "Regular",
+        })),
+        {
+          main: "Not Sure",
+          sub: "We will suggest based on your profile",
+          meta: "Recommended",
+        },
       ];
 
       return (
@@ -3110,7 +3357,8 @@ export default function AbroadLiftMatchesPage() {
               When do you want to start your studies?
             </h2>
             <p className="text-[13px] md:text-[14px] text-slate-500 font-medium mt-1">
-              This helps us estimate your admission chances
+              Study intakes for {countryGuide.countryName} and application
+              windows
             </p>
           </div>
 
@@ -3125,7 +3373,33 @@ export default function AbroadLiftMatchesPage() {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-3 md:gap-4 w-full max-w-2xl mx-auto mb-10">
+          <div className="w-full max-w-2xl mx-auto mb-4 rounded-[18px] border border-blue-100 bg-blue-50/40 px-4 py-3">
+            <p className="text-[12px] md:text-[13px] font-semibold text-blue-700 mb-2">
+              Study Intakes by Country: {countryGuide.countryName}
+            </p>
+            <div className="space-y-1.5">
+              {countryGuide.intakes.map((item) => (
+                <div
+                  key={`${item.label}-${item.months}`}
+                  className="flex items-center justify-between text-[11px] md:text-[12px]"
+                >
+                  <span className="font-semibold text-slate-700">
+                    {item.label} ({item.months})
+                    {item.isMain
+                      ? " - Main"
+                      : item.isLimited
+                        ? " - Limited"
+                        : ""}
+                  </span>
+                  <span className="text-slate-500">
+                    Apply: {item.applyWindow}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4 w-full max-w-2xl mx-auto mb-6">
             {INTAKE_OPTIONS.map((opt) => {
               const isSel = form.intake === opt.main;
               return (
@@ -3151,9 +3425,36 @@ export default function AbroadLiftMatchesPage() {
                   >
                     {opt.sub}
                   </span>
+                  <span
+                    className={`mt-1 ml-4 text-[9px] md:text-[10px] font-semibold ${
+                      isSel ? "text-blue-700" : "text-slate-400"
+                    }`}
+                  >
+                    {opt.meta}
+                  </span>
                 </button>
               );
             })}
+          </div>
+
+          <div className="w-full max-w-2xl mx-auto mb-10 rounded-[18px] border border-slate-100 bg-white px-4 py-3 shadow-sm">
+            <p className="text-[12px] md:text-[13px] font-semibold text-slate-700 mb-2">
+              Simple intake summary
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] md:text-[12px] text-slate-600">
+              <div className="rounded-xl bg-slate-50 px-3 py-2">
+                Sep/Fall: USA, UK, Canada, Europe
+              </div>
+              <div className="rounded-xl bg-slate-50 px-3 py-2">
+                Jan: UK, Canada, Ireland
+              </div>
+              <div className="rounded-xl bg-slate-50 px-3 py-2">
+                Feb/Mar: Australia, NZ, Korea
+              </div>
+              <div className="rounded-xl bg-slate-50 px-3 py-2">
+                Oct: Germany, Japan
+              </div>
+            </div>
           </div>
 
           <div className="h-2 md:hidden" />
