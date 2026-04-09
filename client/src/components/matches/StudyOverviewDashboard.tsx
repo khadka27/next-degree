@@ -53,7 +53,6 @@ export function StudyOverviewDashboard({
   onAdvanceToVisa,
   onGoToMatches,
 }: StudyOverviewDashboardProps) {
-  const userName = session?.user?.name?.split(" ")[0] || form.name || "Student";
   const formatNprLakhRange = (valueNpr: number, spread = 0.12) => {
     const low = Math.max(0, Math.round(valueNpr * (1 - spread)));
     const high = Math.round(valueNpr * (1 + spread));
@@ -65,19 +64,83 @@ export function StudyOverviewDashboard({
     selectedMatch.countryCode || "",
   );
   const hasFunds =
-    parseFloat(form.bankBalance) > 0 || parseFloat(form.sponsorIncome) > 0;
+    Number.parseFloat(form.bankBalance) > 0 ||
+    Number.parseFloat(form.sponsorIncome) > 0;
   let visaBase = 75;
   if (!hasFunds) visaBase -= 20;
-  if (parseInt(form.backlogs) > 3) visaBase -= 10;
-  if (parseInt(form.studyGap) > 2) visaBase -= 5;
+  if (Number.parseInt(form.backlogs || "0", 10) > 3) visaBase -= 10;
+  if (Number.parseInt(form.studyGap || "0", 10) > 2) visaBase -= 5;
   if (isHighRiskCountry) visaBase -= 10;
   const visaChance = Math.max(30, Math.min(98, visaBase));
-  const visaLabel =
-    visaChance >= 80
-      ? "Excellent"
-      : visaChance >= 60
-        ? "Moderate"
-        : "Needs Work";
+  let visaLabel = "Needs Work";
+  if (visaChance >= 80) {
+    visaLabel = "Excellent";
+  } else if (visaChance >= 60) {
+    visaLabel = "Moderate";
+  }
+
+  const gpa = Number.parseFloat(form.gpa) || 0;
+  const testScore = Number.parseFloat(form.testScore) || 0;
+  const backlogs = Number.parseInt(form.backlogs || "0", 10) || 0;
+  const studyGap = Number.parseInt(form.studyGap || "0", 10) || 0;
+  const selectedProgram =
+    selectedMatch.popularPrograms?.[0] || "selected program";
+  const englishStrong =
+    (form.testType === "IELTS" && testScore >= 6.5) ||
+    (form.testType === "PTE" && testScore >= 60) ||
+    (form.testType === "TOEFL" && testScore >= 90) ||
+    (form.testType === "Duolingo" && testScore >= 115);
+
+  let gpaText = `Raise GPA to improve fit for ${selectedMatch.name}`;
+  if (gpa >= 3.5) {
+    gpaText = `Strong GPA fit for ${selectedProgram}`;
+  } else if (gpa >= 3.2) {
+    gpaText = `GPA is competitive for ${selectedMatch.name}`;
+  }
+
+  const englishText = englishStrong
+    ? `${form.testType || "English test"} score is competitive`
+    : `Improve ${form.testType || "English test"} score for a stronger shortlist`;
+
+  const backlogPlural = backlogs === 1 ? "" : "s";
+  const backlogText =
+    backlogs <= 1
+      ? "Backlog history looks manageable"
+      : `${backlogs} backlog${backlogPlural} may reduce competitiveness`;
+
+  const studyGapText =
+    studyGap <= 1
+      ? "Study gap is within a comfortable range"
+      : `Explain the ${studyGap}-year gap clearly in your SOP`;
+
+  const admissionSignals = [
+    {
+      ok: gpa >= 3.2,
+      icon: CheckCircle2,
+      iconClass: gpa >= 3.2 ? "text-emerald-500" : "text-amber-500",
+      text: gpaText,
+    },
+    {
+      ok: englishStrong,
+      icon: englishStrong ? CheckCircle2 : AlertTriangle,
+      iconClass: englishStrong ? "text-emerald-500" : "text-amber-500",
+      text: englishText,
+    },
+    {
+      ok: backlogs <= 1,
+      icon: backlogs <= 1 ? CheckCircle2 : AlertTriangle,
+      iconClass: backlogs <= 1 ? "text-emerald-500" : "text-amber-500",
+      text: backlogText,
+    },
+    {
+      ok: studyGap <= 1,
+      icon: studyGap <= 1 ? CheckCircle2 : AlertTriangle,
+      iconClass: studyGap <= 1 ? "text-emerald-500" : "text-amber-500",
+      text: studyGapText,
+    },
+  ];
+
+  const admissionNotes = admissionSignals.filter((item) => item.ok);
 
   const roadmapSteps = [
     {
@@ -233,14 +296,15 @@ export function StudyOverviewDashboard({
               </div>
 
               <div className="mt-4 space-y-2">
-                <div className="flex items-center gap-2 text-[14px] font-regular text-slate-700">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                  Good GPA Match
-                </div>
-                <div className="flex items-center gap-2 text-[14px] font-regular text-slate-700">
-                  <AlertTriangle className="w-4 h-4 text-amber-500" />
-                  Improve English bounds
-                </div>
+                {admissionNotes.map((item) => (
+                  <div
+                    key={item.text}
+                    className="flex items-center gap-2 text-[14px] font-regular text-slate-700"
+                  >
+                    <item.icon className={`w-4 h-4 ${item.iconClass}`} />
+                    {item.text}
+                  </div>
+                ))}
               </div>
             </div>
             <button

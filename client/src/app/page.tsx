@@ -1146,7 +1146,7 @@ import CTABanner from "@/components/home/CTABanner";
 import GetStartedSection from "@/components/home/GetStartedSection";
 
 const HomePage = () => (
-  <div className="min-h-screen">
+  <div className="min-h-screen mx-auto max-w-[1440px] px-6 sm:px-8 lg:px-12">
     <HeroSection />
     <StatsBar />
     <EverythingSection />

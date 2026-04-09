@@ -1199,8 +1199,12 @@ function MatchCard({
       <div className="p-8 flex flex-col flex-1">
         {/* Row 1: Location & Recommended Badge */}
         <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-2 text-slate-400">
-            <MapPin className="w-4 h-4" />
+          <div className="flex items-center gap-2 text-slate-400 min-w-0">
+            <MapPin className="w-4 h-4 shrink-0" />
+            <FlagIcon
+              countryCode={m.countryCode || "US"}
+              className="w-6 h-4 shrink-0 rounded-[3px]"
+            />
             <span className="text-[11px] font-bold uppercase tracking-widest truncate max-w-[140px] text-slate-500">
               {m.location || "Location Unavailable"}
             </span>
