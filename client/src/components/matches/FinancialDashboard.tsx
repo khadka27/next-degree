@@ -215,7 +215,7 @@ export function FinancialDashboard({
               </div>
               Back to Dashboard
             </button>
-            <h1 className="text-[32px] md:text-[40px] font-bold text-[#111827] tracking-tight leading-tight">
+            <h1 className="text-[28px] sm:text-[32px] md:text-[40px] font-bold text-[#111827] tracking-tight leading-tight">
               Estimated Cost Breakdown
             </h1>
             <p className="text-slate-500 max-w-2xl text-[15px] md:text-[16px] leading-relaxed">
@@ -230,12 +230,12 @@ export function FinancialDashboard({
             </p>
           </div>
 
-          <div className="flex items-center bg-slate-50 p-1.5 rounded-2xl border border-slate-100 self-start md:self-center">
+          <div className="flex flex-wrap items-center bg-slate-50 p-1.5 rounded-2xl border border-slate-100 self-start md:self-center gap-1.5 w-full sm:w-auto">
             {["First Year", "Year on year", "Month on month"].map((p) => (
               <button
                 key={p}
                 onClick={() => setPeriod(p as any)}
-                className={`px-4 py-2.5 rounded-xl text-[13px] font-semibold transition-all ${
+                className={`flex-1 sm:flex-none px-3 sm:px-4 py-2.5 rounded-xl text-[12px] sm:text-[13px] font-semibold transition-all whitespace-nowrap ${
                   period === p
                     ? "bg-white text-slate-900 shadow-sm border border-slate-100"
                     : "text-slate-500 hover:text-slate-700"
@@ -251,7 +251,7 @@ export function FinancialDashboard({
           {/* Left Sidebar - Summary Cards */}
           <div className="lg:col-span-4 space-y-6">
             {/* Total Cost Card */}
-            <Card className="p-8 rounded-[32px] border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.02)] bg-white">
+            <Card className="p-6 md:p-8 rounded-[32px] border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.02)] bg-white">
               <div className="space-y-6">
                 <div>
                   <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-3">
@@ -310,7 +310,7 @@ export function FinancialDashboard({
 
             {/* Benchmarks Card (only show for Annual periods) */}
             {period !== "Month on month" && (
-              <Card className="p-8 rounded-[32px] border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.02)] bg-white">
+              <Card className="p-6 md:p-8 rounded-[32px] border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.02)] bg-white">
                 <h3 className="text-xs font-bold text-slate-400 uppercase tracking-[0.2em] mb-6">
                   Cost Benchmarks
                 </h3>
@@ -359,7 +359,7 @@ export function FinancialDashboard({
             )}
 
             {/* Potential Savings */}
-            <Card className="p-8 rounded-[32px] border border-emerald-100 bg-emerald-50/30 shadow-sm">
+            <Card className="p-6 md:p-8 rounded-[32px] border border-emerald-100 bg-emerald-50/30 shadow-sm">
               <div className="flex items-center gap-2 text-emerald-700 font-bold text-xs uppercase tracking-widest mb-4">
                 <TrendingDown className="w-4 h-4" />
                 <span>Potential Savings</span>
@@ -390,7 +390,7 @@ export function FinancialDashboard({
           {/* Right Main Column - Charts & Breakdown */}
           <div className="lg:col-span-8">
             <Card className="rounded-[40px] border border-slate-100 shadow-[0_15px_50px_rgba(0,0,0,0.03)] bg-white overflow-hidden">
-              <div className="p-8 md:p-12">
+              <div className="p-5 sm:p-6 md:p-12">
                 <h2 className="text-xl font-bold text-slate-900 mb-10">
                   Detailed Expense Categories
                 </h2>
@@ -437,18 +437,18 @@ export function FinancialDashboard({
                   </div>
 
                   {/* Legend Grid */}
-                  <div className="grid grid-cols-2 gap-x-8 gap-y-6 flex-1 w-full">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-5 sm:gap-y-6 flex-1 w-full">
                     {categories.map((cat, i) => (
                       <div
                         key={i}
-                        className="flex items-center justify-between"
+                        className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4"
                       >
                         <div className="flex items-center gap-3">
                           <div
                             className={`w-3 h-3 rounded-full ${cat.color}`}
                           />
                           <div>
-                            <p className="text-[13px] font-bold text-slate-900 leading-none mb-1">
+                            <p className="text-[13px] font-bold text-slate-900 leading-none mb-1 pr-2">
                               {cat.label}
                             </p>
                             <p className="text-[11px] font-medium text-slate-400">
@@ -456,7 +456,7 @@ export function FinancialDashboard({
                             </p>
                           </div>
                         </div>
-                        <span className="text-[14px] font-bold text-slate-900">
+                        <span className="text-[13px] sm:text-[14px] font-bold text-slate-900 sm:text-right">
                           {fmtUsdRange(cat.usd, 0.1)}
                         </span>
                       </div>
@@ -469,7 +469,7 @@ export function FinancialDashboard({
                   {categories.map((cat, i) => (
                     <div
                       key={i}
-                      className="flex items-center gap-4 p-5 md:p-6 bg-slate-50/50 rounded-[24px] border border-slate-50 group hover:border-blue-100 hover:bg-white transition-all duration-500"
+                      className="flex flex-col sm:flex-row sm:items-center gap-4 p-5 md:p-6 bg-slate-50/50 rounded-[24px] border border-slate-50 group hover:border-blue-100 hover:bg-white transition-all duration-500"
                     >
                       <div
                         className={`w-12 h-12 md:w-14 md:h-14 rounded-2xl ${cat.color} flex items-center justify-center text-white shadow-lg shadow-${cat.color.replace("bg-", "")}/20`}
@@ -477,15 +477,15 @@ export function FinancialDashboard({
                         {cat.icon}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h4 className="font-bold text-slate-900 text-[15px] whitespace-nowrap overflow-hidden text-overflow-ellipsis">
+                        <h4 className="font-bold text-slate-900 text-[15px] sm:whitespace-nowrap sm:overflow-hidden sm:text-overflow-ellipsis">
                           {cat.label}
                         </h4>
                         <p className="text-slate-400 text-xs mt-1 truncate">
                           {cat.desc}
                         </p>
                       </div>
-                      <div className="text-right shrink-0 ml-4">
-                        <p className="text-[17px] font-bold text-slate-900 tracking-tight">
+                      <div className="text-left sm:text-right shrink-0 sm:ml-4">
+                        <p className="text-[15px] sm:text-[17px] font-bold text-slate-900 tracking-tight">
                           {fmtUsdRange(cat.usd, 0.1)}
                         </p>
                       </div>
@@ -494,7 +494,7 @@ export function FinancialDashboard({
                 </div>
 
                 {/* Warning Box */}
-                <div className="mt-8 p-6 bg-blue-50/30 rounded-[28px] border border-blue-50 flex gap-4">
+                <div className="mt-8 p-5 sm:p-6 bg-blue-50/30 rounded-[28px] border border-blue-50 flex gap-4">
                   <Info className="w-6 h-6 text-blue-500 shrink-0 mt-0.5" />
                   <div>
                     <h5 className="font-bold text-blue-900 text-sm mb-1.5">
