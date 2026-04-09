@@ -19,6 +19,23 @@ const COUNTRY_CODE_TO_NAME: Record<string, string> = {
   "REPUBLIC OF KOREA": "Korea, Republic of",
   IE: "Ireland",
   NL: "Netherlands",
+  FR: "France",
+  FRANCE: "France",
+  IT: "Italy",
+  ITALY: "Italy",
+  ES: "Spain",
+  SPAIN: "Spain",
+  SE: "Sweden",
+  SWEDEN: "Sweden",
+  CH: "Switzerland",
+  SWITZERLAND: "Switzerland",
+  NZ: "New Zealand",
+  "NEW ZEALAND": "New Zealand",
+  SG: "Singapore",
+  SINGAPORE: "Singapore",
+  AE: "United Arab Emirates",
+  UAE: "United Arab Emirates",
+  "UNITED ARAB EMIRATES": "United Arab Emirates",
 };
 
 export interface HipolabsUniversity {

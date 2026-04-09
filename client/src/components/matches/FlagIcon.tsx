@@ -11,6 +11,14 @@ import {
   NL,
   JP,
   KR,
+  FR,
+  IT,
+  ES,
+  SE,
+  CH,
+  NZ,
+  SG,
+  AE,
 } from "country-flag-icons/react/3x2";
 
 const map: Record<string, any> = {
@@ -25,7 +33,14 @@ const map: Record<string, any> = {
   KR,
   IE,
   NL,
-  CH: US, // Placeholder
+  FR,
+  IT,
+  ES,
+  SE,
+  CH,
+  NZ,
+  SG,
+  AE,
 };
 
 interface FlagIconProps {

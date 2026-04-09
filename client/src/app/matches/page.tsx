@@ -90,6 +90,14 @@ const COUNTRIES = [
   { code: "KR", name: "South Korea" },
   { code: "IE", name: "Ireland" },
   { code: "NL", name: "Netherlands" },
+  { code: "FR", name: "France" },
+  { code: "IT", name: "Italy" },
+  { code: "ES", name: "Spain" },
+  { code: "SE", name: "Sweden" },
+  { code: "CH", name: "Switzerland" },
+  { code: "NZ", name: "New Zealand" },
+  { code: "SG", name: "Singapore" },
+  { code: "AE", name: "UAE" },
 ];
 
 const DEGREES = [

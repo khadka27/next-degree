@@ -30,6 +30,23 @@ const COUNTRY_ALIAS_TO_CODE: Record<string, string> = {
   IRELAND: "IE",
   NL: "NL",
   NETHERLANDS: "NL",
+  FR: "FR",
+  FRANCE: "FR",
+  IT: "IT",
+  ITALY: "IT",
+  ES: "ES",
+  SPAIN: "ES",
+  SE: "SE",
+  SWEDEN: "SE",
+  CH: "CH",
+  SWITZERLAND: "CH",
+  NZ: "NZ",
+  "NEW ZEALAND": "NZ",
+  SG: "SG",
+  SINGAPORE: "SG",
+  AE: "AE",
+  UAE: "AE",
+  "UNITED ARAB EMIRATES": "AE",
 };
 
 function normalizeCountryCode(country: string): string {
