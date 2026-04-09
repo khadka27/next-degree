@@ -18,12 +18,14 @@ The project is structured as a monorepo containing both a premium web applicatio
 The mobile app focuses on a high-fidelity, native experience for students on the go.
 
 ### Key Features
+
 - **Native Tab Dashboard**: Custom implementation of Expo Router tabs for Home, Search, Saved, and Profile.
 - **Onboarding Flow**: Stylized multi-step registration process capturing Country, Degree, and Financial preferences.
 - **Glassmorphic UI**: A modern design language utilizing soft translucency, vibrant teal gradients (`#1A8A99`), and interactive micro-animations.
 - **Dynamic University Profiles**: Detailed institution views with global rankings, tuition data, and integrated application buttons.
 
 ### Tech Stack
+
 - React Native / Expo Go
 - Expo Router (File-based navigation)
 - MaterialCommunityIcons & Feather iconography suites
@@ -35,15 +37,27 @@ The mobile app focuses on a high-fidelity, native experience for students on the
 The web platform provides the heavy-lifting infrastructure for data management and detailed exploration.
 
 ### Key Features
+
 - **Full-stack Architecture**: Powered by Next.js App Router for server-side rendering and SEO optimization.
 - **Database Integration**: Prisma ORM for type-safe database access and streamlined migrations.
 - **Modern Responsive UI**: Crafted with React and TailwindCSS for a weightless, professional editorial feel.
+- **API Layer**: Includes authentication, profile, matching, visa, cost, destination, and admin endpoints under `client/src/app/api`.
+
+### API Reference
+
+- Full endpoint documentation is available in **`client/aip.md`**.
+- The file contains:
+  - Route paths and supported HTTP methods
+  - Key query/body parameters
+  - Auth requirements (user/admin)
+  - Environment variables used by APIs
 
 ---
 
 ## 🚀 Installation & Setup
 
 ### Prerequisites
+
 - **Node.js**: (LTS v18+ recommended)
 - **Package Manager**: npm, yarn, or pnpm
 - **Mobile Emulators**: iOS Simulator (Xcode) or Android Emulator (Android Studio) for phone testing.
@@ -51,6 +65,7 @@ The web platform provides the heavy-lifting infrastructure for data management a
 ### Steps to Run
 
 1. **Clone the repository**:
+
    ```bash
    git clone https://github.com/[your-repo]/abroadLift.git
    ```
@@ -61,6 +76,19 @@ The web platform provides the heavy-lifting infrastructure for data management a
    npm install
    npm run dev
    ```
+
+### Web API Environment
+
+Configure these values in `client/.env` before running API-dependent features:
+
+- `NEXTAUTH_SECRET`
+- `WORQNOW_API_KEY`
+- `WORQNOW_BASE_URL`
+- `HIPOLABS_API_URL`
+- `POPULAR_STUDY_COUNTRIES`
+- `API_NINJAS_KEY`
+- `WHERENEXT_API_URL`
+- `WHERENEXT_RELOCATION_URL`
 
 3. **Mobile Client Setup**:
    ```bash
@@ -73,14 +101,14 @@ The web platform provides the heavy-lifting infrastructure for data management a
 
 ## 🛠️ Combined Tech Stack
 
-| Layer | Technology |
-| :--- | :--- |
-| **Web Frontend** | Next.js, TailwindCSS |
-| **Mobile Frontend** | React Native, Expo |
-| **Authentication** | Custom JWT / Clerk (Planned) |
-| **ORM / Database** | Prisma |
-| **Routing** | Expo Router (Mobile) / App Router (Web) |
+| Layer               | Technology                              |
+| :------------------ | :-------------------------------------- |
+| **Web Frontend**    | Next.js, TailwindCSS                    |
+| **Mobile Frontend** | React Native, Expo                      |
+| **Authentication**  | Custom JWT / Clerk (Planned)            |
+| **ORM / Database**  | Prisma                                  |
+| **Routing**         | Expo Router (Mobile) / App Router (Web) |
 
 ---
 
-*Connecting ambitious students to global opportunities.*
+_Connecting ambitious students to global opportunities._
