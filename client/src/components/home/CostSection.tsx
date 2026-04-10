@@ -31,12 +31,14 @@ const features = [
   },
 ];
 
+const dotIds = Array.from({ length: 16 }, (_, i) => `cost-dot-${i + 1}`);
+
 const CostSection = () => (
   <section className="py-20 relative overflow-hidden">
     {/* Dot pattern top right */}
     <div className="absolute top-10 right-10 grid grid-cols-4 gap-2 opacity-20">
-      {Array.from({ length: 16 }).map((_, i) => (
-        <div key={i} className="w-2 h-2 rounded-full bg-primary" />
+      {dotIds.map((dotId) => (
+        <div key={dotId} className="w-2 h-2 rounded-full bg-primary" />
       ))}
     </div>
 
