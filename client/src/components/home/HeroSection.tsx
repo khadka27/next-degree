@@ -42,7 +42,12 @@ const HeroSection = () => {
 
       {/* 3. Bottom dots burst */}
       <div className="absolute bottom-[5%] left-[24%] pointer-events-none z-0 hidden md:block">
-        <svg width="150" height="150" viewBox="0 0 150 150" className="opacity-70">
+        <svg
+          width="150"
+          height="150"
+          viewBox="0 0 150 150"
+          className="opacity-70"
+        >
           <g fill="#90B7FF">
             {/* Center dot */}
             <circle cx="75" cy="75" r="3" />
@@ -90,31 +95,38 @@ const HeroSection = () => {
       <div className="relative z-10 w-full max-w-[1280px] mx-auto px-6 lg:px-12 flex-grow flex flex-col">
         <div className="flex flex-col-reverse lg:grid lg:grid-cols-2 gap-3 lg:gap-8 flex-grow">
           {/* Left content */}
-          <div className="flex flex-col justify-center  max-w-[580px] mt-4 lg:mt-0 lg:translate-y-10 xl:translate-x-4">
-            <h1 className="text-[30px] text-center sm:text-left sm:text-[34px] lg:text-[40px] font-bold text-[#0f172a] leading-[1.1] mb-3 tracking-tight">
-              Match, Plan and Self-Apply<br className="hidden lg:block" /> with Confidence
+          <div className="flex flex-col justify-center  max-w-[580px] mt-10 lg:mt-0 lg:translate-y-10 xl:translate-x-4">
+            <h1 className="text-[35px] sm:text-[37px] lg:text-[40px] font-bold text-[#0f172a] leading-[1.1] mb-6 tracking-tight">
+              Match, Plan and Self-Apply
+              <br className="hidden lg:block" /> with Confidence
             </h1>
             <p className="text-[#334155] text-[16px] sm:text-[17px] mb-8 leading-relaxed max-w-[450px] font-regular text-center sm:text-left mx-auto sm:mx-0">
               Find the right colleges, estimate your total cost, check your
               admission chances, and track your visa readiness
             </p>
-            <div className="flex flex-row items-center justify-center sm:justify-start gap-x-4 sm:gap-x-8 mb-10">
-              <div className="flex items-center gap-2 whitespace-nowrap">
-                <CheckCircle2 className="w-[18px] h-[18px] text-[#22C55E]" strokeWidth={2.5} />
-                <span className="text-[#37C533] font-semibold text-[11px] sm:text-[13px] uppercase tracking-wide">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 sm:gap-8 mb-10">
+              <div className="flex items-center gap-2">
+                <CheckCircle2
+                  className="w-[18px] h-[18px] text-[#22C55E]"
+                  strokeWidth={2.5}
+                />
+                <span className="text-[#37C533] font-semibold text-[13px] uppercase tracking-wide">
                   160+ Countries
                 </span>
               </div>
-              <div className="flex items-center gap-2 whitespace-nowrap">
-                <CheckCircle2 className="w-[18px] h-[18px] text-[#EF4444]" strokeWidth={2.5} />
-                <span className="text-[#FF0000] font-semibold text-[11px] sm:text-[13px] uppercase tracking-wide">
+              <div className="flex items-center gap-2">
+                <CheckCircle2
+                  className="w-[18px] h-[18px] text-[#EF4444]"
+                  strokeWidth={2.5}
+                />
+                <span className="text-[#FF0000] font-semibold text-[13px] uppercase tracking-wide">
                   1000+ Universities
                 </span>
               </div>
             </div>
-            <div className="flex justify-center sm:justify-start">
-              <Link href="/register">
-                <Button className="bg-[#3686FF] mb-4 text-white px-[24px] py-[12px] rounded-[10px] font-semibold text-[16px] gap-2 shadow-[0_8px_30px_rgb(51,102,255,0.3)] transition-all hover:scale-105 hover:shadow-[0_8px_35px_rgb(51,102,255,0.4)]">
+            <div>
+              <Link href="/matches">
+                <Button className="bg-[#3686FF]text-white px-[24px] py-[12px] rounded-[10px] font-semibold text-[16px] gap-2 shadow-[0_8px_30px_rgb(51,102,255,0.3)] transition-all hover:scale-105 hover:shadow-[0_8px_35px_rgb(51,102,255,0.4)]">
                   Get Started <ArrowRight className="w-5 h-5 ml-1" />
                 </Button>
               </Link>
@@ -144,4 +156,3 @@ const HeroSection = () => {
 };
 
 export default HeroSection;
-

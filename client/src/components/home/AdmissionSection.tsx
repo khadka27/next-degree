@@ -1,5 +1,6 @@
 import { ArrowRight, CheckCircle2 } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
 const points = [
@@ -10,15 +11,30 @@ const points = [
 ];
 
 const DecorativeSplash = () => (
-  <svg width="40" height="40" viewBox="0 0 40 40" fill="none" className="absolute -top-16 left-0 mix-blend-multiply opacity-80 z-20">
-    <path d="M22 6C22 13 14 18 6 22C14 26 22 31 22 38C22 31 30 26 38 22C30 18 22 13 22 6Z" fill="#3686FF" />
+  <svg
+    width="40"
+    height="40"
+    viewBox="0 0 40 40"
+    fill="none"
+    className="absolute -top-16 left-0 mix-blend-multiply opacity-80 z-20"
+  >
+    <path
+      d="M22 6C22 13 14 18 6 22C14 26 22 31 22 38C22 31 30 26 38 22C30 18 22 13 22 6Z"
+      fill="#3686FF"
+    />
   </svg>
 );
 
 const AdmissionSection = () => (
   <section className="py-10 relative overflow-hidden">
     {/* Decorative Top-Left Circles */}
-    <svg width="200" height="200" viewBox="0 0 200 200" fill="none" className="absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
+    <svg
+      width="200"
+      height="200"
+      viewBox="0 0 200 200"
+      fill="none"
+      className="absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+    >
       <circle cx="100" cy="100" r="140" stroke="#E2E8F0" strokeWidth="4" />
       <circle cx="100" cy="100" r="180" stroke="#E2E8F0" strokeWidth="4" />
     </svg>
@@ -30,26 +46,25 @@ const AdmissionSection = () => (
       </h2>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-        
         {/* Left - Image Grid Wrapper aligned to sit flush on bottom edge via negative margin */}
         <div className="relative w-full max-w-[550px] mx-auto lg:mr-auto lg:ml-0 flex justify-center lg:justify-start -mb-24 mt-8 lg:mt-0">
           <div className="relative w-full max-w-[380px] h-[480px]">
             {/* Custom SVG Blob perfectly mirroring the referenced design */}
             <div className="absolute inset-x-0 bottom-0 top-[20px] -z-10 translate-x-[5%] pointer-events-none">
-               <svg 
-                width="100%" 
-                height="100%" 
-                viewBox="0 0 400 480" 
+              <svg
+                width="100%"
+                height="100%"
+                viewBox="0 0 400 480"
                 preserveAspectRatio="none"
               >
-                 <defs>
+                <defs>
                   <linearGradient id="blobGrad" x1="0.5" y1="0" x2="0.5" y2="1">
                     <stop offset="0%" stopColor="#3686FF" />
                     <stop offset="65%" stopColor="#7DAEFF" />
                     <stop offset="100%" stopColor="#F8FAFF" stopOpacity="0" />
                   </linearGradient>
                 </defs>
-                <path 
+                <path
                   d="M 0 0 
                      H 260 
                      A 50 50 0 0 1 310 50 
@@ -58,12 +73,12 @@ const AdmissionSection = () => (
                      V 430 
                      A 50 50 0 0 1 350 480 
                      H 0 
-                     V 0 Z" 
+                     V 0 Z"
                   fill="url(#blobGrad)"
                 />
               </svg>
             </div>
-            
+
             <Image
               src="/assets/graduate-woman.png"
               alt="Understand Admission Probability"
@@ -86,7 +101,7 @@ const AdmissionSection = () => (
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-4 mb-8 max-w-[650px]">
-             {points.map((p) => (
+            {points.map((p) => (
               <div key={p} className="flex items-start gap-4">
                 <CheckCircle2
                   className="w-[20px] h-[20px] text-[#3686FF] mt-[2px] shrink-0"
