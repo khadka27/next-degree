@@ -32,6 +32,11 @@ const cards = [
   },
 ];
 
+const bottomDotIds = Array.from(
+  { length: 12 },
+  (_, i) => `visa-bottom-dot-${i + 1}`,
+);
+
 const VisaReadinessSection = () => {
   return (
     <section className="py-24 bg-[#E4EFFF66] -mx-6 sm:-mx-8 lg:-mx-12 px-6 sm:px-8 lg:px-12 relative overflow-hidden">
@@ -80,9 +85,9 @@ const VisaReadinessSection = () => {
           {/* Left - Cards & Button */}
           <div className="flex flex-col">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-8">
-              {cards.map((card, idx) => (
+              {cards.map((card) => (
                 <div
-                  key={idx}
+                  key={card.title}
                   className="bg-white rounded-[20px] p-6 shadow-xl border border-gray-100  transition-shadow duration-300 flex flex-col items-start"
                 >
                   <div className="mb-4 text-[#3686FF]">{card.icon}</div>
@@ -142,8 +147,8 @@ const VisaReadinessSection = () => {
 
       {/* Bottom Right scattered dots */}
       <div className="absolute bottom-10 right-10 grid grid-cols-4 gap-3 opacity-40 pointer-events-none">
-        {Array.from({ length: 12 }).map((_, i) => (
-          <div key={i} className="w-1.5 h-1.5 rounded-full bg-[#A5C6FF]" />
+        {bottomDotIds.map((dotId) => (
+          <div key={dotId} className="w-1.5 h-1.5 rounded-full bg-[#A5C6FF]" />
         ))}
       </div>
     </section>
