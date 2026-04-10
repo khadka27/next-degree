@@ -69,15 +69,6 @@ function getAcceptanceMeta(rate: number) {
   };
 }
 
-function seededOffset(seed: string, min: number, max: number) {
-  let hash = 0;
-  for (let i = 0; i < seed.length; i += 1) {
-    hash = (hash * 31 + seed.charCodeAt(i)) >>> 0;
-  }
-  const span = max - min + 1;
-  return min + (hash % span);
-}
-
 function getRelevantAcceptanceRate(m: Match) {
   const baseRate =
     typeof m.admissionRate === "number" && Number.isFinite(m.admissionRate)
@@ -115,19 +106,12 @@ function getRelevantAcceptanceRate(m: Match) {
   const intl = m.internationalPercentage || 0;
   const intlAdjustment = intl >= 30 ? 4 : intl >= 20 ? 2 : intl <= 10 ? -3 : 0;
 
-  const seed = `${m.id || m.name}-${m.countryCode || "global"}`;
-  const variance = seededOffset(seed, -5, 5);
-
   return Math.max(
     18,
     Math.min(
       93,
       Math.round(
-        baseRate +
-          rankAdjustment +
-          tuitionAdjustment +
-          intlAdjustment +
-          variance,
+        baseRate + rankAdjustment + tuitionAdjustment + intlAdjustment,
       ),
     ),
   );
@@ -461,7 +445,7 @@ function UniversityDetailsModal({
   onShortlist: () => void;
 }) {
   const admissionChance = getRelevantAcceptanceRate(m);
-  const yearlyLiving = Math.round((m.tuitionFee || 20000) * 0.45);
+  const yearlyLiving = Math.round(Math.max((m.tuitionFee || 0) * 0.38, 9000));
   const courses =
     m.popularPrograms && m.popularPrograms.length > 0
       ? m.popularPrograms

@@ -28,6 +28,8 @@ interface StudyOverviewDashboardProps {
   USD_TO_NPR: number;
   totalYear1Npr: number;
   admissionPct: number;
+  visaChance?: number;
+  visaLabel?: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   costBand: any;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -46,6 +48,8 @@ export function StudyOverviewDashboard({
   USD_TO_NPR,
   totalYear1Npr,
   admissionPct,
+  visaChance,
+  visaLabel,
   costBand,
   admissionBand,
   onAdvanceToCost,
@@ -59,25 +63,8 @@ export function StudyOverviewDashboard({
     return `NPR ${(low / 100000).toFixed(1)}L - NPR ${(high / 100000).toFixed(1)}L`;
   };
 
-  // Visa Chance Logic
-  const isHighRiskCountry = ["AU", "UK"].includes(
-    selectedMatch.countryCode || "",
-  );
-  const hasFunds =
-    Number.parseFloat(form.bankBalance) > 0 ||
-    Number.parseFloat(form.sponsorIncome) > 0;
-  let visaBase = 75;
-  if (!hasFunds) visaBase -= 20;
-  if (Number.parseInt(form.backlogs || "0", 10) > 3) visaBase -= 10;
-  if (Number.parseInt(form.studyGap || "0", 10) > 2) visaBase -= 5;
-  if (isHighRiskCountry) visaBase -= 10;
-  const visaChance = Math.max(30, Math.min(98, visaBase));
-  let visaLabel = "Needs Work";
-  if (visaChance >= 80) {
-    visaLabel = "Excellent";
-  } else if (visaChance >= 60) {
-    visaLabel = "Moderate";
-  }
+  const visaChanceValue = visaChance ?? 0;
+  const visaLabelValue = visaLabel || "Pending";
 
   const gpa = Number.parseFloat(form.gpa) || 0;
   const testScore = Number.parseFloat(form.testScore) || 0;
@@ -162,7 +149,7 @@ export function StudyOverviewDashboard({
     {
       title: "Visa",
       subtitle: "Strengthen financial proof",
-      detail: `${visaChance}% readiness`,
+      detail: `${visaChanceValue}% readiness`,
       action: onAdvanceToVisa,
       cta: "Review visa",
       accent: "from-emerald-500 to-teal-500",
@@ -334,17 +321,17 @@ export function StudyOverviewDashboard({
               </div>
               <div className="mt-4 flex items-baseline gap-2">
                 <span className="text-[24px] font-black tracking-tight text-slate-900">
-                  {visaChance}%
+                  {visaChanceValue}%
                 </span>
                 <span className="font-medium text-sm text-blue-500">
-                  - {visaLabel}
+                  - {visaLabelValue}
                 </span>
               </div>
 
               <div className="w-full h-2 bg-slate-100 rounded-full mt-3 overflow-hidden">
                 <div
                   className="h-full bg-blue-500"
-                  style={{ width: `${visaChance}%` }}
+                  style={{ width: `${visaChanceValue}%` }}
                 ></div>
               </div>
 

@@ -60,11 +60,11 @@ export function FinancialDashboard({
   } = financialMetrics;
 
   const living = dynamicLivingCost || {
-    rent: 3800,
-    food: 1300,
-    transport: 500,
-    insurance: 320,
-    other: 700,
+    rent: Math.round(Math.max(tuitionUsd * 0.38, 4200)),
+    food: Math.round(Math.max(tuitionUsd * 0.12, 1200)),
+    transport: Math.round(Math.max(tuitionUsd * 0.05, 450)),
+    insurance: Math.round(Math.max(tuitionUsd * 0.04, 300)),
+    other: Math.round(Math.max(tuitionUsd * 0.09, 650)),
   };
 
   const categories = useMemo(() => {

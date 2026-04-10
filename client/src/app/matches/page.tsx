@@ -2104,6 +2104,8 @@ export default function AbroadLiftMatchesPage() {
   const [relocationStats, setRelocationStats] = useState<any>(null);
   const [apiCostEstimate, setApiCostEstimate] = useState<any>(null);
   const [destinationInsight, setDestinationInsight] = useState<any>(null);
+  const [admissionAnalysis, setAdmissionAnalysis] = useState<any>(null);
+  const [visaAnalysis, setVisaAnalysis] = useState<any>(null);
 
   const [hasRestored, setHasRestored] = useState(false);
 
@@ -2141,11 +2143,11 @@ export default function AbroadLiftMatchesPage() {
         : selectedMatch.tuitionFee || 22000,
     );
     const livingBreakdownUsd = dynamicLivingCost || {
-      rent: 3800,
-      food: 1300,
-      transport: 500,
-      insurance: 320,
-      other: 700,
+      rent: Math.round(Math.max(tuitionUsd * 0.38, 4200)),
+      food: Math.round(Math.max(tuitionUsd * 0.12, 1200)),
+      transport: Math.round(Math.max(tuitionUsd * 0.05, 450)),
+      insurance: Math.round(Math.max(tuitionUsd * 0.04, 300)),
+      other: Math.round(Math.max(tuitionUsd * 0.09, 650)),
     };
 
     const yearlyLivingUsd = Object.values(
@@ -2153,7 +2155,9 @@ export default function AbroadLiftMatchesPage() {
     ).reduce((s, v) => s + v, 0);
     const setupCostsUsd = 1500;
     const graduationDuration =
-      parseInt(form.duration) || (form.degree === "Postgraduate" ? 2 : 4);
+      selectedMatch.durationYears ||
+      parseInt(form.duration) ||
+      (form.degree === "Postgraduate" ? 2 : 4);
 
     const totalYear1Usd = tuitionUsd + yearlyLivingUsd + setupCostsUsd;
     const totalYear1Npr =
@@ -2280,13 +2284,15 @@ export default function AbroadLiftMatchesPage() {
     );
 
     const baselineAdmission = selectedMatch.admissionRate || 60;
-    const admissionConfidence = Math.max(
-      30,
-      Math.min(
-        96,
-        Math.round(baselineAdmission * 0.55 + academicReadiness * 0.45),
-      ),
-    );
+    const admissionConfidence =
+      admissionAnalysis?.admissionPct ??
+      Math.max(
+        30,
+        Math.min(
+          96,
+          Math.round(baselineAdmission * 0.55 + academicReadiness * 0.45),
+        ),
+      );
 
     const budgetCoverage = Math.max(
       20,
@@ -2335,18 +2341,20 @@ export default function AbroadLiftMatchesPage() {
         : 62,
     );
 
-    const visaConfidence = Math.max(
-      25,
-      Math.min(
-        97,
-        Math.round(
-          academicReadiness * 0.34 +
-            admissionConfidence * 0.24 +
-            Math.min(100, budgetCoverage) * 0.32 +
-            docReadiness * 0.1,
+    const visaConfidence =
+      visaAnalysis?.successChance ??
+      Math.max(
+        25,
+        Math.min(
+          97,
+          Math.round(
+            academicReadiness * 0.34 +
+              admissionConfidence * 0.24 +
+              Math.min(100, budgetCoverage) * 0.32 +
+              docReadiness * 0.1,
+          ),
         ),
-      ),
-    );
+      );
 
     const overallConfidence = Math.max(
       25,
@@ -2368,11 +2376,12 @@ export default function AbroadLiftMatchesPage() {
           ? "moderate"
           : "high";
     const counselorVerdict =
-      overallConfidence >= 78 && budgetStressBand !== "high"
+      admissionAnalysis?.summary ||
+      (overallConfidence >= 78 && budgetStressBand !== "high"
         ? "Strong Proceed"
         : overallConfidence >= 62
           ? "Proceed With Conditions"
-          : "Refine Profile First";
+          : "Refine Profile First");
 
     return {
       admissionConfidence,
@@ -2387,7 +2396,14 @@ export default function AbroadLiftMatchesPage() {
       yearOneNeedNpr,
       budgetNpr,
     };
-  }, [form, selectedMatch, financialMetrics, relocationStats]);
+  }, [
+    form,
+    selectedMatch,
+    financialMetrics,
+    relocationStats,
+    admissionAnalysis,
+    visaAnalysis,
+  ]);
 
   const handleSavePlan = async () => {
     if (!selectedMatch) return;
@@ -2536,6 +2552,51 @@ export default function AbroadLiftMatchesPage() {
         .catch(console.error);
     }
   }, [step, selectedMatch, form.countries]);
+
+  useEffect(() => {
+    if (!selectedMatch || step < 7) {
+      setAdmissionAnalysis(null);
+      setVisaAnalysis(null);
+      return;
+    }
+
+    let active = true;
+
+    const loadAnalyses = async () => {
+      try {
+        const [admissionRes, visaRes] = await Promise.all([
+          fetch("/api/admission-chance", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ form, match: selectedMatch }),
+          }),
+          fetch("/api/visa-prediction", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ form, match: selectedMatch }),
+          }),
+        ]);
+
+        const [admissionData, visaData] = await Promise.all([
+          admissionRes.json(),
+          visaRes.json(),
+        ]);
+
+        if (!active) return;
+
+        if (!admissionData?.error) setAdmissionAnalysis(admissionData);
+        if (!visaData?.error) setVisaAnalysis(visaData);
+      } catch (error) {
+        console.error("Failed to load match analyses", error);
+      }
+    };
+
+    loadAnalyses();
+
+    return () => {
+      active = false;
+    };
+  }, [form, selectedMatch, step]);
 
   useEffect(() => {
     if (status === "authenticated") {
@@ -3612,6 +3673,7 @@ export default function AbroadLiftMatchesPage() {
     if (step >= 8 && selectedMatch) {
       const profileScore = getEligibilityScore(form);
       const admissionPct =
+        admissionAnalysis?.admissionPct ||
         decisionSignals?.admissionConfidence ||
         Math.max(
           35,
@@ -3632,11 +3694,11 @@ export default function AbroadLiftMatchesPage() {
           : selectedMatch.tuitionFee || 22000,
       );
       const livingBreakdown = dynamicLivingCost || {
-        rent: 3800,
-        food: 1300,
-        transport: 500,
-        insurance: 320,
-        other: 700,
+        rent: Math.round(Math.max(tuitionUsd * 0.38, 4200)),
+        food: Math.round(Math.max(tuitionUsd * 0.12, 1200)),
+        transport: Math.round(Math.max(tuitionUsd * 0.05, 450)),
+        insurance: Math.round(Math.max(tuitionUsd * 0.04, 300)),
+        other: Math.round(Math.max(tuitionUsd * 0.09, 650)),
       };
       const livingCostUsd = Object.values(
         livingBreakdown as Record<string, number>,
@@ -3728,6 +3790,8 @@ export default function AbroadLiftMatchesPage() {
               USD_TO_NPR={USD_TO_NPR}
               totalYear1Npr={totalYear1Npr}
               admissionPct={admissionPct}
+              visaChance={visaAnalysis?.successChance}
+              visaLabel={visaAnalysis?.label}
               costBand={costBand}
               admissionBand={admissionBand}
               onAdvanceToCost={() => setStep(9)}
@@ -4090,45 +4154,57 @@ export default function AbroadLiftMatchesPage() {
         },
       ];
 
-      const meta = {
-        US: { v: 185 },
-        CA: { v: 110 },
-        AU: { v: 450 },
-        UK: { v: 600 },
-      }[selectedMatch.countryCode as "US" | "CA" | "AU" | "UK"] || { v: 100 };
-
+      const annualProjectionNpr = financialMetrics.totalDegreeCostNpr;
       const finalEstimateBands = [
         {
-          key: "budget",
-          label: "Budget (Europe)",
-          minLakh: 10,
-          maxLakh: 25,
+          key: "efficient",
+          label: "Efficient Projection",
+          minLakh: Math.max(
+            0,
+            Math.round((annualProjectionNpr * 0.88) / 100000),
+          ),
+          maxLakh: Math.max(
+            0,
+            Math.round((annualProjectionNpr * 0.98) / 100000),
+          ),
         },
         {
-          key: "average",
-          label: "Average (Canada/Australia)",
-          minLakh: 25,
-          maxLakh: 45,
+          key: "expected",
+          label: "Expected Projection",
+          minLakh: Math.max(
+            0,
+            Math.round((annualProjectionNpr * 0.98) / 100000),
+          ),
+          maxLakh: Math.max(
+            0,
+            Math.round((annualProjectionNpr * 1.08) / 100000),
+          ),
         },
         {
-          key: "premium",
-          label: "Premium (USA/UK)",
-          minLakh: 38,
-          maxLakh: 70,
+          key: "stretch",
+          label: "Stretch Projection",
+          minLakh: Math.max(
+            0,
+            Math.round((annualProjectionNpr * 1.08) / 100000),
+          ),
+          maxLakh: Math.max(
+            0,
+            Math.round((annualProjectionNpr * 1.22) / 100000),
+          ),
         },
       ] as const;
 
+      const budgetCoverageForBand = decisionSignals?.budgetCoverage || 0;
       const selectedBandKey =
-        selectedMatch.countryCode === "US" || selectedMatch.countryCode === "UK"
-          ? "premium"
-          : selectedMatch.countryCode === "CA" ||
-              selectedMatch.countryCode === "AU"
-            ? "average"
-            : "budget";
+        budgetCoverageForBand >= 115
+          ? "efficient"
+          : budgetCoverageForBand >= 90
+            ? "expected"
+            : "stretch";
 
       const selectedFinalBand =
         finalEstimateBands.find((band) => band.key === selectedBandKey) ||
-        finalEstimateBands[0];
+        finalEstimateBands[1];
 
       const lakhToNpr = (lakh: number) => lakh * 100000;
       const formatUsd = (npr: number) =>
@@ -4495,7 +4571,13 @@ export default function AbroadLiftMatchesPage() {
                         {
                           t: "Visa Fees",
                           f: "One-time",
-                          v: (meta as any).v * usdToNpr || 350 * usdToNpr,
+                          v: Math.round(
+                            Math.max(
+                              (apiCostEstimate?.monthly_npr ||
+                                livingAnnualNpr / 12) * 1.15,
+                              28000,
+                            ),
+                          ),
                         },
                         {
                           t: "Enrollment Fees",

@@ -77,82 +77,33 @@ export function VisaEligibility({
   onBack,
   onComplete,
 }: VisaEligibilityProps) {
-  const [visaGuidance, setVisaGuidance] = React.useState<VisaGuidanceItem[]>(
-    [],
-  );
+  const [visaAnalysis, setVisaAnalysis] = React.useState<{
+    successChance?: number;
+    readinessPercent?: number;
+    label?: string;
+    guidance?: VisaGuidanceItem[];
+    checklist?: Array<{
+      title?: string;
+      description?: string;
+      status?: string;
+    }>;
+  } | null>(null);
   const [activeTab, setActiveTab] = React.useState<"overview" | "checklist">(
     "overview",
   );
+  const visaCountry = selectedMatch.countryCode || form.countries[0] || "USA";
+  const visaTitle = `${visaCountry} Student Visa`;
   const hasFunds =
     Number.parseFloat(form.bankBalance) > 0 ||
     Number.parseFloat(form.sponsorIncome) > 0;
-  const isHighRiskCountry = ["AU", "UK"].includes(
-    selectedMatch.countryCode || "",
-  );
-  const visaCountry = selectedMatch.countryCode || form.countries[0] || "USA";
-  const visaTitle = `${visaCountry} Student Visa`;
-
-  // Dynamic Success Chance
-  let successBase = 75;
-  if (!hasFunds) {
-    successBase -= 20;
-  }
-  if (Number.parseInt(form.backlogs) > 3) {
-    successBase -= 10;
-  }
-  if (Number.parseInt(form.studyGap) > 2) {
-    successBase -= 5;
-  }
-  if (isHighRiskCountry) {
-    successBase -= 10;
-  }
-
-  const successChance = Math.max(30, Math.min(98, successBase));
+  const successChance = visaAnalysis?.successChance ?? 0;
+  const readinessPercent = visaAnalysis?.readinessPercent ?? 0;
   const successMeta = getSuccessMeta(successChance);
-  const readinessPercent = Math.max(
-    18,
-    Math.min(
-      96,
-      successChance - (hasFunds ? 0 : 8) + (visaGuidance.length > 0 ? 2 : 0),
-    ),
+
+  const guidanceList = React.useMemo(
+    () => visaAnalysis?.guidance || [],
+    [visaAnalysis],
   );
-
-  const guidanceList = React.useMemo(() => {
-    if (visaGuidance.length > 0) return visaGuidance;
-
-    return [
-      {
-        title: "Proof of Funds Mapping",
-        description: `Show ${selectedMatch.countryCode === "AU" ? "AUD 28,000 - AUD 36,000" : "$22,000 - $30,000"} in liquid assets`,
-        status: hasFunds ? "VERIFIED" : "REQUIRED",
-      },
-      {
-        title: "GTE / SOP Statement",
-        description: form.program
-          ? `Draft strong purpose for ${form.program}`
-          : "Draft strong purpose that matches academic history",
-        status: form.program ? "VERIFIED" : "REQUIRED",
-      },
-      {
-        title: "Health Insurance",
-        description: `Mandatory for ${visaCountry} student visa duration`,
-        status: selectedMatch.countryCode === "AU" ? "REQUIRED" : "PENDING",
-      },
-      {
-        title: "Document Upload",
-        description: form.docsReady
-          ? "Upload package is ready for review"
-          : "Upload the required documents to move forward",
-        status: form.docsReady ? "VERIFIED" : "REQUIRED",
-      },
-    ];
-  }, [
-    visaGuidance,
-    hasFunds,
-    selectedMatch.countryCode,
-    form.program,
-    visaCountry,
-  ]);
 
   const completedCount = guidanceList.filter(
     (item) => (item.status || item.s || "PENDING") === "VERIFIED",
@@ -162,86 +113,16 @@ export function VisaEligibility({
     .filter((item) => (item.status || item.s || "PENDING") !== "VERIFIED")
     .slice(0, 3);
 
-  const checklistItems = React.useMemo(() => {
-    const passportReady = !!form.passportReady;
-    const docsReady = !!form.docsReady;
-    const fundReady = hasFunds;
-    const academicReady = Number.parseFloat(form.gpa || "0") >= 2.5;
-    const englishReady = form.hasEnglishTest === false || !!form.testScore;
-    const intakeReady = !!form.intake;
-    const healthReady =
-      selectedMatch.countryCode === "AU" || selectedMatch.countryCode === "UK"
-        ? !!form.scholarship || !!form.testDone
-        : true;
-
-    return [
-      {
-        title: "Passport",
-        description: `Valid passport with enough validity for ${visaCountry}`,
-        status: passportReady ? "complete" : "pending",
-        icon: FileText,
-      },
-      {
-        title: "Financial Evidence",
-        description: fundReady
-          ? `Bank statement and sponsor support are available for ${visaCountry}`
-          : "Bank statement and sponsor support documents are still needed",
-        status: fundReady ? "complete" : "loading",
-        icon: Banknote,
-      },
-      {
-        title: "Admission Offer",
-        description: selectedMatch.name
-          ? `${selectedMatch.name} offer is selected`
-          : "Selected university offer",
-        status: selectedMatch ? "complete" : "pending",
-        icon: GraduationCap,
-      },
-      {
-        title: "Academic Records",
-        description: form.gpa
-          ? `CGPA ${form.gpa}, transcripts, and degree certificates`
-          : "Transcripts, mark sheets, and degree certificates",
-        status: academicReady ? "complete" : "pending",
-        icon: BookOpen,
-      },
-      {
-        title: "English Test",
-        description: englishReady
-          ? `${form.testType || "English"} score is available`
-          : "Add your English score before final submission",
-        status: englishReady ? "complete" : "loading",
-        icon: ShieldCheck,
-      },
-      {
-        title: "Medical / Insurance",
-        description: "Health coverage and required medical documents",
-        status: healthReady ? "complete" : "pending",
-        icon: HeartPulse,
-      },
-      {
-        title: "Submission Pack",
-        description: intakeReady
-          ? "Final visa application and supporting copies"
-          : "Select your intake and upload the final visa package",
-        status: docsReady && intakeReady ? "complete" : "loading",
+  const checklistItems = React.useMemo(
+    () =>
+      visaAnalysis?.checklist?.map((item) => ({
+        title: item.title || "Checklist Item",
+        description: item.description || "",
+        status: item.status || "pending",
         icon: FileCheck,
-      },
-    ];
-  }, [
-    form.passportReady,
-    form.docsReady,
-    form.testType,
-    form.testScore,
-    form.hasEnglishTest,
-    form.intake,
-    hasFunds,
-    form.gpa,
-    form.scholarship,
-    form.testDone,
-    selectedMatch,
-    visaCountry,
-  ]);
+      })) || [],
+    [visaAnalysis],
+  );
 
   const categoryCards: Array<{
     title: string;
@@ -295,37 +176,23 @@ export function VisaEligibility({
   ].filter(Boolean) as string[];
 
   React.useEffect(() => {
-    const code =
-      selectedMatch.countryCode?.toLowerCase() ||
-      form.countries[0]?.toLowerCase() ||
-      "usa";
-    fetch(`/api/visa-guidance?countryCode=${code}`)
+    let active = true;
+    fetch("/api/visa-prediction", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ form, match: selectedMatch }),
+    })
       .then((res) => res.json())
       .then((data) => {
-        if (data && (data.steps || data.requirements)) {
-          setVisaGuidance(data.steps || data.requirements);
-        } else {
-          setVisaGuidance([
-            {
-              title: "Proof of Funds Mapping",
-              description: `Show ${selectedMatch.countryCode === "AU" ? "AUD 28,000 - AUD 36,000" : "$22,000 - $30,000"} in liquid assets`,
-              status: hasFunds ? "VERIFIED" : "REQUIRED",
-            },
-            {
-              title: "GTE / SOP Statement",
-              description: "Draft strong purpose that matches academic history",
-              status: "REQUIRED",
-            },
-            {
-              title: "Health Insurance (OSHC/IHS)",
-              description: "Mandatory for student visa duration",
-              status: "PENDING",
-            },
-          ]);
-        }
+        if (!active || data?.error) return;
+        setVisaAnalysis(data);
       })
       .catch(console.error);
-  }, [form.countries, selectedMatch, hasFunds]);
+
+    return () => {
+      active = false;
+    };
+  }, [form, selectedMatch]);
 
   const tabButtonClass = (tab: "overview" | "checklist") =>
     `flex-1 h-12 md:h-14 rounded-[18px] md:rounded-[22px] text-[12px] md:text-sm font-bold transition-all ${activeTab === tab ? "bg-white text-blue-600 shadow-sm" : "text-slate-500 hover:text-slate-800"}`;
