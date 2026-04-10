@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-explicit-any, sonarjs/cognitive-complexity */
 "use client";
 
 import React from "react";
@@ -6,14 +6,11 @@ import {
   AlertTriangle,
   ArrowRight,
   BadgeCheck,
-  Banknote,
   BookOpen,
   ChevronLeft,
   ChevronRight,
   FileCheck,
   FileText,
-  GraduationCap,
-  HeartPulse,
   ListChecks,
   ShieldCheck,
   Sparkles,
@@ -93,6 +90,9 @@ export function VisaEligibility({
   );
   const visaCountry = selectedMatch.countryCode || form.countries[0] || "USA";
   const visaTitle = `${visaCountry} Student Visa`;
+  const isHighRiskCountry = ["AU", "UK"].includes(
+    selectedMatch.countryCode || "",
+  );
   const hasFunds =
     Number.parseFloat(form.bankBalance) > 0 ||
     Number.parseFloat(form.sponsorIncome) > 0;
