@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { Suspense } from "react";
 import "./globals.css";
 import ClientWrapper from "@/components/ClientWrapper";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
@@ -118,7 +119,9 @@ export default function RootLayout({
         className="bg-white text-[#0f172a] antialiased overflow-x-hidden font-poppins"
         suppressHydrationWarning={true}
       >
-        <GoogleAnalytics />
+        <Suspense fallback={null}>
+          <GoogleAnalytics />
+        </Suspense>
         <ClientWrapper>{children}</ClientWrapper>
       </body>
     </html>
