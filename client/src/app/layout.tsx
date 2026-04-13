@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import ClientWrapper from "@/components/ClientWrapper";
+import GoogleAnalytics from "@/components/GoogleAnalytics";
 import { absoluteUrl, siteConfig } from "@/lib/seo";
 
 export const metadata: Metadata = {
@@ -117,6 +118,7 @@ export default function RootLayout({
         className="bg-white text-[#0f172a] antialiased overflow-x-hidden font-poppins"
         suppressHydrationWarning={true}
       >
+        <GoogleAnalytics />
         <ClientWrapper>{children}</ClientWrapper>
       </body>
     </html>
