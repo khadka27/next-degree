@@ -164,7 +164,7 @@ function TextInput({
       onChange={(event) => onChange(event.target.value)}
       placeholder={placeholder}
       className={cx(
-        "h-[58px] w-full rounded-3xl border bg-white px-5 text-[32px] font-medium text-[#2A3F63] outline-none transition",
+        "h-14.5 w-full rounded-3xl border bg-white px-5 text-[32px] font-medium text-[#2A3F63] outline-none transition",
         hasError
           ? "border-[#F199A6] focus:border-[#E65A6E]"
           : "border-[#C8D4E8] focus:border-[#6C83B5]",
@@ -192,7 +192,7 @@ function SelectInput({
         value={value}
         onChange={(event) => onChange(event.target.value)}
         className={cx(
-          "h-[58px] w-full appearance-none rounded-3xl border bg-white px-5 pr-14 text-[32px] font-medium text-[#2A3F63] outline-none transition",
+          "h-14.5 w-full appearance-none rounded-3xl border bg-white px-5 pr-14 text-[32px] font-medium text-[#2A3F63] outline-none transition",
           hasError
             ? "border-[#F199A6] focus:border-[#E65A6E]"
             : "border-[#C8D4E8] focus:border-[#6C83B5]",
@@ -391,7 +391,7 @@ export default function AdditionalInformationPage() {
 
   return (
     <main className="min-h-screen bg-[#DDE4EE] pt-28 pb-10 px-4 md:px-8">
-      <div className="mx-auto max-w-[1240px] space-y-6">
+      <div className="mx-auto max-w-310 space-y-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-[30px] font-semibold text-[#23395D]">
@@ -465,7 +465,7 @@ export default function AdditionalInformationPage() {
                 <div>
                   <FieldLabel label="Phone number" required />
                   <div className="grid grid-cols-[150px_1fr] gap-0">
-                    <div className="h-[58px] rounded-l-3xl border border-r-0 border-[#C8D4E8] bg-white px-4 text-[28px] font-medium text-[#2A3F63] flex items-center gap-2">
+                    <div className="h-14.5 rounded-l-3xl border border-r-0 border-[#C8D4E8] bg-white px-4 text-[28px] font-medium text-[#2A3F63] flex items-center gap-2">
                       +1
                       <ChevronDown className="h-4 w-4" />
                     </div>
@@ -474,7 +474,7 @@ export default function AdditionalInformationPage() {
                       onChange={(event) =>
                         updateField("phoneNumber", event.target.value)
                       }
-                      className="h-[58px] rounded-r-3xl border border-[#C8D4E8] bg-white px-5 text-[32px] font-medium text-[#2A3F63] outline-none"
+                      className="h-14.5 rounded-r-3xl border border-[#C8D4E8] bg-white px-5 text-[32px] font-medium text-[#2A3F63] outline-none"
                     />
                   </div>
                   {!form.phoneVerified && (
@@ -601,7 +601,7 @@ export default function AdditionalInformationPage() {
                         key={value}
                         type="button"
                         onClick={() => updateField("maritalStatus", value)}
-                        className="flex h-[58px] items-center gap-3 rounded-3xl border border-[#C8D4E8] bg-white px-4 text-[32px] text-[#2A3F63]"
+                        className="flex h-14.5 items-center gap-3 rounded-3xl border border-[#C8D4E8] bg-white px-4 text-[32px] text-[#2A3F63]"
                       >
                         {form.maritalStatus === value ? (
                           <CheckCircle2 className="h-6 w-6 text-[#5C73C9]" />
@@ -621,7 +621,7 @@ export default function AdditionalInformationPage() {
                         key={value}
                         type="button"
                         onClick={() => updateField("gender", value)}
-                        className="flex h-[58px] items-center gap-3 rounded-3xl border border-[#C8D4E8] bg-white px-4 text-[32px] text-[#2A3F63]"
+                        className="flex h-14.5 items-center gap-3 rounded-3xl border border-[#C8D4E8] bg-white px-4 text-[32px] text-[#2A3F63]"
                       >
                         {form.gender === value ? (
                           <CheckCircle2 className="h-6 w-6 text-[#5C73C9]" />
@@ -777,7 +777,7 @@ export default function AdditionalInformationPage() {
                   <button
                     type="button"
                     onClick={() => updateField("graduatedInstitution", true)}
-                    className="flex h-[58px] items-center gap-3 rounded-3xl border border-[#C8D4E8] bg-white px-4 text-[32px] text-[#2A3F63]"
+                    className="flex h-14.5 items-center gap-3 rounded-3xl border border-[#C8D4E8] bg-white px-4 text-[32px] text-[#2A3F63]"
                   >
                     {form.graduatedInstitution ? (
                       <CheckCircle2 className="h-6 w-6 text-[#5C73C9]" />
@@ -789,9 +789,9 @@ export default function AdditionalInformationPage() {
                   <button
                     type="button"
                     onClick={() => updateField("graduatedInstitution", false)}
-                    className="flex h-[58px] items-center gap-3 rounded-3xl border border-[#C8D4E8] bg-white px-4 text-[32px] text-[#2A3F63]"
+                    className="flex h-14.5 items-center gap-3 rounded-3xl border border-[#C8D4E8] bg-white px-4 text-[32px] text-[#2A3F63]"
                   >
-                    {!form.graduatedInstitution ? (
+                    {form.graduatedInstitution === false ? (
                       <CheckCircle2 className="h-6 w-6 text-[#5C73C9]" />
                     ) : (
                       <Circle className="h-6 w-6 text-[#5C73C9]" />
@@ -803,7 +803,7 @@ export default function AdditionalInformationPage() {
 
               <button
                 type="button"
-                className="flex h-[58px] w-full items-center justify-center gap-3 rounded-3xl border border-[#B9C8DF] bg-[#E3E9F6] text-[34px] font-semibold text-[#5C73C9]"
+                className="flex h-14.5 w-full items-center justify-center gap-3 rounded-3xl border border-[#B9C8DF] bg-[#E3E9F6] text-[34px] font-semibold text-[#5C73C9]"
               >
                 <Plus className="h-6 w-6" />
                 Add Attended School
@@ -817,7 +817,7 @@ export default function AdditionalInformationPage() {
             type="button"
             onClick={handleSave}
             disabled={saving}
-            className="h-[60px] min-w-[420px] rounded-3xl bg-[#8EA1BF] px-7 text-[34px] font-semibold text-white disabled:opacity-70"
+            className="h-15 min-w-105 rounded-3xl bg-[#8EA1BF] px-7 text-[34px] font-semibold text-white disabled:opacity-70"
           >
             {saving ? "Saving..." : "Save & Continue"}
           </button>
