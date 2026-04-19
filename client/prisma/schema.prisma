@@ -174,7 +174,7 @@ model MatchingRecord {
     visaSuccess     Float?
     costEstimate    Float?
 
-    createdAt DateTime @updatedAt
+    createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 }
 
