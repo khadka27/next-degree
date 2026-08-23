@@ -26,8 +26,10 @@ import {
   BookOpen,
 } from "lucide-react";
 import { Match, Form } from "@/types/matches";
-import { User } from "next-auth";
+import { FlagIcon } from "@/components/matches/FlagIcon";
+import { convertGpaTo4Scale, parseGpaToFloat } from "@/lib/gpaConverter";
 import { formatNPRDevanagariRange } from "@/lib/currency";
+import { User } from "next-auth";
 
 interface Session {
   user: User;
@@ -204,9 +206,10 @@ export function UniversitySelection({
 
   if (!matches || matches.length === 0) {
     const reasons: string[] = [];
-    const gpa = parseFloat(form.gpa);
+    const gpa = parseGpaToFloat(form.gpa) ?? parseFloat(form.gpa);
     if (!isNaN(gpa) && gpa > 0 && gpa < 2.5) {
-      reasons.push(`Your GPA (${gpa}) is below minimum admission requirements (2.5 - 3.0+) for standard universities.`);
+      const gpaDisplay = convertGpaTo4Scale(form.gpa) || form.gpa;
+      reasons.push(`Your GPA (${gpaDisplay}) is below minimum admission requirements (2.5 - 3.0+) for standard universities.`);
     }
 
     const testScore = parseFloat(form.testScore);

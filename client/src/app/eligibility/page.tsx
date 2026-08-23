@@ -3,6 +3,7 @@
 import { CustomSelect } from "@/components/ui/CustomSelect";
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
+import { parseGpaToFloat } from "@/lib/gpaConverter";
 import {
   GraduationCap,
   Calendar,
@@ -293,7 +294,7 @@ export default function EligibilityHub() {
             const p = data.profile || {};
             setForm((prev) => ({
               ...prev,
-              gpa: p.gpa || prev.gpa,
+              gpa: p.gpa ? (parseGpaToFloat(p.gpa) ?? (typeof p.gpa === 'number' ? p.gpa : parseFloat(p.gpa) || prev.gpa)) : prev.gpa,
               countries: p.nationality ? [p.nationality] : prev.countries,
             }));
           }

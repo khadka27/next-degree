@@ -3391,7 +3391,7 @@ export default function AbroadLiftMatchesPage() {
     }
 
     let acad = 0;
-    const gpa = parseFloat(f.gpa) || 3.0;
+    const gpa = parseGpaToFloat(f.gpa) ?? (parseFloat(f.gpa) || 3.0);
     if (gpa >= 3.8) acad = 25;
     else if (gpa >= 3.5) acad = 20;
     else if (gpa >= 3.0) acad = 15;
@@ -6482,7 +6482,7 @@ export default function AbroadLiftMatchesPage() {
             </div>
             <div>
               <p className="text-[10px] font-bold text-slate-400 uppercase">Academic GPA & Test</p>
-              <p className="font-extrabold text-slate-900 mt-0.5">GPA {form.gpa || "3.5"} / 4.0</p>
+              <p className="font-extrabold text-slate-900 mt-0.5">GPA {convertGpaTo4Scale(form.gpa) || form.gpa || "3.5"} / 4.0</p>
               <p className="text-[11px] text-slate-500">{form.testType || "IELTS"}: {form.testScore || "7.0"}</p>
             </div>
             <div>

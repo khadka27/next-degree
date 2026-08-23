@@ -6,6 +6,7 @@ import {
   ChevronRight, ChevronLeft, Calendar, Coins, GraduationCap, Globe2, BookOpen
 } from "lucide-react";
 import { evaluateScholarship } from "@/lib/scholarship-evaluator";
+import { parseGpaToFloat } from "@/lib/gpaConverter";
 import Loading from "@/components/ui/Loading";
 
 interface Scholarship {
@@ -61,7 +62,7 @@ export default function ScholarshipsPage() {
           const data = await res.json();
           const p = data.profile || {};
           setUserProfile({
-            gpa: p.gpa ? parseFloat(String(p.gpa)) : 3.5,
+            gpa: p.gpa ? (parseGpaToFloat(p.gpa) ?? parseFloat(String(p.gpa))) : 3.5,
             englishScore: p.englishScore ? parseFloat(String(p.englishScore)) : 7.0,
             testType: p.testType || "IELTS",
             degreeLevel: p.degreeLevel || "Master's Degree",

@@ -6,7 +6,7 @@
 
 import { CustomSelect } from "@/components/ui/CustomSelect";
 import Loading from "@/components/ui/Loading";
-import { convertGpaTo4Scale } from "@/lib/gpaConverter";
+import { convertGpaTo4Scale, parseGpaToFloat } from "@/lib/gpaConverter";
 
 import { useEffect, useMemo, useState, useRef, Suspense } from "react";
 import { signOut, useSession } from "next-auth/react";
@@ -588,7 +588,7 @@ function DashboardInner() {
     const defaultCurrent = {
       id: "current",
       name: profile.name ? `${profile.name} (Active Profile)` : "Active Profile",
-      gpa: profile.gpa || "3.50",
+      gpa: convertGpaTo4Scale(profile.gpa) || profile.gpa || "3.50",
       highestEducation: profile.highestEducation || "Bachelor's",
       testType: profile.testType || "IELTS",
       englishScore: profile.englishScore || "7.0",
@@ -670,7 +670,7 @@ function DashboardInner() {
       presets.push({
         id: `saved_profile_${item.id}`,
         name: `Saved Match: ${item.matchData?.name || "University Match"}`,
-        gpa: item.formData?.gpa || "3.5",
+        gpa: convertGpaTo4Scale(item.formData?.gpa) || item.formData?.gpa || "3.5",
         highestEducation: item.formData?.highestEducation || "Bachelor's",
         testType: item.formData?.testType && item.formData?.testType !== "NONE" ? item.formData.testType : "IELTS",
         englishScore: item.formData?.testScore || "7.0",
@@ -2147,7 +2147,7 @@ function DashboardInner() {
                           </div>
                           <div className="flex gap-2">
                             {profile.gpa && (
-                              <span className="px-3 py-1 rounded-xl bg-slate-100 text-xs font-bold text-slate-700 border border-slate-200/60">GPA {profile.gpa}</span>
+                              <span className="px-3 py-1 rounded-xl bg-slate-100 text-xs font-bold text-slate-700 border border-slate-200/60">GPA {convertGpaTo4Scale(profile.gpa) || profile.gpa}</span>
                             )}
                             {profile.englishScore && (
                               <span className="px-3 py-1 rounded-xl bg-emerald-50 text-xs font-bold text-emerald-700 border border-emerald-100">{profile.testType || "IELTS"} {profile.englishScore}</span>
@@ -2314,7 +2314,8 @@ function DashboardInner() {
                             {savedMatches.slice(0, 3).map((m) => {
                               const rawDegree = m.formData?.degree || "bachelors";
                               const degree = formatDegree(rawDegree);
-                              const gpa = m.formData?.gpa || "—";
+                              const rawGpa = m.formData?.gpa || "—";
+                              const gpa = convertGpaTo4Scale(rawGpa) || rawGpa;
                               const testType = m.formData?.testType && m.formData?.testType !== "NONE" ? m.formData.testType : null;
                               const testScore = m.formData?.testScore || "";
                               const univName = m.matchData?.name || "University Match";
@@ -2405,7 +2406,7 @@ function DashboardInner() {
                               {profile.preferredCountry || "Canada"}
                             </span>
                             <span className="bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200/60 text-slate-700">
-                              GPA {profile.gpa || "3.5"}
+                              GPA {convertGpaTo4Scale(profile.gpa) || profile.gpa || "3.5"}
                             </span>
                             <span className="bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200/60 text-slate-700">
                               {profile.testType || "IELTS"} {profile.englishScore || "7.0"}
@@ -2500,7 +2501,8 @@ function DashboardInner() {
                           ) : (
                             filteredShortlists.map((item) => {
                               const degree = item.formData?.degree || "Bachelor";
-                              const gpa = item.formData?.gpa || "—";
+                              const rawGpa = item.formData?.gpa || "—";
+                              const gpa = convertGpaTo4Scale(rawGpa) || rawGpa;
                               const testType = item.formData?.testType && item.formData?.testType !== "NONE" ? item.formData.testType : null;
                               const testScore = item.formData?.testScore || "";
                               const univName = item.matchData?.name || "University Match";
@@ -3395,7 +3397,7 @@ function DashboardInner() {
                       <Lightbulb className="w-6 h-6 text-emerald-600 shrink-0" />
                       <div>
                         <p className="text-xs font-black text-emerald-800">Scholarship Tips</p>
-                        <p className="text-xs font-semibold text-emerald-700/80 mt-0.5">Your GPA of <strong>{profile.gpa || "3.5+"}</strong> makes you eligible for merit-based awards. Apply before deadlines!</p>
+                        <p className="text-xs font-semibold text-emerald-700/80 mt-0.5">Your GPA of <strong>{convertGpaTo4Scale(profile.gpa) || profile.gpa || "3.5+"}</strong> makes you eligible for merit-based awards. Apply before deadlines!</p>
                       </div>
                     </div>
 
@@ -3485,7 +3487,8 @@ function DashboardInner() {
                       <div className="grid grid-cols-1 gap-4">
                         {savedMatches.map((item) => {
                           const degree = item.formData?.degree || "Bachelor";
-                          const gpa = item.formData?.gpa || "—";
+                          const rawGpa = item.formData?.gpa || "—";
+                          const gpa = convertGpaTo4Scale(rawGpa) || rawGpa;
                           const testType = item.formData?.testType && item.formData?.testType !== "NONE" ? item.formData.testType : null;
                           const testScore = item.formData?.testScore || "";
                           const country = item.formData?.countries?.[0] || item.matchData?.countryCode || "CA";
@@ -3699,8 +3702,8 @@ function DashboardInner() {
                           const p1 = allCompareProfiles.find((p) => p.id === selectedProfile1Id) || allCompareProfiles[0];
                           const p2 = allCompareProfiles.find((p) => p.id === selectedProfile2Id) || allCompareProfiles[1] || allCompareProfiles[0];
 
-                          const gpa1 = parseFloat(p1.gpa || "3.5");
-                          const gpa2 = parseFloat(p2.gpa || "3.5");
+                          const gpa1 = parseGpaToFloat(p1.gpa) ?? 3.5;
+                          const gpa2 = parseGpaToFloat(p2.gpa) ?? 3.5;
                           const budget1 = parseFloat(p1.yearlyBudget || "30000");
                           const budget2 = parseFloat(p2.yearlyBudget || "30000");
 
@@ -3719,7 +3722,7 @@ function DashboardInner() {
                                   </div>
                                   <h3 className="text-lg font-black text-slate-900 mb-1">{p1.name}</h3>
                                   <p className="text-xs text-slate-500 font-semibold">
-                                    GPA: {p1.gpa} | {p1.testType} {p1.englishScore} | Budget: {formatBudgetDisplay(p1.yearlyBudget, p1.currency)}/yr
+                                    GPA: {convertGpaTo4Scale(p1.gpa) || p1.gpa} | {p1.testType} {p1.englishScore} | Budget: {formatBudgetDisplay(p1.yearlyBudget, p1.currency)}/yr
                                   </p>
                                 </Card>
 
@@ -3734,7 +3737,7 @@ function DashboardInner() {
                                   </div>
                                   <h3 className="text-lg font-black text-slate-900 mb-1">{p2.name}</h3>
                                   <p className="text-xs text-slate-500 font-semibold">
-                                    GPA: {p2.gpa} | {p2.testType} {p2.englishScore} | Budget: {formatBudgetDisplay(p2.yearlyBudget, p2.currency)}/yr
+                                    GPA: {convertGpaTo4Scale(p2.gpa) || p2.gpa} | {p2.testType} {p2.englishScore} | Budget: {formatBudgetDisplay(p2.yearlyBudget, p2.currency)}/yr
                                   </p>
                                 </Card>
                               </div>
@@ -3758,8 +3761,8 @@ function DashboardInner() {
                                     <tbody className="divide-y divide-slate-100 text-xs font-semibold text-slate-700">
                                       <tr className="hover:bg-slate-50/80">
                                         <td className="p-3.5 font-extrabold text-slate-900">Academic GPA</td>
-                                        <td className={`p-3.5 font-extrabold ${gpa1 > gpa2 ? "text-emerald-700" : ""}`}>{p1.gpa} / 4.00</td>
-                                        <td className={`p-3.5 font-extrabold ${gpa2 > gpa1 ? "text-emerald-700" : ""}`}>{p2.gpa} / 4.00</td>
+                                        <td className={`p-3.5 font-extrabold ${gpa1 > gpa2 ? "text-emerald-700" : ""}`}>{convertGpaTo4Scale(p1.gpa) || p1.gpa} / 4.00</td>
+                                        <td className={`p-3.5 font-extrabold ${gpa2 > gpa1 ? "text-emerald-700" : ""}`}>{convertGpaTo4Scale(p2.gpa) || p2.gpa} / 4.00</td>
                                         <td className="p-3.5 text-right">
                                           <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase ${gpa1 > gpa2 ? "bg-blue-50 text-blue-700" : gpa2 > gpa1 ? "bg-indigo-50 text-indigo-700" : "bg-slate-100 text-slate-600"}`}>
                                             {gpa1 > gpa2 ? "Profile A +" + (gpa1 - gpa2).toFixed(2) : gpa2 > gpa1 ? "Profile B +" + (gpa2 - gpa1).toFixed(2) : "Equal GPA"}

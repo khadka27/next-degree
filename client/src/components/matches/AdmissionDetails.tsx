@@ -20,6 +20,7 @@ import { Match, Form } from "@/types/matches";
 import { motion, animate } from "framer-motion";
 import { Scholarship } from "@/lib/api/abroadlift";
 import { evaluateScholarship } from "@/lib/scholarship-evaluator";
+import { convertGpaTo4Scale, parseGpaToFloat } from "@/lib/gpaConverter";
 
 function AnimatedPercentRange({ lower, upper }: { lower: number; upper: number }) {
   const nodeRef = useRef<HTMLSpanElement>(null);
@@ -94,7 +95,7 @@ export function AdmissionDetails({
   onAdvanceToVisa,
   admissionAnalysis,
 }: AdmissionDetailsProps) {
-  const gpa = Number.parseFloat(form.gpa) || 0;
+  const gpa = parseGpaToFloat(form.gpa) ?? (Number.parseFloat(form.gpa) || 0);
   const testScore = Number.parseFloat(form.testScore) || 0;
   const backlogs = Number.parseInt(form.backlogs || "0", 10) || 0;
   const studyGap = Number.parseInt(form.studyGap || "0", 10) || 0;
@@ -393,7 +394,7 @@ export function AdmissionDetails({
             {/* Quick Context Pills */}
             <div className="flex flex-wrap items-center gap-2">
               <span className="px-3 py-1 rounded-full bg-white border border-slate-200 text-slate-700 text-[11px] font-bold shadow-xs">
-                GPA: <strong className="text-slate-900">{form.gpa}</strong>
+                GPA: <strong className="text-slate-900">{convertGpaTo4Scale(form.gpa) || form.gpa}</strong>
               </span>
               <span className="px-3 py-1 rounded-full bg-white border border-slate-200 text-slate-700 text-[11px] font-bold shadow-xs">
                 {form.testType || "Language"}: <strong className="text-slate-900">{form.testScore || "Not specified"}</strong>
@@ -503,7 +504,7 @@ export function AdmissionDetails({
                 </h2>
 
                 <p className="text-slate-600 text-[14px] md:text-[15px] max-w-2xl font-medium leading-relaxed">
-                  Calculated based on your <strong className="text-slate-900 font-bold">GPA {form.gpa}</strong>,{" "}
+                  Calculated based on your <strong className="text-slate-900 font-bold">GPA {convertGpaTo4Scale(form.gpa) || form.gpa}</strong>,{" "}
                   <strong className="text-slate-900 font-bold">{form.testType || "Language"} {form.testScore}</strong>, and historical acceptance data for{" "}
                   <strong className="text-slate-900 font-bold">{selectedMatch.name}</strong>.
                 </p>
@@ -895,7 +896,7 @@ export function AdmissionDetails({
                     </div>
                     <div className="flex gap-2.5 items-start">
                       <span className="w-5 h-5 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0 text-[10px] font-black text-blue-600">2</span>
-                      <span className="leading-relaxed">Target colleges accepting GPA <strong className="text-slate-900">{form.gpa}</strong>.</span>
+                      <span className="leading-relaxed">Target colleges accepting GPA <strong className="text-slate-900">{convertGpaTo4Scale(form.gpa) || form.gpa}</strong>.</span>
                     </div>
                   </>
                 ) : (

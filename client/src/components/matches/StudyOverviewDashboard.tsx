@@ -4,6 +4,7 @@ import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Match, Form } from "@/types/matches";
+import { parseGpaToFloat } from "@/lib/gpaConverter";
 import {
   Bell,
   Edit3,
@@ -77,7 +78,7 @@ export function StudyOverviewDashboard({
   const visaChanceValue = visaChance ?? 0;
   const visaLabelValue = visaLabel || "Pending";
 
-  const gpa = Number.parseFloat(form.gpa) || 0;
+  const gpa = parseGpaToFloat(form.gpa) ?? (Number.parseFloat(form.gpa) || 0);
   const testScore = Number.parseFloat(form.testScore) || 0;
   const backlogs = Number.parseInt(form.backlogs || "0", 10) || 0;
   const studyGap = Number.parseInt(form.studyGap || "0", 10) || 0;

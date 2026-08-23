@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Match, Form } from "@/types/matches";
+import { parseGpaToFloat } from "@/lib/gpaConverter";
 import { motion } from "framer-motion";
 
 interface VisaEligibilityProps {
@@ -55,7 +56,7 @@ export function VisaEligibility({
   const rawBank = parseFloat(String(form.bankBalance || 0));
   const rawIncome = parseFloat(String(form.sponsorIncome || 0));
   const hasAdequateFunds = rawBank >= 500000 || rawIncome >= 500000 || rawBudget >= 5000;
-  const userGpa = parseFloat(String(form.gpa || 0)) || 3.0;
+  const userGpa = parseGpaToFloat(form.gpa) ?? (parseFloat(String(form.gpa || 0)) || 3.0);
 
   // Local state for interactive document checklist
   const [docsStatus, setDocsStatus] = useState<Record<string, boolean>>(() => {
