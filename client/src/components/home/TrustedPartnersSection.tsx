@@ -5,6 +5,7 @@ import { ArrowRight, MapPin, Calendar, Award } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { getSchoolSlug } from "@/lib/slug";
 
 const fallbackCountries = [
   { name: "Canada", flag: "🇨🇦" },
@@ -384,7 +385,7 @@ const TrustedPartnersSection = () => {
               </div>
               
               <div className="p-6 pt-0">
-                <Link href={`/schools/${u.id}`} className="block w-full">
+                <Link href={`/schools/${getSchoolSlug(u)}`} className="block w-full">
                   <Button className="w-full bg-[#3686FF] hover:bg-blue-600 px-4 py-3 rounded-2xl text-white font-bold text-xs shadow-md">
                     View Details
                   </Button>

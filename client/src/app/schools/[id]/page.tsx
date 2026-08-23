@@ -10,6 +10,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { formatNPRDevanagari, getRateToNpr } from "@/lib/currency";
 import Loading from "@/components/ui/Loading";
+import { getSchoolSlug } from "@/lib/slug";
 
 interface School {
   _id: string;
@@ -104,6 +105,14 @@ export default function SchoolDetailPage() {
 
         if (schoolData.success && schoolData.data) {
           setSchool(schoolData.data);
+          const canonicalSlug = getSchoolSlug(schoolData.data);
+          if (canonicalSlug && typeof window !== "undefined" && window.history) {
+            const currentPath = window.location.pathname;
+            const targetPath = `/schools/${canonicalSlug}`;
+            if (currentPath !== targetPath) {
+              window.history.replaceState(null, "", targetPath);
+            }
+          }
         } else {
           throw new Error("School not found.");
         }

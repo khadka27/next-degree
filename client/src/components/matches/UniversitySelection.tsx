@@ -29,6 +29,7 @@ import { Match, Form } from "@/types/matches";
 import { FlagIcon } from "@/components/matches/FlagIcon";
 import { convertGpaTo4Scale, parseGpaToFloat } from "@/lib/gpaConverter";
 import { formatNPRDevanagariRange } from "@/lib/currency";
+import { getSchoolSlug } from "@/lib/slug";
 import { User } from "next-auth";
 
 interface Session {
@@ -1067,7 +1068,7 @@ export function UniversityDetailsModal({
         {/* Minimal Action Footer */}
         <div className="shrink-0 border-t border-slate-100 p-4 md:px-7 md:py-4 bg-white flex items-center justify-between gap-3">
           <Link
-            href={`/schools/${m.id}`}
+            href={`/schools/${getSchoolSlug(m)}`}
             target="_blank"
             rel="noopener noreferrer"
             className="text-xs font-extrabold text-slate-600 hover:text-blue-600 flex items-center gap-1.5 transition-colors"

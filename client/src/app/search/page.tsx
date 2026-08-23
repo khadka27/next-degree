@@ -14,6 +14,7 @@ import {
 import { FlagIcon } from "@/components/matches/FlagIcon";
 import SearchGlobe from "@/components/SearchGlobe";
 import Loading from "@/components/ui/Loading";
+import { getSchoolSlug } from "@/lib/slug";
 
 const COUNTRY_CODES: { [key: string]: string } = {
   "All Countries": "US,CA,GB,AU,DE,IE,MT",
@@ -610,7 +611,7 @@ export default function SearchPage() {
                           <span className="text-[12px] font-bold uppercase tracking-widest">Diverse Campus</span>
                         </div>
                         <Link 
-                          href={session ? `/schools/${uni.id}` : `/register?callbackUrl=${encodeURIComponent(`/schools/${uni.id}`)}`} 
+                          href={session ? `/schools/${getSchoolSlug(uni)}` : `/register?callbackUrl=${encodeURIComponent(`/schools/${getSchoolSlug(uni)}`)}`} 
                           className="bg-[#3686FF] text-white h-12 px-6 rounded-full font-bold text-[13px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-[#2970E6] transition-all group active:scale-95 shadow-[0_8px_20px_rgba(54,134,255,0.3)] hover:shadow-[0_12px_24px_rgba(54,134,255,0.4)]"
                         >
                           View
@@ -689,7 +690,7 @@ export default function SearchPage() {
                     </div>
                     
                     <Link 
-                      href={session ? `/schools/${uni.id}` : `/register?callbackUrl=${encodeURIComponent(`/schools/${uni.id}`)}`} 
+                      href={session ? `/schools/${getSchoolSlug(uni)}` : `/register?callbackUrl=${encodeURIComponent(`/schools/${getSchoolSlug(uni)}`)}`} 
                       className="bg-[#3686FF] text-white h-12 px-6 rounded-full font-bold text-[13px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-[#2970E6] transition-all group active:scale-95 shadow-[0_8px_20px_rgba(54,134,255,0.2)] hover:shadow-[0_12px_24px_rgba(54,134,255,0.3)] w-full text-center"
                     >
                       View
